@@ -1,0 +1,30 @@
+name: 🔗 GHA
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - "*"
+    paths-ignore:
+      - "**/*.md"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/*"
+      - ".github/CODEOWNERS"
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - "**/*.md"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/*"
+      - ".github/CODEOWNERS"
+
+jobs:
+  static-checks:
+    name: 📊 Static checks
+    uses: ./.github/workflows/static-checks.yml
+  
+  linux-build:
+    needs: static-checks
+    name: 🐧 Linux build
+    uses: ./.github/workflows/linux-build.yml

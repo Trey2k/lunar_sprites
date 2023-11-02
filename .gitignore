@@ -1,0 +1,48 @@
+# Binary files
+*.slo
+*.lo
+*.o
+*.os
+*.obj
+*.pyc
+*.bc
+*.dylib
+*.universal
+*.so
+*.dylib
+*.dll
+*.lai
+*.la
+*.a
+*.lib
+*.exe
+*.out
+*.app
+
+# Temporary files
+*~
+.*.swp
+*.gen.*
+
+# SCons
+__pycache__
+.scon*
+*.pyc
+custom.py
+
+# Editors
+.vscode
+.idea/
+.nvim.lua
+.nvimrc
+.exrc
+.clangd
+.cache
+*.cbp
+*.layout
+compile_commands.json
+
+# Other
+*.log
+/bin/
+scu/

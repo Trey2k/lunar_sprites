@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+Import("env")
+
+env.platform_sources = []
+
+lib = env.add_library("platform", env.platform_sources)
+env.Prepend(LIBS=[lib])
