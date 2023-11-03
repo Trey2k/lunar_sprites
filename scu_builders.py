@@ -257,8 +257,15 @@ def generate_scu_files(max_includes_per_scu):
         return
 
     process_folder(["core"])
+    process_folder(["core/os"])
+    process_folder(["core/math"])
 
     process_folder(["platform"])
+    process_folder(["platform/linuxbsd"])
+    process_folder(["platform/linuxbsd/wayland"])
+
+    process_folder(["renderer"])
+    process_folder(["renderer/opengl3"])
 
     process_folder(["modules/test_module"])
 

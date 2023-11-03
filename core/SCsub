@@ -21,6 +21,9 @@ env.core_sources += thirdparty_obj
 env.add_source_files(env.core_sources, "*.c")
 env.add_source_files(env.core_sources, "version_hash.gen.c")
 
+SConscript("os/SCsub")
+SConscript("math/SCsub")
+
 lib = env.add_library("core", env.core_sources)
 env.Prepend(LIBS=[lib])
 

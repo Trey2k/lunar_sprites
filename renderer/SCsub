@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+
+Import("env")
+
+env.renderer_sources = [
+    "renderer.c",
+    "surface.c",
+]
+
+if env["use_opengl3"]:
+    SConscript("opengl3/SCsub")
+
+lib = env.add_library("renderer", env.renderer_sources)
+env.Prepend(LIBS=[lib])

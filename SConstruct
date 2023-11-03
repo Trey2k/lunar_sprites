@@ -131,6 +131,8 @@ opts.Add(EnumVariable("lto", "Link-time optimization (production builds)", "none
 opts.Add(BoolVariable("production", "Set defaults to build Lunar Sprites for use in production", False))
 
 # Components
+opts.Add(BoolVariable("use_opengl3", "Use OpenGL 3.3+", True))
+
 opts.Add(EnumVariable("precision", "Set the floating-point precision level", "single", ("single", "double")))
 opts.Add(BoolVariable("disable_exceptions", "Force disabliplatform_apisng exception handling code", True))
 opts.Add("custom_modules", "A list of comma-seperated directory paths containing custom modules to build.", "")
@@ -346,7 +348,7 @@ if selected_platform in platform_list:
         env["werror"] = methods.get_cmdline_bool("werror", True)
         env["tests"] = methods.get_cmdline_bool("tests", True)
     if env["production"]:
-        env["use_static_cpp"] = methods.get_cmdline_bool("use_static_cpp", True)
+        env["use_static_c"] = methods.get_cmdline_bool("use_static_c", True)
         env["debug_symbols"] = methods.get_cmdline_bool("debug_symbols", False)
         # LTO "auto" means we handle the preferred option in each platform detect.py.
         env["lto"] = ARGUMENTS.get("lto", "auto")
@@ -612,6 +614,7 @@ if selected_platform in platform_list:
     Export("env")
 
     # Build subdirs, the build order is dependent on link order.
+    SConscript("renderer/SCsub")
     SConscript("core/SCsub")
     SConscript("platform/SCsub")
     SConscript("modules/SCsub")

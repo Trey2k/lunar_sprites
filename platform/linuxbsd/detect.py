@@ -33,11 +33,8 @@ def get_opts():
         EnumVariable("linker", "Linker program", "default", ("default", "bfd", "gold", "lld", "mold")),
         BoolVariable("use_llvm", "Use the LLVM compiler", False),
         BoolVariable("use_static_c", "Link libgcc statically for better portability", True),
-        BoolVariable("use_asan", "Use LLVM/GCC compiler address sanitizer (ASAN)", False),
-        BoolVariable("use_lsan", "Use LLVM/GCC compiler leak sanitizer (LSAN)", False),
-        BoolVariable("use_tsan", "Use LLVM/GCC compiler thread sanitizer (TSAN)", False),
-        BoolVariable("use_msan", "Use LLVM compiler memory sanitizer (MSAN)", False),
-        BoolVariable("use_sowrap", "Dynamically load system libraries", True),
+        BoolVariable("use_x11", "Use X11 display server", False),
+        BoolVariable("use_wayland", "Use Wayland display server", True),
     ]
 
 
@@ -127,6 +124,42 @@ def configure(env: "Environment"):
 
     if platform.system() == "FreeBSD":
         env.Append(LINKFLAGS=["-lkvm"])
+    
+    if env["use_wayland"]:
+        env.Append(CPPDEFINES=["WAYLAND_ENABLED"])
+
+        if os.system("pkg-config --exists wayland-client"):
+            print("Error: Wayland libraries not found. Aborting.")
+            sys.exit(255)
+        env.ParseConfig("pkg-config wayland-client --cflags --libs")
+
+        if os.system("pkg-config --exists wayland-cursor"):
+            print("Error: Wayland cursor libraries not found. Aborting.")
+            sys.exit(255)
+        env.ParseConfig("pkg-config wayland-cursor --cflags --libs")
+
+        if os.system("pkg-config --exists wayland-egl"):
+            print("Error: Wayland EGL libraries not found. Aborting.")
+            sys.exit(255)
+        env.ParseConfig("pkg-config wayland-egl --cflags --libs")
+
+        if os.system("pkg-config --exists wayland-protocols"):
+            print("Error: Wayland protocols not found. Aborting.")
+            sys.exit(255)
+        env.ParseConfig("pkg-config wayland-protocols --cflags --libs")
+
+        wayland_protocols_dir = os.popen("pkg-config wayland-protocols --variable=pkgdatadir").read().strip().replace("//", "/")
+        print("Wayland protocols dir: " + wayland_protocols_dir)
+        os.system("wayland-scanner client-header %s/stable/xdg-shell/xdg-shell.xml %s/xdg-shell.gen.h" % (wayland_protocols_dir, "platform/linuxbsd/wayland"))
+        os.system("wayland-scanner private-code %s/stable/xdg-shell/xdg-shell.xml %s/xdg-shell.gen.c" % (wayland_protocols_dir, "platform/linuxbsd/wayland"))
+
+    if env["use_x11"]:
+        env.Append(CPPDEFINES=["X11_ENABLED"])
+
+        if os.system("pkg-config --exists x11"):
+            print("Error: X11 libraries not found. Aborting.")
+            sys.exit(255)
+        env.ParseConfig("pkg-config x11 --cflags --libs")
 
     # Link those statically for portability
     if env["use_static_c"]:
