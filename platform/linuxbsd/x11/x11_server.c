@@ -1,11 +1,10 @@
 #include "platform/linuxbsd/x11/x11_server.h"
 #include "core/core.h"
 
-X11Server *x11_server_create(const EventManager *event_manager) {
-	CORE_ASSERT(event_manager);
-
+X11Server *x11_server_create() {
 	X11Server *server = core_malloc(sizeof(X11Server));
-	server->event_manager = event_manager;
+	server->event_manager = core_get_event_manager();
+	CORE_ASSERT(server->event_manager);
 
 	server->display = XOpenDisplay(NULL);
 	if (!server->display) {

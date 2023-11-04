@@ -1,4 +1,6 @@
 #include "platform/linuxbsd/x11/x11_window.h"
+#include "core/event/event_manager.h"
+#include "core/input/input.h"
 #include <X11/Xlib.h>
 
 X11Window *x11_window_create(X11Server *server, String title, int32 width, int32 height) {
@@ -37,6 +39,9 @@ void x11_window_destroy(X11Window *window) {
 void x11_window_poll(X11Window *window) {
 	Display *display = window->server->display;
 	XEvent event;
+
+	const EventManager *event_manager = core_get_event_manager();
+
 	while (XPending(display)) {
 		XNextEvent(display, &event);
 		switch (event.type) {
@@ -45,8 +50,8 @@ void x11_window_poll(X11Window *window) {
 			case KeyPress: {
 				Event e;
 				e.type = EVENT_KEYPRESS;
-				e.keypress.keycode = event.xkey.keycode;
-				event_manager_emit(window->server->event_manager, &e);
+				e.key_press.key_code = event.xkey.keycode;
+				event_manager_emit(event_manager, &e);
 			} break;
 		}
 	}

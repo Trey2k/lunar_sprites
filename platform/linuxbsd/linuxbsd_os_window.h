@@ -13,7 +13,7 @@
 #include "platform/linuxbsd/x11/x11_window.h"
 #endif
 
-struct LunarWindow {
+struct LSWindow {
 	DisplayServer display_server;
 	union {
 #if defined(X11_ENABLED)

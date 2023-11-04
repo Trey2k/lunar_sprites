@@ -12,7 +12,7 @@ typedef struct {
 	int default_screen;
 } X11Server;
 
-X11Server *x11_server_create(const EventManager *event_manager);
+X11Server *x11_server_create();
 void x11_server_destroy(X11Server *server);
 
 #endif // X11_SERVER_H

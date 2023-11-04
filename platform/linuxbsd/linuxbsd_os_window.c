@@ -3,7 +3,7 @@
 #include "core/core_log.h"
 #include "platform/linuxbsd/wayland/wayland_window.h"
 
-LunarWindow *os_window_create(const OS *os, const String title, int32 width, int32 height) {
+LSWindow *os_window_create(const OS *os, const String title, int32 width, int32 height) {
 	switch (os->display_server) {
 #if defined(WAYLAND_ENABLED)
 		case DISPLAY_SERVER_WAYLAND: {
@@ -13,7 +13,7 @@ LunarWindow *os_window_create(const OS *os, const String title, int32 width, int
 				return NULL;
 			}
 
-			LunarWindow *window = core_malloc(sizeof(LunarWindow));
+			LSWindow *window = core_malloc(sizeof(LSWindow));
 			window->display_server = DISPLAY_SERVER_WAYLAND;
 			window->wayland_window = win;
 			return window;
@@ -28,7 +28,7 @@ LunarWindow *os_window_create(const OS *os, const String title, int32 width, int
 				return NULL;
 			}
 
-			LunarWindow *window = core_malloc(sizeof(LunarWindow));
+			LSWindow *window = core_malloc(sizeof(LSWindow));
 			window->display_server = DISPLAY_SERVER_X11;
 			window->x11_window = win;
 			return window;
@@ -40,7 +40,7 @@ LunarWindow *os_window_create(const OS *os, const String title, int32 width, int
 	};
 }
 
-void window_destroy(LunarWindow *window) {
+void window_destroy(LSWindow *window) {
 	switch (window->display_server) {
 #if defined(WAYLAND_ENABLED)
 		case DISPLAY_SERVER_WAYLAND: {
@@ -62,7 +62,7 @@ void window_destroy(LunarWindow *window) {
 	core_free(window);
 }
 
-void window_poll(const LunarWindow *window) {
+void window_poll(const LSWindow *window) {
 	switch (window->display_server) {
 #if defined(WAYLAND_ENABLED)
 		case DISPLAY_SERVER_WAYLAND: {

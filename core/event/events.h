@@ -1,11 +1,8 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
+#include "core/input/events.h"
 #include "core/typedefs.h"
-
-typedef struct {
-	unsigned char keycode;
-} EventKeyPress;
 
 typedef enum {
 	EVENT_NONE,
@@ -15,7 +12,7 @@ typedef enum {
 typedef struct {
 	EventType type;
 	union {
-		EventKeyPress keypress;
+		EventKeyPress key_press;
 	};
 
 	bool handled;

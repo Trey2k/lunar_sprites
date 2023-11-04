@@ -18,7 +18,7 @@ typedef struct {
 	const EventManager *event_manager;
 } WaylandServer;
 
-WaylandServer *wayland_server_create(const EventManager *event_manager);
+WaylandServer *wayland_server_create();
 void wayland_server_destroy(WaylandServer *server);
 
 #endif // WAYLAND_SERVER_H

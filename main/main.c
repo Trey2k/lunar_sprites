@@ -22,7 +22,7 @@ void main_start() {
 
 	core_add_event_handler(&main_event_handler);
 
-	LunarWindow *window = os_window_create(os, "Test", 800, 600);
+	LSWindow *window = os_window_create(os, "Test", 800, 600);
 	if (!window) {
 		core_log(LOG_LEVEL_FATAL, "Failed to create window\n");
 		goto after_window_destroy;
@@ -40,8 +40,9 @@ after_window_destroy:
 void main_event_handler(Event *event) {
 	switch (event->type) {
 		case EVENT_KEYPRESS: {
-			const char keycode = event->keypress.keycode;
-			core_log(LOG_LEVEL_INFO, "Key pressed: %d\n", keycode);
+			const char keycode = event->key_press.key_code;
+			core_log(LOG_LEVEL_INFO, "Key pressed: %d\nIs repeat: %s\n", keycode,
+					event->key_press.repeat ? "true" : "false");
 
 			if (keycode == 9) {
 				running = false;

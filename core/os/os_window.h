@@ -8,11 +8,11 @@
 #define MIN_WINDOW_WIDTH 50
 #define MIN_WINDOW_HEIGHT 50
 
-typedef struct LunarWindow LunarWindow;
+typedef struct LSWindow LSWindow;
 
-LunarWindow *os_window_create(const OS *const os, const String title, int32 width, int32 height);
-void window_destroy(LunarWindow *window);
+LSWindow *os_window_create(const OS *os, const String title, int32 width, int32 height);
+void window_destroy(LSWindow *window);
 
-void window_poll(const LunarWindow *window);
+void window_poll(const LSWindow *window);
 
 #endif // OS_WINDOW_H

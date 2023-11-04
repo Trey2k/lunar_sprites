@@ -16,7 +16,7 @@ void core_init() {
 		core_fatal("Failed to create event manager\n");
 	}
 
-	os = os_create(event_manager);
+	os = os_create();
 	if (!os) {
 		event_manager_destroy(event_manager);
 		core_fatal("Failed to create OS\n");
@@ -67,4 +67,8 @@ const OS *core_get_os() {
 
 const Renderer *core_get_renderer() {
 	return renderer;
+}
+
+const EventManager *core_get_event_manager() {
+	return event_manager;
 }
