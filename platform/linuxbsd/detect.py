@@ -33,8 +33,8 @@ def get_opts():
         EnumVariable("linker", "Linker program", "default", ("default", "bfd", "gold", "lld", "mold")),
         BoolVariable("use_llvm", "Use the LLVM compiler", False),
         BoolVariable("use_static_c", "Link libgcc statically for better portability", True),
-        BoolVariable("use_x11", "Use X11 display server", False),
-        BoolVariable("use_wayland", "Use Wayland display server", True),
+        BoolVariable("use_x11", "Use X11 display server", True),
+        BoolVariable("use_wayland", "Use Wayland display server", False),
     ]
 
 

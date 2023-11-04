@@ -22,8 +22,10 @@ typedef struct {
 	bool maximized;
 } WaylandWindow;
 
-WaylandWindow *wayland_window_create(WaylandServer *server, String title, int32 width, int32 height);
+WaylandWindow *wayland_window_create(const WaylandServer *server, String title, int32 width, int32 height);
 void wayland_window_destroy(WaylandWindow *window);
+
+void wayland_window_poll(const WaylandWindow *window);
 
 void wayland_window_resize(WaylandWindow *window, int32 width, int32 height, bool full_screen);
 void wayland_window_set_title(WaylandWindow *window, String title);

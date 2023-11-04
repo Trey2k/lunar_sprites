@@ -19,8 +19,9 @@ env_thirdparty.add_source_files(thirdparty_obj, thirdparty_misc_sources)
 env.core_sources += thirdparty_obj
 
 env.add_source_files(env.core_sources, "*.c")
-env.add_source_files(env.core_sources, "version_hash.gen.c")
+env.add_source_files(env.core_sources, "version_info.gen.c")
 
+SConscript("event/SCsub")
 SConscript("os/SCsub")
 SConscript("math/SCsub")
 

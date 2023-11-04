@@ -6,7 +6,7 @@
 #include "core/os/os_window.h"
 #include "platform/linuxbsd/wayland/xdg-shell.gen.h"
 
-WaylandWindow *wayland_window_create(WaylandServer *server, String title, int32 width, int32 height) {
+WaylandWindow *wayland_window_create(const WaylandServer *server, String title, int32 width, int32 height) {
 	struct wl_surface *surface = wl_compositor_create_surface(server->compositor);
 	if (!surface) {
 		core_log(LOG_LEVEL_ERROR, "Failed to create Wayland surface\n");

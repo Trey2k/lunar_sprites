@@ -2,14 +2,17 @@
 #define OS_WINDOW_H
 
 #include "core/os/os.h"
+#include "core/string.h"
 #include "core/typedefs.h"
 
 #define MIN_WINDOW_WIDTH 50
 #define MIN_WINDOW_HEIGHT 50
 
-typedef struct Window Window;
+typedef struct LunarWindow LunarWindow;
 
-Window *os_window_create(const OS *os, String title, int32 width, int32 height);
-void os_window_destroy(const OS *os, Window *window);
+LunarWindow *os_window_create(const OS *const os, const String title, int32 width, int32 height);
+void window_destroy(LunarWindow *window);
+
+void window_poll(const LunarWindow *window);
 
 #endif // OS_WINDOW_H

@@ -9,7 +9,6 @@ typedef int int32;
 typedef unsigned int uint32;
 typedef long long int64;
 typedef unsigned long long uint64;
-typedef const char *String;
 typedef __SIZE_TYPE__ size_t;
 
 #ifndef NULL

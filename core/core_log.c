@@ -16,7 +16,7 @@ LogLevel core_log_get_level() {
 	return log_level;
 }
 
-void core_log(LogLevel level, String message, ...) {
+void core_log(LogLevel level, const String message, ...) {
 	if (level < log_level) {
 		printf("test");
 		return;
