@@ -2,10 +2,10 @@
 
 #include "core/core.h"
 
-OS *os_create() {
+OS *os_create(Input *input) {
 #if defined(WAYLAND_ENABLED)
 	WaylandServer *wayland_server = NULL;
-	wayland_server = wayland_server_create();
+	wayland_server = wayland_server_create(input);
 	if (wayland_server) {
 		OS *os = core_malloc(sizeof(OS));
 		os->display_server = DISPLAY_SERVER_WAYLAND;
@@ -16,7 +16,7 @@ OS *os_create() {
 
 #if defined(X11_ENABLED)
 	X11Server *x11_server = NULL;
-	x11_server = x11_server_create();
+	x11_server = x11_server_create(input);
 	if (x11_server) {
 		OS *os = core_malloc(sizeof(OS));
 		os->display_server = DISPLAY_SERVER_X11;

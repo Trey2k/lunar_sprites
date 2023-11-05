@@ -12,6 +12,17 @@ size_t string_length(const String string) {
 	return strlen(string);
 }
 
+size_t string_hash_djb2(const String string) {
+	CORE_ASSERT(string);
+
+	size_t hash = 0;
+	for (size_t i = 0; i < string_length(string); i++) {
+		hash = ((hash << 5) + hash) + string[i];
+	}
+
+	return hash;
+}
+
 bool string_is_empty(const String string) {
 	CORE_ASSERT(string);
 

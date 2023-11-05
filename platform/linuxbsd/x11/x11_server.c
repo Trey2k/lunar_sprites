@@ -1,10 +1,12 @@
 #include "platform/linuxbsd/x11/x11_server.h"
+#include "core/containers/hashtable.h"
 #include "core/core.h"
 
-X11Server *x11_server_create() {
+X11Server *x11_server_create(Input *input) {
+	CORE_ASSERT(input);
+
 	X11Server *server = core_malloc(sizeof(X11Server));
-	server->event_manager = core_get_event_manager();
-	CORE_ASSERT(server->event_manager);
+	server->input = input;
 
 	server->display = XOpenDisplay(NULL);
 	if (!server->display) {
@@ -13,10 +15,13 @@ X11Server *x11_server_create() {
 	}
 
 	server->default_screen = DefaultScreen(server->display);
+
 	return server;
 }
 
 void x11_server_destroy(X11Server *server) {
+	CORE_ASSERT(server);
+
 	XCloseDisplay(server->display);
 	core_free(server);
 }

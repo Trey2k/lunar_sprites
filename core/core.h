@@ -10,6 +10,7 @@
 #include "renderer/renderer.h"
 
 void core_init();
+void core_poll();
 void core_deinit();
 
 void *core_malloc(size_t size);
@@ -18,10 +19,11 @@ void core_free(void *ptr);
 
 void core_fatal(const String message, ...);
 
-void core_add_event_handler(EventHandler handler);
+void core_add_event_handler(EventHandler handler, void *user_data);
 
+const EventManager *core_get_event_manager();
+const Input *core_get_input();
 const OS *core_get_os();
 const Renderer *core_get_renderer();
-const EventManager *core_get_event_manager();
 
 #endif // CORE_H

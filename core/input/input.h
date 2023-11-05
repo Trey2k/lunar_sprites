@@ -1,13 +1,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "core/core.h"
-#include "core/event/event_manager.h"
-#include "core/input/keycodes.h"
+/* Input needs Window and Window needs Input. So the typedef is on its own for now. */
 
 typedef struct Input Input;
-
-Input *input_create(const EventManager *event_manager);
-void input_destroy(Input *input);
 
 #endif // INPUT_H

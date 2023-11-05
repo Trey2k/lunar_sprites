@@ -21,6 +21,6 @@ typedef struct {
 X11Window *x11_window_create(X11Server *server, const String title, int32 width, int32 height);
 void x11_window_destroy(X11Window *window);
 
-void x11_window_poll(X11Window *window);
+void x11_window_poll(const X11Window *window, const LSWindow *parent);
 
 #endif // X11_WINDOW_H
