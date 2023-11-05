@@ -27,27 +27,27 @@ void core_log(LogLevel level, const String message, ...) {
 
 	switch (level) {
 		case LOG_LEVEL_DEBUG: {
-			fprintf(stdout, "%s", "DEBUG: ");
+			fprintf(stdout, "%s", "[DEBUG] ");
 			vfprintf(stdout, message, args);
 		} break;
 
 		case LOG_LEVEL_INFO: {
-			fprintf(stdout, "%s", "INFO: ");
+			fprintf(stdout, "%s", "[INFO] ");
 			vfprintf(stdout, message, args);
 		} break;
 
 		case LOG_LEVEL_WARNING: {
-			fprintf(stdout, "%s", "WARNING: ");
+			fprintf(stdout, "%s", "[WARNING] ");
 			vfprintf(stdout, message, args);
 		} break;
 
 		case LOG_LEVEL_ERROR: {
-			fprintf(stderr, "%s", "ERROR: ");
+			fprintf(stderr, "%s", "[ERROR] ");
 			vfprintf(stderr, message, args);
 		} break;
 
 		case LOG_LEVEL_FATAL: {
-			fprintf(stderr, "%s", "FATAL: ");
+			fprintf(stderr, "%s", "[FATAL] ");
 			vfprintf(stderr, message, args);
 		} break;
 	};

@@ -38,7 +38,9 @@ static const struct wl_registry_listener registry_listener = {
 	global_registry_remover
 };
 
-WaylandServer *wayland_server_create() {
+WaylandServer *wayland_server_create(Input *input) {
+	CORE_ASSERT(input);
+
 	struct wl_display *display = wl_display_connect(NULL);
 	if (!display) {
 		return NULL;
@@ -48,8 +50,7 @@ WaylandServer *wayland_server_create() {
 	CORE_ASSERT_MSG(registry, "Failed to get Wayland registry\n");
 
 	WaylandServer *server = core_malloc(sizeof(WaylandServer));
-	server->event_manager = core_get_event_manager();
-	CORE_ASSERT(server->event_manager);
+	server->input = input;
 	server->display = display;
 
 	wl_registry_add_listener(registry, &registry_listener, server);

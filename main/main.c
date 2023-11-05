@@ -3,24 +3,22 @@
 #include "core/core.h"
 #include "core/core_log.h"
 #include "core/event/event_manager.h"
-#include "core/os/os.h"
+#include "core/input/input_methods.h"
+#include "core/input/keycodes.h"
 #include "core/os/os_window.h"
 #include "modules/register_module_types.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-static bool running = true;
-
-void main_event_handler(Event *event);
+void main_event_handler(Event *event, void *user_data);
 
 void main_start() {
 	core_init();
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
-	const OS *os = core_get_os();
 
-	core_add_event_handler(&main_event_handler);
+	const OS *os = core_get_os();
+	const Input *input = core_get_input();
+
+	bool running = true;
+	core_add_event_handler(&main_event_handler, &running);
 
 	LSWindow *window = os_window_create(os, "Test", 800, 600);
 	if (!window) {
@@ -28,7 +26,12 @@ void main_start() {
 		goto after_window_destroy;
 	}
 	while (running) {
+		core_poll();
 		window_poll(window);
+
+		if (input_is_key_just_released(input, LS_KEY_SPACE)) {
+			core_log(LOG_LEVEL_INFO, "Space released!\n");
+		}
 	}
 
 	window_destroy(window);
@@ -37,15 +40,26 @@ after_window_destroy:
 	core_deinit();
 }
 
-void main_event_handler(Event *event) {
+void main_event_handler(Event *event, void *user_data) {
+	bool *running = user_data;
 	switch (event->type) {
-		case EVENT_KEYPRESS: {
-			const char keycode = event->key_press.key_code;
-			core_log(LOG_LEVEL_INFO, "Key pressed: %d\nIs repeat: %s\n", keycode,
-					event->key_press.repeat ? "true" : "false");
+		case EVENT_KEY: {
+			const EventKey *key_event = &event->key;
+			switch (key_event->type) {
+				case EVENT_KEY_PRESSED: {
+					if (key_event->repeat) {
+						core_log(LOG_LEVEL_INFO, "Key %s repeated\n", keycode_to_string(key_event->keycode));
+					} else {
+						core_log(LOG_LEVEL_INFO, "Key %s pressed\n", keycode_to_string(key_event->keycode));
+					}
 
-			if (keycode == 9) {
-				running = false;
+					if (key_event->keycode == LS_KEY_ESCAPE) {
+						*running = false;
+					}
+				} break;
+				default: {
+					core_log(LOG_LEVEL_INFO, "Key %s released\n", keycode_to_string(key_event->keycode));
+				} break;
 			}
 		} break;
 		default:

@@ -1,7 +1,10 @@
 #include "platform/linuxbsd/x11/x11_window.h"
-#include "core/event/event_manager.h"
-#include "core/input/input.h"
+#include "core/input/events.h"
+#include "core/input/input_methods.h"
 #include <X11/Xlib.h>
+
+#include "core/os/os_window.h"
+#include "platform/linuxbsd/x11/x11_keymap.h"
 
 X11Window *x11_window_create(X11Server *server, String title, int32 width, int32 height) {
 	CORE_ASSERT(server);
@@ -25,7 +28,7 @@ X11Window *x11_window_create(X11Server *server, String title, int32 width, int32
 		return NULL;
 	}
 
-	XSelectInput(display, window->window, ExposureMask | KeyPressMask);
+	XSelectInput(display, window->window, ExposureMask | KeyPressMask | KeyReleaseMask);
 	XMapWindow(display, window->window);
 
 	return window;
@@ -36,11 +39,9 @@ void x11_window_destroy(X11Window *window) {
 	core_free(window);
 }
 
-void x11_window_poll(X11Window *window) {
+void x11_window_poll(const X11Window *window, const LSWindow *parent) {
 	Display *display = window->server->display;
 	XEvent event;
-
-	const EventManager *event_manager = core_get_event_manager();
 
 	while (XPending(display)) {
 		XNextEvent(display, &event);
@@ -48,10 +49,19 @@ void x11_window_poll(X11Window *window) {
 			case Expose:
 				break;
 			case KeyPress: {
-				Event e;
-				e.type = EVENT_KEYPRESS;
-				e.key_press.key_code = event.xkey.keycode;
-				event_manager_emit(event_manager, &e);
+				input_handle_press(window->server->input, parent, x11_map_key(event.xkey.keycode));
+			} break;
+
+			case KeyRelease: {
+				XEvent nev;
+				if (XPending(display)) {
+					XPeekEvent(display, &nev);
+					if (nev.type == KeyPress && nev.xkey.time == event.xkey.time && nev.xkey.keycode == event.xkey.keycode) {
+						break;
+					}
+				}
+
+				input_handle_release(window->server->input, parent, x11_map_key(event.xkey.keycode));
 			} break;
 		}
 	}

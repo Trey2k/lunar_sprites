@@ -66,14 +66,14 @@ void window_poll(const LSWindow *window) {
 	switch (window->display_server) {
 #if defined(WAYLAND_ENABLED)
 		case DISPLAY_SERVER_WAYLAND: {
-			wayland_window_poll(window->wayland_window);
+			wayland_window_poll(window->wayland_window, window);
 			break;
 		} break;
 #endif
 
 #if defined(X11_ENABLED)
 		case DISPLAY_SERVER_X11: {
-			x11_window_poll(window->x11_window);
+			x11_window_poll(window->x11_window, window);
 			break;
 		} break;
 #endif

@@ -1,6 +1,9 @@
 #ifndef KEYCODES_H
 #define KEYCODES_H
 
+#include "core/string.h"
+#include "core/typedefs.h"
+
 /* Keycodes are from glfw */
 typedef enum {
 	LS_KEY_UNKNOWN = -1,
@@ -130,6 +133,253 @@ typedef enum {
 	LS_KEY_MENU = 348,
 
 	LS_KEY_LAST = LS_KEY_MENU
-} LSKeyCode;
+} LSKeycode;
+
+_FORCE_INLINE_ const String keycode_to_string(LSKeycode keycode) {
+	switch (keycode) {
+		case LS_KEY_SPACE:
+			return "[Space]";
+		case LS_KEY_APOSTROPHE:
+			return "'";
+		case LS_KEY_COMMA:
+			return ",";
+		case LS_KEY_MINUS:
+			return "-";
+		case LS_KEY_PERIOD:
+			return ".";
+		case LS_KEY_SLASH:
+			return "/";
+		case LS_KEY_0:
+			return "0";
+		case LS_KEY_1:
+			return "1";
+		case LS_KEY_2:
+			return "2";
+		case LS_KEY_3:
+			return "3";
+		case LS_KEY_4:
+			return "4";
+		case LS_KEY_5:
+			return "5";
+		case LS_KEY_6:
+			return "6";
+		case LS_KEY_7:
+			return "7";
+		case LS_KEY_8:
+			return "8";
+		case LS_KEY_9:
+			return "9";
+		case LS_KEY_SEMICOLON:
+			return ";";
+		case LS_KEY_EQUAL:
+			return "=";
+		case LS_KEY_A:
+			return "A";
+		case LS_KEY_B:
+			return "B";
+		case LS_KEY_C:
+			return "C";
+		case LS_KEY_D:
+			return "D";
+		case LS_KEY_E:
+			return "E";
+		case LS_KEY_F:
+			return "F";
+		case LS_KEY_G:
+			return "G";
+		case LS_KEY_H:
+			return "H";
+		case LS_KEY_I:
+			return "I";
+		case LS_KEY_J:
+			return "J";
+		case LS_KEY_K:
+			return "K";
+		case LS_KEY_L:
+			return "L";
+		case LS_KEY_M:
+			return "M";
+		case LS_KEY_N:
+			return "N";
+		case LS_KEY_O:
+			return "O";
+		case LS_KEY_P:
+			return "P";
+		case LS_KEY_Q:
+			return "Q";
+		case LS_KEY_R:
+			return "R";
+		case LS_KEY_S:
+			return "S";
+		case LS_KEY_T:
+			return "T";
+		case LS_KEY_U:
+			return "U";
+		case LS_KEY_V:
+			return "V";
+		case LS_KEY_W:
+			return "W";
+		case LS_KEY_X:
+			return "X";
+		case LS_KEY_Y:
+			return "Y";
+		case LS_KEY_Z:
+			return "Z";
+		case LS_KEY_LEFT_BRACKET:
+			return "[";
+		case LS_KEY_BACKSLASH:
+			return "\\";
+		case LS_KEY_RIGHT_BRACKET:
+			return "]";
+		case LS_KEY_GRAVE_ACCENT:
+			return "`";
+		case LS_KEY_WORLD_1:
+			return "[World 1]";
+		case LS_KEY_WORLD_2:
+			return "[World 2]";
+		case LS_KEY_ESCAPE:
+			return "[Escape]";
+		case LS_KEY_ENTER:
+			return "[Enter]";
+		case LS_KEY_TAB:
+			return "[Tab]";
+		case LS_KEY_BACKSPACE:
+			return "[Backspace]";
+		case LS_KEY_INSERT:
+			return "[Insert]";
+		case LS_KEY_DELETE:
+			return "[Delete]";
+		case LS_KEY_RIGHT:
+			return "[Right]";
+		case LS_KEY_LEFT:
+			return "[Left]";
+		case LS_KEY_DOWN:
+			return "[Down]";
+		case LS_KEY_UP:
+			return "[Up]";
+		case LS_KEY_PAGE_UP:
+			return "[Page Up]";
+		case LS_KEY_PAGE_DOWN:
+			return "[Page Down]";
+		case LS_KEY_HOME:
+			return "[Home]";
+		case LS_KEY_END:
+			return "[End]";
+		case LS_KEY_CAPS_LOCK:
+			return "[Caps Lock]";
+		case LS_KEY_SCROLL_LOCK:
+			return "[Scroll Lock]";
+		case LS_KEY_NUM_LOCK:
+			return "[Num Lock]";
+		case LS_KEY_PRINT_SCREEN:
+			return "[Print Screen]";
+		case LS_KEY_PAUSE:
+			return "[Pause]";
+		case LS_KEY_F1:
+			return "[F1]";
+		case LS_KEY_F2:
+			return "[F2]";
+		case LS_KEY_F3:
+			return "[F3]";
+		case LS_KEY_F4:
+			return "[F4]";
+		case LS_KEY_F5:
+			return "[F5]";
+		case LS_KEY_F6:
+			return "[F6]";
+		case LS_KEY_F7:
+			return "[F7]";
+		case LS_KEY_F8:
+			return "[F8]";
+		case LS_KEY_F9:
+			return "[F9]";
+		case LS_KEY_F10:
+			return "[F10]";
+		case LS_KEY_F11:
+			return "[F11]";
+		case LS_KEY_F12:
+			return "[F12]";
+		case LS_KEY_F13:
+			return "[F13]";
+		case LS_KEY_F14:
+			return "[F14]";
+		case LS_KEY_F15:
+			return "[F15]";
+		case LS_KEY_F16:
+			return "[F16]";
+		case LS_KEY_F17:
+			return "[F17]";
+		case LS_KEY_F18:
+			return "[F18]";
+		case LS_KEY_F19:
+			return "[F19]";
+		case LS_KEY_F20:
+			return "[F20]";
+		case LS_KEY_F21:
+			return "[F21]";
+		case LS_KEY_F22:
+			return "[F22]";
+		case LS_KEY_F23:
+			return "[F23]";
+		case LS_KEY_F24:
+			return "[F24]";
+		case LS_KEY_F25:
+			return "[F25]";
+		case LS_KEY_KP_0:
+			return "[KEYPAD] 0";
+		case LS_KEY_KP_1:
+			return "[KEYPAD] 1";
+		case LS_KEY_KP_2:
+			return "[KEYPAD] 2";
+		case LS_KEY_KP_3:
+			return "[KEYPAD] 3";
+		case LS_KEY_KP_4:
+			return "[KEYPAD] 4";
+		case LS_KEY_KP_5:
+			return "[KEYPAD] 5";
+		case LS_KEY_KP_6:
+			return "[KEYPAD] 6";
+		case LS_KEY_KP_7:
+			return "[KEYPAD] 7";
+		case LS_KEY_KP_8:
+			return "[KEYPAD] 8";
+		case LS_KEY_KP_9:
+			return "[KEYPAD] 9";
+		case LS_KEY_KP_DECIMAL:
+			return "[KEYPAD] .";
+		case LS_KEY_KP_DIVIDE:
+			return "[KEYPAD] /";
+		case LS_KEY_KP_MULTIPLY:
+			return "[KEYPAD] *";
+		case LS_KEY_KP_SUBTRACT:
+			return "[KEYPAD] -";
+		case LS_KEY_KP_ADD:
+			return "[KEYPAD] +";
+		case LS_KEY_KP_ENTER:
+			return "[KEYPAD] [Enter]";
+		case LS_KEY_KP_EQUAL:
+			return "[KEYPAD] =";
+		case LS_KEY_LEFT_SHIFT:
+			return "[Left Shift]";
+		case LS_KEY_LEFT_CONTROL:
+			return "[Left Control]";
+		case LS_KEY_LEFT_ALT:
+			return "[Left Alt]";
+		case LS_KEY_LEFT_SUPER:
+			return "[Left Super]";
+		case LS_KEY_RIGHT_SHIFT:
+			return "[Right Shift]";
+		case LS_KEY_RIGHT_CONTROL:
+			return "[Right Control]";
+		case LS_KEY_RIGHT_ALT:
+			return "[Right Alt]";
+		case LS_KEY_RIGHT_SUPER:
+			return "[Right Super]";
+		case LS_KEY_MENU:
+			return "[Menu]";
+		default:
+			return "[Unknown]";
+	};
+}
 
 #endif // KEYCODES_H
