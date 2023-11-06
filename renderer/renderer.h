@@ -2,9 +2,14 @@
 #define RENDERER_H
 
 #include "core/typedefs.h"
+#include "core/types/string.h"
 
 #if defined(OPENGL3_ENABLED)
-#include "renderer/opengl3/opengl3_renderer.h"
+#include "renderer/opengl3/renderer.h"
+typedef void *(*OPENGLloadproc)(const char *name);
+
+extern const OPENGLloadproc OPENGL3_LOAD_PROC;
+
 #endif
 
 #define RENDERER_BACKEND_COUNT 2
@@ -25,16 +30,13 @@ _FORCE_INLINE_ String renderer_backend_to_string(RendererBackend backend) {
 	}
 }
 
-typedef struct {
-	RendererBackend backend;
-	union {
+bool renderer_init(RendererBackend backend);
+void renderer_deinit();
+
+RendererBackend renderer_get_backend();
+
 #if defined(OPENGL3_ENABLED)
-		OpenGL3Renderer *opengl3_renderer;
+const OpenGL3Renderer *renderer_get_opengl3();
 #endif
-	};
-} Renderer;
 
-Renderer *renderer_create(RendererBackend backend);
-void renderer_destroy(Renderer *renderer);
-
-#endif
+#endif // RENDERER_H

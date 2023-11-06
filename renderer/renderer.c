@@ -2,39 +2,58 @@
 #include "core/core.h"
 #include "core/typedefs.h"
 
+struct Renderer {
+	RendererBackend backend;
+	union {
 #if defined(OPENGL3_ENABLED)
-#include "renderer/opengl3/opengl3_renderer.h"
+		OpenGL3Renderer *opengl3_renderer;
 #endif
+	};
+};
 
-Renderer *renderer_create(RendererBackend backend) {
-	CORE_ASSERT(backend < RENDERER_BACKEND_COUNT - 1 && backend >= RENDERER_BACKEND_NONE);
+static struct Renderer renderer;
 
-	Renderer *renderer = core_malloc(sizeof(Renderer));
-	renderer->backend = backend;
+bool renderer_init(RendererBackend backend) {
+	CORE_ASSERT(backend < RENDERER_BACKEND_COUNT && backend >= RENDERER_BACKEND_NONE);
+
+	renderer.backend = backend;
 
 	switch (backend) {
 		case RENDERER_BACKEND_NONE: {
+			return true;
 		} break;
-		case RENDERER_BACKEND_OPENGL3: {
 #if defined(OPENGL3_ENABLED)
-			renderer->opengl3_renderer = opengl3_renderer_create();
-#endif
+		case RENDERER_BACKEND_OPENGL3: {
+			renderer.opengl3_renderer = opengl3_renderer_create();
+			CORE_ASSERT(renderer.opengl3_renderer);
+			return true;
 		} break;
+#endif
+		default:
+			core_fatal("Unknown renderer backend: %d\n", backend);
 	}
 
-	return renderer;
+	return false;
 }
 
-void renderer_destroy(Renderer *renderer) {
-	switch (renderer->backend) {
+void renderer_deinit() {
+	switch (renderer.backend) {
 		case RENDERER_BACKEND_NONE: {
 		} break;
 		case RENDERER_BACKEND_OPENGL3: {
 #if defined(OPENGL3_ENABLED)
-			opengl3_renderer_destroy(renderer->opengl3_renderer);
+			opengl3_renderer_destroy(renderer.opengl3_renderer);
 #endif
 		} break;
 	}
-
-	core_free(renderer);
 }
+
+RendererBackend renderer_get_backend() {
+	return renderer.backend;
+}
+
+#if defined(OPENGL3_ENABLED)
+const OpenGL3Renderer *renderer_get_opengl3() {
+	return renderer.opengl3_renderer;
+}
+#endif

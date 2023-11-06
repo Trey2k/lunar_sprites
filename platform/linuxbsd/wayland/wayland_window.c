@@ -3,7 +3,7 @@
 #include "core/core.h"
 #include "core/core_log.h"
 #include "core/math/math.h"
-#include "core/os/os_window.h"
+#include "core/os/window.h"
 #include "platform/linuxbsd/wayland/xdg-shell.gen.h"
 
 WaylandWindow *wayland_window_create(const WaylandServer *server, String title, int32 width, int32 height) {

@@ -2,9 +2,9 @@
 #define INPUT_EVENTS_H
 
 #include "core/input/keycodes.h"
-#include "core/os/os_window.h"
+#include "core/os/window.h"
 
-#include "core/types/vector2/vector2.h"
+#include "core/types/vector2.h"
 
 typedef enum {
 	EVENT_KEY_PRESSED,

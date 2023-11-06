@@ -4,7 +4,7 @@ Import("env")
 
 env.renderer_sources = [
     "renderer.c",
-    "surface.c",
+    "context.c",
 ]
 
 if env["use_opengl3"]:

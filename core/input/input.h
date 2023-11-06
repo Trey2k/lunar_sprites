@@ -3,7 +3,7 @@
 
 #include "core/events/events.h"
 #include "core/input/keycodes.h"
-#include "core/types/vector2/vector2.h"
+#include "core/types/vector2.h"
 
 void input_poll();
 

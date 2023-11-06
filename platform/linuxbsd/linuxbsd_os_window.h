@@ -1,7 +1,8 @@
 #ifndef LINUXBSD_OS_WINDOW_H
 #define LINUXBSD_OS_WINDOW_H
 
-#include "core/os/os_window.h"
+#include "core/os/window.h"
+#include "renderer/context.h"
 
 #include "platform/linuxbsd/linuxbsd_os.h"
 
@@ -14,11 +15,14 @@
 #endif
 
 struct LSWindow {
+	Context *context;
+
 	DisplayServer display_server;
 	union {
 #if defined(X11_ENABLED)
 		X11Window *x11_window;
 #endif
+
 #if defined(WAYLAND_ENABLED)
 		WaylandWindow *wayland_window;
 #endif

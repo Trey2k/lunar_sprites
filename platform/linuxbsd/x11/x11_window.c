@@ -2,50 +2,54 @@
 
 #include "core/events/events.h"
 #include "core/input/input.h"
-#include "core/os/os_window.h"
+#include "core/os/window.h"
+#include "platform/linuxbsd/linuxbsd_os.h"
 #include "platform/linuxbsd/x11/x11_keymap.h"
 
 #include <X11/Xlib.h>
 
-X11Window *x11_window_create(X11Server *server, String title, int32 width, int32 height) {
-	CORE_ASSERT(server);
-
+X11Window *x11_window_create(String title, int32 width, int32 height) {
 	X11Window *window = core_malloc(sizeof(X11Window));
-	window->server = server;
 	window->width = width;
 	window->height = height;
 
+	const X11Server *server = x11_server_create();
+
 	Display *display = server->display;
 	const int32 screen = server->default_screen;
+	Window root = RootWindow(display, screen);
+	Visual *visual = DefaultVisual(display, screen);
 
-	window->window = XCreateSimpleWindow(
-			display,
-			RootWindow(display, screen),
-			10, 10, width, height, 1,
-			BlackPixel(display, screen),
-			WhitePixel(display, screen));
+	Colormap colormap = XCreateColormap(display, root, visual, AllocNone);
+
+	XSetWindowAttributes attributes;
+	attributes.colormap = colormap;
+	attributes.event_mask = EVENT_MASK;
+
+	window->window = XCreateWindow(display, root, 0, 0, width, height, 0,
+			DefaultDepth(display, screen), InputOutput, visual,
+			CWColormap | CWEventMask, &attributes);
 	if (!window->window) {
 		core_log(LOG_LEVEL_ERROR, "Failed to create X11 window\n");
 		return NULL;
 	}
 
-	XStoreName(display, window->window, title);
-
-	XSelectInput(display, window->window,
-			ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask |
-					ButtonReleaseMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask);
+	XFreeColormap(display, colormap);
 	XMapWindow(display, window->window);
+	x11_window_set_title(window, title);
 
 	return window;
 }
 
 void x11_window_destroy(X11Window *window) {
-	XDestroyWindow(window->server->display, window->window);
+	const X11Server *server = os_linuxbsd_get_x11_server();
+	XDestroyWindow(server->display, window->window);
 	core_free(window);
 }
 
 void x11_window_poll(const X11Window *window, const LSWindow *parent) {
-	Display *display = window->server->display;
+	const X11Server *server = os_linuxbsd_get_x11_server();
+	Display *display = server->display;
 	XEvent event;
 
 	while (XPending(display)) {
@@ -90,4 +94,14 @@ void x11_window_poll(const X11Window *window, const LSWindow *parent) {
 			} break;
 		}
 	}
+}
+
+void x11_window_set_title(const X11Window *window, String title) {
+	const X11Server *server = os_linuxbsd_get_x11_server();
+	XStoreName(server->display, window->window, title);
+}
+
+void x11_window_set_size(const X11Window *window, int32 width, int32 height) {
+	const X11Server *server = os_linuxbsd_get_x11_server();
+	XResizeWindow(server->display, window->window, width, height);
 }

@@ -7,10 +7,10 @@ set -uo pipefail
 
 if [ $# -eq 0 ]; then
     # Loop through all code files tracked by Git.
-    files=$(git ls-files -- '*.c' '*.h' '*.cpp' '*.hpp' '*.cc' '*.hh' '*.cxx' '*.m' '*.mm' '*.inc' '*.java' '*.glsl' ':!:*.gen.*' ':!:external/*', ':!:.github/*')
+    files=$(git ls-files -- '*.c' '*.h' '*.cpp' '*.hpp' '*.cc' '*.hh' '*.cxx' '*.m' '*.mm' '*.inc' '*.java' '*.glsl' ':!:*.gen.*' ':!:thirdparty/*', ':!:.github/*')
 else
     # $1 should be a file listing file paths to process. Used in CI.
-    files=$(cat "$1" | grep -v "external/" | grep -E "\.(c|h|cpp|hpp|cc|hh|cxx|m|mm|inc|java|glsl)$")
+    files=$(cat "$1" | grep -v "thirdparty/" | grep -E "\.(c|h|cpp|hpp|cc|hh|cxx|m|mm|inc|java|glsl)$")
 fi
 
 if [ ! -z "$files" ]; then

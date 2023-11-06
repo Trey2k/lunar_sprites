@@ -1,9 +1,11 @@
 #ifndef OS_H
 #define OS_H
 
-typedef struct OS OS;
+#include "core/typedefs.h"
 
-OS *os_create();
-void os_destroy(OS *os);
+bool os_init();
+void os_deinit();
+
+void *os_get_native_display();
 
 #endif // OS_H

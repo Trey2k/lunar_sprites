@@ -1,6 +1,7 @@
 #ifndef LINUXBSD_OS_H
 #define LINUXBSD_OS_H
 
+#include "renderer/renderer.h"
 #if defined(WAYLAND_ENABLED)
 #include "platform/linuxbsd/wayland/wayland_server.h"
 #endif
@@ -16,17 +17,14 @@ typedef enum {
 	DISPLAY_SERVER_X11
 } DisplayServer;
 
-struct OS {
-	DisplayServer display_server;
-	union {
+DisplayServer os_linuxbsd_get_display_server();
+
 #if defined(WAYLAND_ENABLED)
-		WaylandServer *wayland_server;
+WaylandServer *os_linuxbsd_get_wayland_server();
 #endif
 
 #if defined(X11_ENABLED)
-		X11Server *x11_server;
+X11Server *os_linuxbsd_get_x11_server();
 #endif
-	};
-};
 
 #endif // LINUXBSD_OS_H

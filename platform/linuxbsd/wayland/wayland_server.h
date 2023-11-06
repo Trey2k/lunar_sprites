@@ -3,6 +3,7 @@
 
 #include "core/input/input.h"
 #include "platform/linuxbsd/wayland/xdg-shell.gen.h"
+#include "renderer/renderer.h"
 #include <wayland-client.h>
 
 typedef struct {

@@ -1,8 +1,8 @@
 #ifndef KEYCODES_H
 #define KEYCODES_H
 
-#include "core/string.h"
 #include "core/typedefs.h"
+#include "core/types/string.h"
 
 /* Keycodes are from glfw */
 typedef enum {
@@ -163,7 +163,7 @@ typedef enum {
 	LS_MOUSE_BUTTON_MIDDLE = LS_MOUSE_BUTTON_3,
 } LSMouseButton;
 
-_FORCE_INLINE_ const String keycode_to_string(LSKeycode keycode) {
+_FORCE_INLINE_ String keycode_to_string(LSKeycode keycode) {
 	switch (keycode) {
 		case LS_KEY_SPACE:
 			return "[Space]";
@@ -410,7 +410,7 @@ _FORCE_INLINE_ const String keycode_to_string(LSKeycode keycode) {
 	};
 }
 
-_FORCE_INLINE_ const String modifier_to_string(LSModifier modifier) {
+_FORCE_INLINE_ String modifier_to_string(LSModifier modifier) {
 	switch (modifier) {
 		case LS_MOD_SHIFT:
 			return "[Shift]";
@@ -429,7 +429,7 @@ _FORCE_INLINE_ const String modifier_to_string(LSModifier modifier) {
 	};
 }
 
-_FORCE_INLINE_ const String mouse_button_to_string(LSMouseButton button) {
+_FORCE_INLINE_ String mouse_button_to_string(LSMouseButton button) {
 	switch (button) {
 		case LS_MOUSE_BUTTON_1:
 			return "[Mouse 1]";

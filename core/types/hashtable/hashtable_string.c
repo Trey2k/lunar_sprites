@@ -1,6 +1,6 @@
 #include "core/core.h"
 #include "core/core_log.h"
-#include "core/types/hashtable/hashtable.h"
+#include "core/types/hashtable.h"
 
 struct HashtableString {
 	size_t size;
@@ -9,11 +9,11 @@ struct HashtableString {
 };
 
 struct HashtableStringEntry {
-	String key;
+	char *key;
 	void *value;
 };
 
-static size_t hashtable_string_index(const HashtableString *hashtable, const String key) {
+static size_t hashtable_string_index(const HashtableString *hashtable, String key) {
 	CORE_ASSERT(hashtable);
 	CORE_ASSERT(key);
 
@@ -43,7 +43,7 @@ void hashtable_string_destroy(HashtableString *hashtable) {
 	core_free(hashtable);
 }
 
-void hashtable_string_set(HashtableString *hashtable, const String key, void *value) {
+void hashtable_string_set(HashtableString *hashtable, String key, void *value) {
 	CORE_ASSERT(hashtable);
 	CORE_ASSERT(key);
 
@@ -59,7 +59,7 @@ void hashtable_string_set(HashtableString *hashtable, const String key, void *va
 	}
 }
 
-void *hashtable_string_get(const HashtableString *hashtable, const String key) {
+void *hashtable_string_get(const HashtableString *hashtable, String key) {
 	CORE_ASSERT(hashtable);
 	CORE_ASSERT(key);
 
@@ -69,7 +69,7 @@ void *hashtable_string_get(const HashtableString *hashtable, const String key) {
 	return entry->value;
 }
 
-bool hashtable_string_contains(const HashtableString *hashtable, const String key) {
+bool hashtable_string_contains(const HashtableString *hashtable, String key) {
 	CORE_ASSERT(hashtable);
 	CORE_ASSERT(key);
 
@@ -77,7 +77,7 @@ bool hashtable_string_contains(const HashtableString *hashtable, const String ke
 	return hashtable->entries[index].value != NULL;
 }
 
-bool hashtable_string_remove(HashtableString *hashtable, const String key) {
+bool hashtable_string_remove(HashtableString *hashtable, String key) {
 	CORE_ASSERT(hashtable);
 	CORE_ASSERT(key);
 

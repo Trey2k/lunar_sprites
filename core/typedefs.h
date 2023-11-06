@@ -79,10 +79,8 @@ typedef __SIZE_TYPE__ size_t;
 #endif
 
 #ifndef CORE_ASSERT
-#define CORE_ASSERT(condition)                                          \
-	if (!(condition)) {                                                 \
-		CORE_ASSERT_MSG("Assertion `%s` failed.\n", _MKSTR(condition)); \
-	}
+#define CORE_ASSERT(condition) \
+	CORE_ASSERT_MSG(condition, "Assertion `%s` failed.\n", _MKSTR(condition));
 #endif
 
 #else

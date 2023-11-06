@@ -3,7 +3,10 @@
 Import("env")
 
 # TODO: Detect if OpenGL3 is available
-env.ParseConfig("pkg-config gl --cflags --libs")
 env.Append(CPPDEFINES=["OPENGL3_ENABLED"])
+env.Append(CPPPATH=[
+    "#thirdparty/glad",
+])
 
+env.add_source_files(env.renderer_sources, "#thirdparty/glad/egl.c")
 env.add_source_files(env.renderer_sources, "*.c")
