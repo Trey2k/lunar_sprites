@@ -10,20 +10,20 @@ static void global_registry_handler(void *data, struct wl_registry *registry, ui
 	WaylandServer *server = (WaylandServer *)data;
 	CORE_ASSERT_MSG(server, "Wayland server is NULL");
 
-	if (string_equals(interface, "wl_compositor")) {
+	if (string_equals((const String)interface, "wl_compositor")) {
 		server->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 1);
 		core_log(LOG_LEVEL_INFO, "Found compositor\n");
-	} else if (string_equals(interface, "wl_subcompositor")) {
+	} else if (string_equals((const String)interface, "wl_subcompositor")) {
 		server->subcompositor = wl_registry_bind(registry, id, &wl_subcompositor_interface, 1);
 		core_log(LOG_LEVEL_INFO, "Found subcompositor\n");
-	} else if (string_equals(interface, "wl_seat")) {
+	} else if (string_equals((const String)interface, "wl_seat")) {
 		server->seat = wl_registry_bind(registry, id, &wl_seat_interface, 1);
 		core_log(LOG_LEVEL_INFO, "Found seat\n");
-	} else if (string_equals(interface, "wl_shm")) {
+	} else if (string_equals((const String)interface, "wl_shm")) {
 		server->shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
 		server->cursor_theme = wl_cursor_theme_load(NULL, 32, server->shm);
 		core_log(LOG_LEVEL_INFO, "Found shared memory\n");
-	} else if (string_equals(interface, xdg_wm_base_interface.name)) {
+	} else if (string_equals((const String)interface, (const String)xdg_wm_base_interface.name)) {
 		server->xdg_wm_base = wl_registry_bind(registry, id, &xdg_wm_base_interface, 1);
 		core_log(LOG_LEVEL_INFO, "Found xdg_wm_base\n");
 	}
@@ -38,9 +38,7 @@ static const struct wl_registry_listener registry_listener = {
 	global_registry_remover
 };
 
-WaylandServer *wayland_server_create(Input *input) {
-	CORE_ASSERT(input);
-
+WaylandServer *wayland_server_create() {
 	struct wl_display *display = wl_display_connect(NULL);
 	if (!display) {
 		return NULL;
@@ -50,7 +48,6 @@ WaylandServer *wayland_server_create(Input *input) {
 	CORE_ASSERT_MSG(registry, "Failed to get Wayland registry\n");
 
 	WaylandServer *server = core_malloc(sizeof(WaylandServer));
-	server->input = input;
 	server->display = display;
 
 	wl_registry_add_listener(registry, &registry_listener, server);

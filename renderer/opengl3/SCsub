@@ -2,9 +2,8 @@
 
 Import("env")
 
-# TODO: Detect if OpenGL 3 is available
+# TODO: Detect if OpenGL3 is available
 env.ParseConfig("pkg-config gl --cflags --libs")
-env.ParseConfig("pkg-config egl --cflags --libs")
 env.Append(CPPDEFINES=["OPENGL3_ENABLED"])
 
 env.add_source_files(env.renderer_sources, "*.c")

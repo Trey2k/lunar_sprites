@@ -21,8 +21,8 @@ env.core_sources += thirdparty_obj
 env.add_source_files(env.core_sources, "*.c")
 env.add_source_files(env.core_sources, "version_info.gen.c")
 
-SConscript("containers/SCsub")
-SConscript("event/SCsub")
+SConscript("types/SCsub")
+SConscript("events/SCsub")
 SConscript("input/SCsub")
 SConscript("os/SCsub")
 SConscript("math/SCsub")

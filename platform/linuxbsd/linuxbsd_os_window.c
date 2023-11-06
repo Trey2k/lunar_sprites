@@ -1,7 +1,12 @@
-#include "platform/linuxbsd/linuxbsd_os_window.h"
 #include "core/core.h"
 #include "core/core_log.h"
+#if defined(WAYLAND_ENABLED)
 #include "platform/linuxbsd/wayland/wayland_window.h"
+#endif
+
+#if defined(X11_ENABLED)
+#include "platform/linuxbsd/linuxbsd_os_window.h"
+#endif
 
 LSWindow *os_window_create(const OS *os, const String title, int32 width, int32 height) {
 	switch (os->display_server) {

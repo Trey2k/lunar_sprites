@@ -3,6 +3,7 @@
 
 #include "core/input/keycodes.h"
 #include "core/typedefs.h"
+
 #include <X11/Xlib.h>
 
 _FORCE_INLINE_ LSKeycode x11_map_key(uint32 x11_keycode) {
@@ -240,6 +241,23 @@ _FORCE_INLINE_ LSKeycode x11_map_key(uint32 x11_keycode) {
 
 		default:
 			return LS_KEY_UNKNOWN;
+	}
+}
+
+_FORCE_INLINE_ LSMouseButton x11_map_mbutton(uint32 x11_button) {
+	switch (x11_button) {
+		case Button1:
+			return LS_MOUSE_BUTTON_1;
+		case Button2:
+			return LS_MOUSE_BUTTON_2;
+		case Button3:
+			return LS_MOUSE_BUTTON_3;
+		case Button4:
+			return LS_MOUSE_BUTTON_4;
+		case Button5:
+			return LS_MOUSE_BUTTON_5;
+		default:
+			return LS_MOUSE_BUTTON_NONE;
 	}
 }
 

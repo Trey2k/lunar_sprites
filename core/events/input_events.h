@@ -4,6 +4,8 @@
 #include "core/input/keycodes.h"
 #include "core/os/os_window.h"
 
+#include "core/types/vector2/vector2.h"
+
 typedef enum {
 	EVENT_KEY_PRESSED,
 	EVENT_KEY_RELEASED
@@ -16,5 +18,21 @@ typedef struct {
 
 	LSWindow *window;
 } EventKey;
+
+typedef enum {
+	EVENT_MOUSE_PRESSED,
+	EVENT_MOUSE_RELEASED,
+	EVENT_MOUSE_MOVED,
+	EVENT_MOUSE_ENTERED,
+	EVENT_MOUSE_LEFT
+} EventMouseType;
+
+typedef struct {
+	EventMouseType type;
+	LSMouseButton button;
+	Vector2i position;
+
+	LSWindow *window;
+} EventMouse;
 
 #endif // INPUT_EVENTS_H

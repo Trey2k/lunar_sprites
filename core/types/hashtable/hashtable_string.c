@@ -1,6 +1,6 @@
-#include "core/containers/hashtable.h"
 #include "core/core.h"
 #include "core/core_log.h"
+#include "core/types/hashtable/hashtable.h"
 
 struct HashtableString {
 	size_t size;

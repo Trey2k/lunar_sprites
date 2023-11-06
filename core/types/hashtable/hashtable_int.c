@@ -1,4 +1,4 @@
-#include "core/containers/hashtable.h"
+#include "core/types/hashtable/hashtable.h"
 
 #include "core/core.h"
 

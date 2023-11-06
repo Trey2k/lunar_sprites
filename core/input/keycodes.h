@@ -7,6 +7,7 @@
 /* Keycodes are from glfw */
 typedef enum {
 	LS_KEY_UNKNOWN = -1,
+	LS_KEY_NONE = 0,
 
 	/* Printable keys */
 	LS_KEY_SPACE = 32,
@@ -134,6 +135,33 @@ typedef enum {
 
 	LS_KEY_LAST = LS_KEY_MENU
 } LSKeycode;
+
+typedef enum {
+	LS_MOD_NONE = 0,
+	LS_MOD_SHIFT = 0x0001,
+	LS_MOD_CONTROL = 0x0002,
+	LS_MOD_ALT = 0x0004,
+	LS_MOD_SUPER = 0x0008,
+	LS_MOD_CAPS_LOCK = 0x0010,
+	LS_MOD_NUM_LOCK = 0x0020,
+	LS_MOD_LAST = LS_MOD_NUM_LOCK
+} LSModifier;
+
+typedef enum {
+	LS_MOUSE_BUTTON_NONE = -1,
+	LS_MOUSE_BUTTON_1 = 0,
+	LS_MOUSE_BUTTON_2 = 1,
+	LS_MOUSE_BUTTON_3 = 2,
+	LS_MOUSE_BUTTON_4 = 3,
+	LS_MOUSE_BUTTON_5 = 4,
+	LS_MOUSE_BUTTON_6 = 5,
+	LS_MOUSE_BUTTON_7 = 6,
+	LS_MOUSE_BUTTON_8 = 7,
+	LS_MOUSE_BUTTON_LAST = LS_MOUSE_BUTTON_8,
+	LS_MOUSE_BUTTON_LEFT = LS_MOUSE_BUTTON_1,
+	LS_MOUSE_BUTTON_RIGHT = LS_MOUSE_BUTTON_2,
+	LS_MOUSE_BUTTON_MIDDLE = LS_MOUSE_BUTTON_3,
+} LSMouseButton;
 
 _FORCE_INLINE_ const String keycode_to_string(LSKeycode keycode) {
 	switch (keycode) {
@@ -377,6 +405,48 @@ _FORCE_INLINE_ const String keycode_to_string(LSKeycode keycode) {
 			return "[Right Super]";
 		case LS_KEY_MENU:
 			return "[Menu]";
+		default:
+			return "[Unknown]";
+	};
+}
+
+_FORCE_INLINE_ const String modifier_to_string(LSModifier modifier) {
+	switch (modifier) {
+		case LS_MOD_SHIFT:
+			return "[Shift]";
+		case LS_MOD_CONTROL:
+			return "[Control]";
+		case LS_MOD_ALT:
+			return "[Alt]";
+		case LS_MOD_SUPER:
+			return "[Super]";
+		case LS_MOD_CAPS_LOCK:
+			return "[Caps Lock]";
+		case LS_MOD_NUM_LOCK:
+			return "[Num Lock]";
+		default:
+			return "[Unknown]";
+	};
+}
+
+_FORCE_INLINE_ const String mouse_button_to_string(LSMouseButton button) {
+	switch (button) {
+		case LS_MOUSE_BUTTON_1:
+			return "[Mouse 1]";
+		case LS_MOUSE_BUTTON_2:
+			return "[Mouse 2]";
+		case LS_MOUSE_BUTTON_3:
+			return "[Mouse 3]";
+		case LS_MOUSE_BUTTON_4:
+			return "[Mouse 4]";
+		case LS_MOUSE_BUTTON_5:
+			return "[Mouse 5]";
+		case LS_MOUSE_BUTTON_6:
+			return "[Mouse 6]";
+		case LS_MOUSE_BUTTON_7:
+			return "[Mouse 7]";
+		case LS_MOUSE_BUTTON_8:
+			return "[Mouse 8]";
 		default:
 			return "[Unknown]";
 	};

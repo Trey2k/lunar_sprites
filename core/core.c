@@ -1,54 +1,41 @@
 #include "core/core.h"
 #include "core/core_log.h"
-#include "core/input/input_methods.h"
+#include "core/events/events.h"
+#include "core/input/input.h"
 #include "core/os/os.h"
 #include "renderer/renderer.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
 
-static EventManager *event_manager;
-static Input *input;
 static OS *os;
 static Renderer *renderer;
 
 void core_init() {
-	event_manager = event_manager_create();
-	if (!event_manager) {
-		core_fatal("Failed to create event manager\n");
-	}
+	events_init();
 
-	input = input_create(event_manager);
-	if (!input) {
-		event_manager_destroy(event_manager);
-		core_fatal("Failed to create input\n");
-	}
-
-	os = os_create(input);
+	os = os_create();
 	if (!os) {
-		input_destroy(input);
-		event_manager_destroy(event_manager);
+		events_deinit();
 		core_fatal("Failed to create OS\n");
 	}
 
 	renderer = renderer_create(RENDERER_BACKEND_OPENGL3);
 	if (!renderer) {
 		os_destroy(os);
-		input_destroy(input);
-		event_manager_destroy(event_manager);
+		events_deinit();
 		core_fatal("Failed to create renderer\n");
 	}
 }
 
 void core_poll() {
-	input_poll(input);
+	input_poll();
 }
 
 void core_deinit() {
-	os_destroy(os);
 	renderer_destroy(renderer);
-	event_manager_destroy(event_manager);
-	input_destroy(input);
+	os_destroy(os);
+	events_deinit();
 }
 
 void *core_malloc(size_t size) {
@@ -71,23 +58,10 @@ void core_fatal(const String message, ...) {
 	exit(1);
 }
 
-// This is needed becuase only core has a none const ref to the event manager
-void core_add_event_handler(const EventHandler handler, void *user_data) {
-	event_manager_add_handler(event_manager, handler, user_data);
-}
-
 const OS *core_get_os() {
 	return os;
 }
 
 const Renderer *core_get_renderer() {
 	return renderer;
-}
-
-const EventManager *core_get_event_manager() {
-	return event_manager;
-}
-
-const Input *core_get_input() {
-	return input;
 }

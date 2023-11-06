@@ -1,12 +1,8 @@
 #include "platform/linuxbsd/x11/x11_server.h"
-#include "core/containers/hashtable.h"
 #include "core/core.h"
 
-X11Server *x11_server_create(Input *input) {
-	CORE_ASSERT(input);
-
+X11Server *x11_server_create() {
 	X11Server *server = core_malloc(sizeof(X11Server));
-	server->input = input;
 
 	server->display = XOpenDisplay(NULL);
 	if (!server->display) {

@@ -14,11 +14,9 @@ typedef struct {
 	struct wl_shm *shm;
 	struct wl_cursor_theme *cursor_theme;
 	struct wl_surface *cursor_surface;
-
-	Input *input;
 } WaylandServer;
 
-WaylandServer *wayland_server_create(Input *input);
+WaylandServer *wayland_server_create();
 void wayland_server_destroy(WaylandServer *server);
 
 #endif // WAYLAND_SERVER_H

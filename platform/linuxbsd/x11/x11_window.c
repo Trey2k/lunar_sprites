@@ -1,10 +1,11 @@
 #include "platform/linuxbsd/x11/x11_window.h"
-#include "core/input/events.h"
-#include "core/input/input_methods.h"
-#include <X11/Xlib.h>
 
+#include "core/events/events.h"
+#include "core/input/input.h"
 #include "core/os/os_window.h"
 #include "platform/linuxbsd/x11/x11_keymap.h"
+
+#include <X11/Xlib.h>
 
 X11Window *x11_window_create(X11Server *server, String title, int32 width, int32 height) {
 	CORE_ASSERT(server);
@@ -28,7 +29,11 @@ X11Window *x11_window_create(X11Server *server, String title, int32 width, int32
 		return NULL;
 	}
 
-	XSelectInput(display, window->window, ExposureMask | KeyPressMask | KeyReleaseMask);
+	XStoreName(display, window->window, title);
+
+	XSelectInput(display, window->window,
+			ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask |
+					ButtonReleaseMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask);
 	XMapWindow(display, window->window);
 
 	return window;
@@ -49,7 +54,7 @@ void x11_window_poll(const X11Window *window, const LSWindow *parent) {
 			case Expose:
 				break;
 			case KeyPress: {
-				input_handle_press(window->server->input, parent, x11_map_key(event.xkey.keycode));
+				input_handle_press(parent, x11_map_key(event.xkey.keycode));
 			} break;
 
 			case KeyRelease: {
@@ -61,7 +66,27 @@ void x11_window_poll(const X11Window *window, const LSWindow *parent) {
 					}
 				}
 
-				input_handle_release(window->server->input, parent, x11_map_key(event.xkey.keycode));
+				input_handle_release(parent, x11_map_key(event.xkey.keycode));
+			} break;
+
+			case ButtonPress: {
+				input_handle_mouse_press(parent, x11_map_mbutton(event.xbutton.button), (Vector2i){ event.xbutton.x, event.xbutton.y });
+			} break;
+
+			case ButtonRelease: {
+				input_handle_mouse_release(parent, x11_map_mbutton(event.xbutton.button), (Vector2i){ event.xbutton.x, event.xbutton.y });
+			} break;
+
+			case MotionNotify: {
+				input_handle_mouse_move(parent, (Vector2i){ event.xmotion.x, event.xmotion.y });
+			} break;
+
+			case EnterNotify: {
+				input_handle_mouse_enter(parent, (Vector2i){ event.xcrossing.x, event.xcrossing.y });
+			} break;
+
+			case LeaveNotify: {
+				input_handle_mouse_leave(parent, (Vector2i){ event.xcrossing.x, event.xcrossing.y });
 			} break;
 		}
 	}
