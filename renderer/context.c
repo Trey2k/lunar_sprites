@@ -60,3 +60,18 @@ void context_make_current(const Context *context) {
 			core_fatal("Unknown renderer backend: %d\n", context->backend);
 	};
 }
+
+void context_swap_buffers(const Context *context) {
+	CORE_ASSERT(context);
+
+	switch (context->backend) {
+#if defined(OPENGL3_ENABLED)
+		case RENDERER_BACKEND_OPENGL3: {
+			opengl3_context_swap_buffers(context->opengl3_context);
+		} break;
+#endif
+
+		default:
+			core_fatal("Unknown renderer backend: %d\n", context->backend);
+	};
+}

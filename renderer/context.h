@@ -23,5 +23,6 @@ Context *context_create(const LSWindow *window);
 void context_destroy(Context *context);
 
 void context_make_current(const Context *context);
+void context_swap_buffers(const Context *context);
 
 #endif // CONTEXT_H

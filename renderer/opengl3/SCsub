@@ -9,4 +9,5 @@ env.Append(CPPPATH=[
 ])
 
 env.add_source_files(env.renderer_sources, "#thirdparty/glad/egl.c")
+env.add_source_files(env.renderer_sources, "#thirdparty/glad/gl.c")
 env.add_source_files(env.renderer_sources, "*.c")

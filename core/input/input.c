@@ -123,7 +123,7 @@ bool input_is_key_just_released(LSKeycode keycode) {
 
 void input_handle_mouse_press(const LSWindow *window, LSMouseButton button, Vector2i position) {
 	CORE_ASSERT(window);
-	CORE_ASSERT(button > 0 && button < LS_MOUSE_BUTTON_LAST);
+	CORE_ASSERT(button >= 0 && button <= LS_MOUSE_BUTTON_LAST);
 
 	if (!input.mouse_button_state[button].pressed) {
 		input.mouse_button_state[button].pressed = true;
@@ -144,7 +144,7 @@ void input_handle_mouse_press(const LSWindow *window, LSMouseButton button, Vect
 
 void input_handle_mouse_release(const LSWindow *window, LSMouseButton button, Vector2i position) {
 	CORE_ASSERT(window);
-	CORE_ASSERT(button > 0 && button < LS_MOUSE_BUTTON_LAST);
+	CORE_ASSERT(button >= 0 && button <= LS_MOUSE_BUTTON_LAST);
 
 	input.mouse_button_state[button].pressed = false;
 	input.mouse_position = position;

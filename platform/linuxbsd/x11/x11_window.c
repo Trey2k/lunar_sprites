@@ -13,7 +13,7 @@ X11Window *x11_window_create(String title, int32 width, int32 height) {
 	window->width = width;
 	window->height = height;
 
-	const X11Server *server = x11_server_create();
+	const X11Server *server = os_linuxbsd_get_x11_server();
 
 	Display *display = server->display;
 	const int32 screen = server->default_screen;

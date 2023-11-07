@@ -41,6 +41,11 @@ OpenGL3Renderer *opengl3_renderer_create() {
 		return NULL;
 	}
 
+	if (!eglBindAPI(EGL_OPENGL_API)) {
+		core_log(LOG_LEVEL_ERROR, "Failed to bind OpenGL API (eglError: 0x%X)\n", eglGetError());
+		return NULL;
+	}
+
 	OpenGL3Renderer *renderer = core_malloc(sizeof(OpenGL3Renderer));
 	renderer->egl_display = egl_display;
 	renderer->egl_config = egl_config;
