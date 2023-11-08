@@ -1,7 +1,7 @@
 #ifndef VECTOR2_H
 #define VECTOR2_H
 
-#include "core/typedefs.h"
+#include "core/types/typedefs.h"
 
 typedef struct Vector2 {
 	float32 x;

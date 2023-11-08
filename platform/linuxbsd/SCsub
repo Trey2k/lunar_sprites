@@ -3,8 +3,8 @@
 Import("env")
 
 common_linuxbsd = [
-    "linuxbsd_os.c",
-    "linuxbsd_os_window.c",
+    "os.c",
+    "window.c",
 ]
 
 if env["use_wayland"]:
@@ -13,4 +13,4 @@ if env["use_wayland"]:
 if env["use_x11"]:
     common_linuxbsd += SConscript("x11/SCsub")
 
-prog = env.add_program("#bin/lunar_sprites", ["lunar_sprites_linuxbsd.c"] + common_linuxbsd)
+prog = env.add_program("#bin/lunar_sprites", ["main.c"] + common_linuxbsd)

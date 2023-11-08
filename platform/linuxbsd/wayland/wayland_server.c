@@ -8,7 +8,7 @@
 
 static void global_registry_handler(void *data, struct wl_registry *registry, uint32_t id, String interface, uint32_t version) {
 	WaylandServer *server = (WaylandServer *)data;
-	CORE_ASSERT_MSG(server, "Wayland server is NULL");
+	LS_ASSERT_MSG(server, "Wayland server is NULL");
 
 	if (string_equals(interface, "wl_compositor")) {
 		server->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 1);
@@ -45,7 +45,7 @@ WaylandServer *wayland_server_create() {
 	}
 
 	struct wl_registry *registry = wl_display_get_registry(display);
-	CORE_ASSERT_MSG(registry, "Failed to get Wayland registry\n");
+	LS_ASSERT_MSG(registry, "Failed to get Wayland registry\n");
 
 	WaylandServer *server = core_malloc(sizeof(WaylandServer));
 	server->display = display;

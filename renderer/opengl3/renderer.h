@@ -1,6 +1,7 @@
 #ifndef OPENGL3_RENDERER_H
 #define OPENGL3_RENDERER_H
 
+#include "core/os/os.h"
 #include <glad/egl.h>
 #include <glad/gl.h>
 
@@ -17,7 +18,7 @@ typedef struct {
 	EGLConfig egl_config;
 } OpenGL3Renderer;
 
-OpenGL3Renderer *opengl3_renderer_create();
+OpenGL3Renderer *opengl3_renderer_create(const OS *os);
 void opengl3_renderer_destroy(OpenGL3Renderer *renderer);
 
 #endif // OPENGL3_RENDERER_H

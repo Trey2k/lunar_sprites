@@ -1,8 +1,8 @@
 #ifndef KEYCODES_H
 #define KEYCODES_H
 
-#include "core/typedefs.h"
-#include "core/types/string.h"
+#include "core/types/string/string.h"
+#include "core/types/typedefs.h"
 
 /* Keycodes are from glfw */
 typedef enum {

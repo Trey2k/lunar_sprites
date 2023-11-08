@@ -428,9 +428,9 @@ if selected_platform in platform_list:
         print("Using LTO: " + env["lto"])
 
     if not env.msvc:
-        env.Prepend(CFLAGS=["-std=c99"])
+        env.Prepend(CFLAGS=["-std=c17"])
     else:
-        env.Prepend(CCFLAGS=["/std:c99"])
+        env.Prepend(CCFLAGS=["/std:c17"])
 
     # Enforce our minimal compiler version requirements
     cc_version = methods.get_compiler_version(env) or {
@@ -615,9 +615,9 @@ if selected_platform in platform_list:
 
     # Build subdirs, the build order is dependent on link order.
     SConscript("renderer/SCsub")
+    SConscript("modules/SCsub")
     SConscript("core/SCsub")
     SConscript("platform/SCsub")
-    SConscript("modules/SCsub")
     if env["tests"]:
         SConscript("tests/SCsub")
     SConscript("main/SCsub")

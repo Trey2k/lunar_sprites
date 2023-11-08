@@ -1,23 +1,21 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "core/typedefs.h"
-#include "core/types/string.h"
+#include "core/os/os.h"
+#include "core/types/string/string.h"
+#include "core/types/typedefs.h"
 
 #if defined(OPENGL3_ENABLED)
 #include "renderer/opengl3/renderer.h"
-typedef void *(*OPENGLloadproc)(const char *name);
-
-extern const OPENGLloadproc OPENGL3_LOAD_PROC;
-
 #endif
 
 #define RENDERER_BACKEND_COUNT 2
-
 typedef enum {
 	RENDERER_BACKEND_NONE,
 	RENDERER_BACKEND_OPENGL3,
 } RendererBackend;
+
+typedef struct Renderer Renderer;
 
 _FORCE_INLINE_ String renderer_backend_to_string(RendererBackend backend) {
 	switch (backend) {
@@ -30,13 +28,16 @@ _FORCE_INLINE_ String renderer_backend_to_string(RendererBackend backend) {
 	}
 }
 
-bool renderer_init(RendererBackend backend);
-void renderer_deinit();
+Renderer *renderer_create(RendererBackend backend, const OS *os);
+void renderer_destroy(Renderer *renderer);
 
-RendererBackend renderer_get_backend();
+RendererBackend renderer_get_backend(const Renderer *renderer);
 
 #if defined(OPENGL3_ENABLED)
-const OpenGL3Renderer *renderer_get_opengl3();
+const OpenGL3Renderer *renderer_get_opengl3(const Renderer *renderer);
 #endif
+
+// Defined in core/lunar_sprites.c
+const Renderer *ls_get_renderer();
 
 #endif // RENDERER_H

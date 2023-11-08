@@ -1,6 +1,4 @@
-#include "core/core_log.h"
-
-#include "core/core.h"
+#include "core/log/log.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -8,15 +6,15 @@
 
 static LogLevel log_level = LOG_LEVEL_INFO;
 
-void core_log_set_level(LogLevel level) {
+void ls_set_level(LogLevel level) {
 	log_level = level;
 }
 
-LogLevel core_log_get_level() {
+LogLevel ls_get_level() {
 	return log_level;
 }
 
-void core_log(LogLevel level, String message, ...) {
+void ls_log(LogLevel level, String message, ...) {
 	if (level < log_level) {
 		printf("test");
 		return;
@@ -53,4 +51,12 @@ void core_log(LogLevel level, String message, ...) {
 	};
 
 	va_end(args);
+}
+
+void ls_log_fatal(String message, ...) {
+	va_list args;
+	va_start(args, message);
+	ls_log(LOG_LEVEL_ERROR, message, args);
+	va_end(args);
+	exit(1);
 }

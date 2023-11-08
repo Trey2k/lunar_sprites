@@ -1,11 +1,22 @@
 #ifndef OS_H
 #define OS_H
 
-#include "core/typedefs.h"
+#include "core/types/typedefs.h"
 
-bool os_init();
-void os_deinit();
+#include "platform/os.h"
 
-void *os_get_native_display();
+#include "core/input/input_manager.h"
+
+typedef struct OS OS;
+
+OS *ls_create_os();
+void ls_destroy_os(OS *os);
+
+void *os_get_native_display(const OS *os);
+
+PlatformOS *os_get_platform_os(const OS *os);
+
+// Defined in core/lunar_sprites.c
+const OS *ls_get_os();
 
 #endif // OS_H

@@ -1,7 +1,7 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
-#include "core/os/window.h"
+#include "core/window/window.h"
 #include "renderer/renderer.h"
 
 #if defined(OPENGL3_ENABLED)
@@ -19,10 +19,10 @@ typedef struct {
 	};
 } Context;
 
-Context *context_create(const LSWindow *window);
-void context_destroy(Context *context);
+Context *renderer_context_create(const Renderer *renderer, const LSWindow *window);
+void renderer_context_destroy(Context *context);
 
-void context_make_current(const Context *context);
-void context_swap_buffers(const Context *context);
+void renderer_context_make_current(const Context *context);
+void renderer_context_swap_buffers(const Context *context);
 
 #endif // CONTEXT_H

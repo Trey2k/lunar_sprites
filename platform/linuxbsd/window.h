@@ -1,22 +1,19 @@
-#ifndef LINUXBSD_OS_WINDOW_H
-#define LINUXBSD_OS_WINDOW_H
+#ifndef LINUXBSD_WINDOW_H
+#define LINUXBSD_WINDOW_H
 
-#include "core/os/window.h"
-#include "renderer/context.h"
+#include "platform/window.h"
 
-#include "platform/linuxbsd/linuxbsd_os.h"
+#include "platform/linuxbsd/os.h"
 
 #if defined(WAYLAND_ENABLED)
 #include "platform/linuxbsd/wayland/wayland_window.h"
 #endif
 
 #if defined(X11_ENABLED)
-#include "platform/linuxbsd/x11/x11_window.h"
+#include "platform/linuxbsd/x11/window.h"
 #endif
 
-struct LSWindow {
-	Context *context;
-
+struct PlatformWindow {
 	DisplayServer display_server;
 	union {
 #if defined(X11_ENABLED)
@@ -29,4 +26,4 @@ struct LSWindow {
 	};
 };
 
-#endif // LINUXBSD_OS_WINDOW_H
+#endif // LINUXBSD_WINDOW_H

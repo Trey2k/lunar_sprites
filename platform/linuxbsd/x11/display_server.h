@@ -1,8 +1,7 @@
 #ifndef X11_SERVER_H
 #define X11_SERVER_H
 
-#include "core/input/input.h"
-#include "renderer/renderer.h"
+#include "core/types/typedefs.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>

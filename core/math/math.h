@@ -1,7 +1,7 @@
 #ifndef MATH_H
 #define MATH_H
 
-#include "core/typedefs.h"
+#include "core/types/typedefs.h"
 
 _FORCE_INLINE_ int32 math_max(int32 a, int32 b) { return a > b ? a : b; }
 _FORCE_INLINE_ int32 math_min(int32 a, int32 b) { return a < b ? a : b; }

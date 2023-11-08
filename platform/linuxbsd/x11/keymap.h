@@ -2,7 +2,7 @@
 #define X11_KEYMAP_H
 
 #include "core/input/keycodes.h"
-#include "core/typedefs.h"
+#include "core/types/typedefs.h"
 
 #include <X11/Xlib.h>
 
