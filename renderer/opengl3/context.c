@@ -1,9 +1,9 @@
 #include "renderer/opengl3/context.h"
 #include "core/debug.h"
-#include "core/log/log.h"
-#include "core/memory/memory.h"
+#include "core/log.h"
+#include "core/memory.h"
 #include "core/types/typedefs.h"
-#include "core/window/window.h"
+#include "core/window.h"
 #include <glad/egl.h>
 #include <glad/gl.h>
 

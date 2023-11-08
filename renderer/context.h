@@ -1,7 +1,7 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
-#include "core/window/window.h"
+#include "core/window.h"
 #include "renderer/renderer.h"
 
 #if defined(OPENGL3_ENABLED)

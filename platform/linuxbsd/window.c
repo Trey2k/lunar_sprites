@@ -1,6 +1,6 @@
 #include "platform/linuxbsd/window.h"
-#include "core/log/log.h"
-#include "core/memory/memory.h"
+#include "core/log.h"
+#include "core/memory.h"
 
 #if defined(WAYLAND_ENABLED)
 #include "platform/linuxbsd/wayland/window.h"

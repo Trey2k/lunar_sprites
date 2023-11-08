@@ -1,12 +1,12 @@
-#include "core/window/window.h"
+#include "core/window.h"
 #include "core/debug.h"
-#include "core/memory/memory.h"
+#include "core/memory.h"
 
 #include "platform/window.h"
 
 #include "renderer/context.h"
 
-#include "core/lunar_sprites.h"
+#include "core/core.h"
 
 struct LSWindow {
 	PlatformWindow *platform_window;
@@ -14,24 +14,30 @@ struct LSWindow {
 	Context *context;
 };
 
-LSWindow *ls_create_window(String title, int32 width, int32 height) {
+LSWindow *ls_create_window(const Renderer *renderer, String title, int32 width, int32 height) {
+	if (renderer_get_backend(renderer) == RENDERER_BACKEND_NONE) {
+		ls_log(LOG_LEVEL_WARNING, "Cannot create window with renderer backend NONE\n");
+		return NULL;
+	}
+
 	const OS *os = ls_get_os();
 	LS_ASSERT(os);
-	const Renderer *renderer = ls_get_renderer();
-	LS_ASSERT(renderer);
 
 	LSWindow *window = ls_malloc(sizeof(LSWindow));
 	window->platform_window = platform_create_window(os_get_platform_os(os), title, width, height);
 
 	window->context = renderer_context_create(renderer, window);
-	renderer_context_make_current(window->context);
-	renderer_context_swap_buffers(window->context);
+	window_make_current(window);
+	window_swap_buffers(window);
 
 	return window;
 }
 
 void window_destroy(LSWindow *window) {
 	LS_ASSERT(window);
+	if (window->context) {
+		renderer_context_destroy(window->context);
+	}
 
 	platform_destroy_window(window->platform_window);
 	ls_free(window);
@@ -58,31 +64,31 @@ void window_poll(const LSWindow *window) {
 			case PLATFORM_INPUT_NONE: {
 			} break;
 			case PLATFORM_INPUT_KEYPRESS: {
-				ls_handle_press(window, input->keycode);
+				core_handle_press(window, input->keycode);
 			} break;
 
 			case PLATFORM_INPUT_KEYRELEASE: {
-				ls_handle_release(window, input->keycode);
+				core_handle_release(window, input->keycode);
 			} break;
 
 			case PLATFORM_INPUT_MOUSEPRESS: {
-				ls_handle_mouse_press(window, input->button, input->position);
+				core_handle_mouse_press(window, input->button, input->position);
 			} break;
 
 			case PLATFORM_INPUT_MOUSERELEASE: {
-				ls_handle_mouse_release(window, input->button, input->position);
+				core_handle_mouse_release(window, input->button, input->position);
 			} break;
 
 			case PLATFORM_INPUT_MOUSEMOVE: {
-				ls_handle_mouse_move(window, input->position);
+				core_handle_mouse_move(window, input->position);
 			} break;
 
 			case PLATFORM_INPUT_MOUSEENTER: {
-				ls_handle_mouse_enter(window, input->position);
+				core_handle_mouse_enter(window, input->position);
 			} break;
 
 			case PLATFORM_INPUT_MOUSELEAVE: {
-				ls_handle_mouse_leave(window, input->position);
+				core_handle_mouse_leave(window, input->position);
 			} break;
 
 			default: {
@@ -107,4 +113,16 @@ void window_set_size(const LSWindow *window, int32 width, int32 height) {
 	LS_ASSERT(window);
 
 	platform_window_set_size(window->platform_window, width, height);
+}
+
+void window_make_current(const LSWindow *window) {
+	LS_ASSERT(window);
+
+	renderer_context_make_current(window->context);
+}
+
+void window_swap_buffers(const LSWindow *window) {
+	LS_ASSERT(window);
+
+	renderer_context_swap_buffers(window->context);
 }

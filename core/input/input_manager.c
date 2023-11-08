@@ -3,8 +3,8 @@
 #include "core/debug.h"
 #include "core/events/event_manager.h"
 #include "core/events/events.h"
-#include "core/log/log.h"
-#include "core/memory/memory.h"
+#include "core/log.h"
+#include "core/memory.h"
 
 typedef struct {
 	bool pressed;

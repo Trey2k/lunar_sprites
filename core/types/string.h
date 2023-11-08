@@ -19,4 +19,11 @@ char *ls_str_format(String format, ...);
 String ls_str_char(String str, int32 c);
 String ls_str_find(String str, String substr);
 
+bool ls_str_to_int32(String string, int32 *out_value);
+bool ls_str_to_float32(String string, float32 *out_value);
+bool ls_str_to_bool(String string, bool *out_value);
+
+void ls_str_to_lower(char *string);
+void ls_str_to_upper(char *string);
+
 #endif // STRING_H

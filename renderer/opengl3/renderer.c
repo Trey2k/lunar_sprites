@@ -1,7 +1,7 @@
 #include "renderer/opengl3/renderer.h"
 #include "core/debug.h"
-#include "core/log/log.h"
-#include "core/memory/memory.h"
+#include "core/log.h"
+#include "core/memory.h"
 #include "core/os/os.h"
 
 OpenGL3Renderer *opengl3_renderer_create(const OS *os) {

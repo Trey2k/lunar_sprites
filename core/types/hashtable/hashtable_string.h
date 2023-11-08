@@ -1,7 +1,7 @@
 #ifndef HASHTABLE_STRING_H
 #define HASHTABLE_STRING_H
 
-#include "core/types/string/string.h"
+#include "core/types/string.h"
 #include "core/types/typedefs.h"
 
 typedef struct HashtableString HashtableString;
@@ -11,6 +11,9 @@ void hashtable_string_destroy(HashtableString *hashtable);
 
 void hashtable_string_set(HashtableString *hashtable, String key, void *data);
 void *hashtable_string_get(const HashtableString *hashtable, String key);
+
+String *hashtable_string_get_keys(const HashtableString *hashtable);
+
 bool hashtable_string_has(const HashtableString *hashtable, String key);
 bool hashtable_string_remove(HashtableString *hashtable, String key);
 

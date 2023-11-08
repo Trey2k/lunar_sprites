@@ -1,7 +1,7 @@
 #include "core/events/event_manager.h"
 #include "core/debug.h"
 #include "core/events/events.h"
-#include "core/memory/memory.h"
+#include "core/memory.h"
 
 struct EventManager {
 	size_t handler_count;

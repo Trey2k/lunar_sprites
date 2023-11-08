@@ -1,7 +1,7 @@
 #include "platform/linuxbsd/x11/display_server.h"
 #include "core/debug.h"
-#include "core/log/log.h"
-#include "core/memory/memory.h"
+#include "core/log.h"
+#include "core/memory.h"
 
 X11Server *x11_server_create() {
 	X11Server *server = ls_malloc(sizeof(X11Server));

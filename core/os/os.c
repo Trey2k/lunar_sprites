@@ -1,6 +1,6 @@
 #include "core/os/os.h"
 #include "core/debug.h"
-#include "core/memory/memory.h"
+#include "core/memory.h"
 
 struct OS {
 	PlatformOS *platform_os;

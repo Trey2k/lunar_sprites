@@ -2,7 +2,7 @@
 #define RENDERER_H
 
 #include "core/os/os.h"
-#include "core/types/string/string.h"
+#include "core/types/string.h"
 #include "core/types/typedefs.h"
 
 #if defined(OPENGL3_ENABLED)
@@ -36,8 +36,5 @@ RendererBackend renderer_get_backend(const Renderer *renderer);
 #if defined(OPENGL3_ENABLED)
 const OpenGL3Renderer *renderer_get_opengl3(const Renderer *renderer);
 #endif
-
-// Defined in core/lunar_sprites.c
-const Renderer *ls_get_renderer();
 
 #endif // RENDERER_H

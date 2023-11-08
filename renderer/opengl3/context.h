@@ -1,7 +1,7 @@
 #ifndef OPENGL3_CONTEXT_H
 #define OPENGL3_CONTEXT_H
 
-#include "core/window/window.h"
+#include "core/window.h"
 #include "renderer/opengl3/renderer.h"
 #include <glad/egl.h>
 #include <glad/gl.h>

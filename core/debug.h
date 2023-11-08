@@ -1,6 +1,6 @@
 #ifndef DEBUG_H
 
-#include "core/log/log.h"
+#include "core/log.h"
 
 #ifdef DEBUG_ENABLED
 #define DEBUG_METHODS_ENABLED

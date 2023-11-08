@@ -1,8 +1,8 @@
 #include "platform/linuxbsd/os.h"
 
 #include "core/debug.h"
-#include "core/log/log.h"
-#include "core/memory/memory.h"
+#include "core/log.h"
+#include "core/memory.h"
 
 PlatformOS *platform_create_os() {
 	PlatformOS *os = ls_malloc(sizeof(PlatformOS));

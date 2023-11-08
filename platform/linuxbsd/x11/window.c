@@ -1,7 +1,7 @@
 #include "platform/linuxbsd/x11/window.h"
 #include "core/debug.h"
-#include "core/log/log.h"
-#include "core/memory/memory.h"
+#include "core/log.h"
+#include "core/memory.h"
 #include "platform/linuxbsd/x11/keymap.h"
 #include "platform/window.h"
 

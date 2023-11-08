@@ -1,6 +1,6 @@
 #include "renderer/renderer.h"
 #include "core/debug.h"
-#include "core/memory/memory.h"
+#include "core/memory.h"
 #include "core/types/typedefs.h"
 
 struct Renderer {

@@ -1,6 +1,6 @@
 #include "renderer/context.h"
 #include "core/debug.h"
-#include "core/memory/memory.h"
+#include "core/memory.h"
 #include "core/types/typedefs.h"
 #include "renderer/renderer.h"
 

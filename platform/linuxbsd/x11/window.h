@@ -1,7 +1,7 @@
 #ifndef X11_WINDOW_H
 #define X11_WINDOW_H
 
-#include "core/types/string/string.h"
+#include "core/types/string.h"
 #include "core/types/typedefs.h"
 
 #include "platform/linuxbsd/x11/display_server.h"
