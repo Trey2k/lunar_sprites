@@ -265,7 +265,7 @@ def generate_scu_files(max_includes_per_scu):
     process_folder(["platform/linuxbsd/wayland"])
 
     process_folder(["renderer"])
-    process_folder(["renderer/opengl3"])
+    process_folder(["renderer/gles3"])
 
     process_folder(["modules/test_module"])
 

@@ -2,12 +2,12 @@
 
 Import("env")
 
-# TODO: Detect if OpenGL3 is available
-env.Append(CPPDEFINES=["OPENGL3_ENABLED"])
+# TODO: Detect if GLES2 is available
+env.Append(CPPDEFINES=["GLES2_ENABLED"])
 env.Append(CPPPATH=[
     "#thirdparty/glad",
 ])
 
 env.add_source_files(env.renderer_sources, "#thirdparty/glad/egl.c")
-env.add_source_files(env.renderer_sources, "#thirdparty/glad/gl.c")
+env.add_source_files(env.renderer_sources, "#thirdparty/glad/gles2.c")
 env.add_source_files(env.renderer_sources, "*.c")

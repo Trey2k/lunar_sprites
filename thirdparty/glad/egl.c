@@ -30,6 +30,7 @@ int GLAD_EGL_VERSION_1_3 = 0;
 int GLAD_EGL_VERSION_1_4 = 0;
 int GLAD_EGL_VERSION_1_5 = 0;
 int GLAD_EGL_KHR_create_context = 0;
+int GLAD_EGL_KHR_platform_android = 0;
 int GLAD_EGL_KHR_platform_wayland = 0;
 int GLAD_EGL_KHR_platform_x11 = 0;
 
@@ -178,6 +179,7 @@ static int glad_egl_find_extensions_egl(EGLDisplay display) {
     if (!glad_egl_get_extensions(display, &extensions)) return 0;
 
     GLAD_EGL_KHR_create_context = glad_egl_has_extension(extensions, "EGL_KHR_create_context");
+    GLAD_EGL_KHR_platform_android = glad_egl_has_extension(extensions, "EGL_KHR_platform_android");
     GLAD_EGL_KHR_platform_wayland = glad_egl_has_extension(extensions, "EGL_KHR_platform_wayland");
     GLAD_EGL_KHR_platform_x11 = glad_egl_has_extension(extensions, "EGL_KHR_platform_x11");
 

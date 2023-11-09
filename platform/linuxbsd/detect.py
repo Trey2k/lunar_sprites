@@ -32,7 +32,6 @@ def get_opts():
     return [
         EnumVariable("linker", "Linker program", "default", ("default", "bfd", "gold", "lld", "mold")),
         BoolVariable("use_llvm", "Use the LLVM compiler", False),
-        BoolVariable("use_static_c", "Link libgcc statically for better portability", True),
         BoolVariable("use_x11", "Use X11 display server", True),
         BoolVariable("use_wayland", "Use Wayland display server", False),
     ]
@@ -160,12 +159,3 @@ def configure(env: "Environment"):
             print("Error: X11 libraries not found. Aborting.")
             sys.exit(255)
         env.ParseConfig("pkg-config x11 --cflags --libs")
-
-    # Link those statically for portability
-    if env["use_static_c"]:
-        env.Append(LINKFLAGS=["-static-libgcc"])
-        if env["use_llvm"] and platform.system() != "FreeBSD":
-            env["LINKCOM"] = env["LINKCOM"] + " -l:libatomic.a"
-    else:
-        if env["use_llvm"] and platform.system() != "FreeBSD":
-            env.Append(LIBS=["atomic"])

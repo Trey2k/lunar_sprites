@@ -66,7 +66,7 @@ static void init(int32 argc, char *argv[]) {
 }
 
 static void register_flags() {
-	ls_register_flag("renderer", FLAG_TYPE_STRING, (FlagValue){ .string = "OPENGL3" }, "The renderer to use. Valid values are `NONE` and `OPENGL3`");
+	ls_register_flag("renderer", FLAG_TYPE_STRING, (FlagValue){ .string = "GLES2" }, "The renderer to use. Valid values are `NONE` and `GLES2`");
 }
 
 static void deinit() {
@@ -79,7 +79,7 @@ static void deinit() {
 }
 
 static RendererBackend get_render_backend() {
-	RendererBackend renderer_backend = RENDERER_BACKEND_OPENGL3;
+	RendererBackend renderer_backend = RENDERER_BACKEND_GLES2;
 
 	const Flag *flag = ls_get_flag("renderer");
 
@@ -88,8 +88,8 @@ static RendererBackend get_render_backend() {
 
 	if (ls_str_equals(renderer_string, "NONE")) {
 		renderer_backend = RENDERER_BACKEND_NONE;
-	} else if (ls_str_equals(renderer_string, "OPENGL3")) {
-		renderer_backend = RENDERER_BACKEND_OPENGL3;
+	} else if (ls_str_equals(renderer_string, "GLES2")) {
+		renderer_backend = RENDERER_BACKEND_GLES2;
 	} else {
 		ls_log_fatal("Invalid value for flag `renderer`. Exepected `NONE` or `OPENGL3`. Got `%s`\n", flag->value.string);
 	}

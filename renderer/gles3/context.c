@@ -1,13 +1,13 @@
-#include "renderer/opengl3/context.h"
+#include "renderer/gles3/context.h"
 #include "core/debug.h"
 #include "core/log.h"
 #include "core/memory.h"
 #include "core/types/typedefs.h"
 #include "core/window.h"
 #include <glad/egl.h>
-#include <glad/gl.h>
+#include <glad/gles2.h>
 
-OpenGL3Context *opengl3_context_create(const OpenGL3Renderer *renderer, const LSWindow *window) {
+GLES2Context *gles3_context_create(const GLES2Renderer *renderer, const LSWindow *window) {
 	LS_ASSERT(renderer);
 	LS_ASSERT(window);
 
@@ -24,32 +24,32 @@ OpenGL3Context *opengl3_context_create(const OpenGL3Renderer *renderer, const LS
 		return NULL;
 	}
 
-	OpenGL3Context *context = ls_malloc(sizeof(OpenGL3Context));
+	GLES2Context *context = ls_malloc(sizeof(GLES2Context));
 	context->renderer = renderer;
 	context->egl_surface = egl_surface;
 	context->egl_context = egl_context;
 
-	opengl3_context_make_current(context);
+	gles3_context_make_current(context);
 
-	int32 version = gladLoaderLoadGL();
+	int32 version = gladLoaderLoadGLES2();
 	if (!version) {
-		ls_log(LOG_LEVEL_ERROR, "Failed to load OpenGL.\n");
+		ls_log(LOG_LEVEL_ERROR, "Failed to load OpenGL ES.\n");
 		return NULL;
 	}
 
-	ls_log(LOG_LEVEL_INFO, "Loaded OpenGL version %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+	ls_log(LOG_LEVEL_INFO, "Loaded OpenGL ES version %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
-	ls_log(LOG_LEVEL_INFO, "OpenGL vendor: %s\n", glGetString(GL_VENDOR));
-	ls_log(LOG_LEVEL_INFO, "OpenGL renderer: %s\n", glGetString(GL_RENDERER));
-	ls_log(LOG_LEVEL_INFO, "OpenGL version: %s\n", glGetString(GL_VERSION));
-	ls_log(LOG_LEVEL_INFO, "OpenGL shading language version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	ls_log(LOG_LEVEL_INFO, "OpenGL ES vendor: %s\n", glGetString(GL_VENDOR));
+	ls_log(LOG_LEVEL_INFO, "OpenGL ES renderer: %s\n", glGetString(GL_RENDERER));
+	ls_log(LOG_LEVEL_INFO, "OpenGL ES version: %s\n", glGetString(GL_VERSION));
+	ls_log(LOG_LEVEL_INFO, "OpenGL ES shading language version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	opengl3_context_make_current(NULL);
+	gles3_context_make_current(NULL);
 
 	return context;
 }
 
-void opengl3_context_destroy(OpenGL3Context *context) {
+void gles3_context_destroy(GLES2Context *context) {
 	LS_ASSERT(context);
 
 	eglDestroyContext(context->renderer->egl_display, context->egl_context);
@@ -57,7 +57,7 @@ void opengl3_context_destroy(OpenGL3Context *context) {
 	ls_free(context);
 }
 
-void opengl3_context_make_current(const OpenGL3Context *context) {
+void gles3_context_make_current(const GLES2Context *context) {
 	if (!context) {
 		eglMakeCurrent(NULL, NULL, NULL, NULL);
 		return;
@@ -68,7 +68,7 @@ void opengl3_context_make_current(const OpenGL3Context *context) {
 	}
 }
 
-void opengl3_context_swap_buffers(const OpenGL3Context *context) {
+void gles3_context_swap_buffers(const GLES2Context *context) {
 	LS_ASSERT(context);
 
 	if (!eglSwapBuffers(context->renderer->egl_display, context->egl_surface)) {

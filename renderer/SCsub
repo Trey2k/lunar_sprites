@@ -7,8 +7,8 @@ env.renderer_sources = [
     "context.c",
 ]
 
-if env["use_opengl3"]:
-    SConscript("opengl3/SCsub")
+if env["use_gles3"]:
+    SConscript("gles3/SCsub")
 
 lib = env.add_library("renderer", env.renderer_sources)
 env.Prepend(LIBS=[lib])

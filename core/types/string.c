@@ -83,9 +83,12 @@ char *ls_str_format(String format, ...) {
 	va_start(args, format);
 
 	size_t length = vsnprintf(NULL, 0, format, args);
-	char *string = ls_malloc(length + 1);
-	vsnprintf(string, length + 1, format, args);
+	va_end(args); // End the va_list before starting it again
 
+	char *string = ls_malloc(length + 1);
+
+	va_start(args, format); // Start the va_list again before using it
+	vsnprintf(string, length + 1, format, args);
 	va_end(args);
 
 	return string;
