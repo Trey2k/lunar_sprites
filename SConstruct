@@ -148,6 +148,8 @@ opts.Add(EnumVariable("warnings", "Level of compilation warnings", "all", ("extr
 opts.Add(BoolVariable("werror", "Treat warnings as errors", False))
 opts.Add("extra_suffix", "Custom extra suffix added to the base filename of all generated binary files", "")
 opts.Add("object_prefix", "Custom prefix added to the base filename of all generated object files", "")
+opts.Add(BoolVariable("vsproj", "Generate a Visual Studio solution", False))
+opts.Add("vsproj_name", "Name of the Visual Studio solution", "lunar_sprites")
 opts.Add("build_profile", "Path to a file containing a feature build profile", "")
 opts.Add(BoolVariable("modules_enabled_by_default", "If no, disable all modules except ones explicitly enabled", True))
 opts.Add(BoolVariable("scu_build", "Use single compilation unit build", False))
@@ -597,6 +599,10 @@ if selected_platform in platform_list:
     if scons_cache_path != None:
         CacheDir(scons_cache_path)
         print("Scons cache enabled... (path: '" + scons_cache_path + "')")
+    
+    if env["vsproj"]:
+        env.vs_incs = []
+        env.vs_srcs = []
 
     if env["compiledb"]:
         # Generating the compilation DB (`compile_commands.json`) requires SCons 4.0.0 or later.
@@ -623,6 +629,13 @@ if selected_platform in platform_list:
     SConscript("main/SCsub")
 
     SConscript("platform/" + selected_platform + "/SCsub")  # Build selected platform.
+
+    if env["vsproj"]:
+        if os.name != "nt":
+            print("Error: The `vsproj` option is only usable on Windows with Visual Studio.")
+            Exit(255)
+        env["CPPPATH"] = [Dir(path) for path in env["CPPPATH"]]
+        methods.generate_vs_project(env, ARGUMENTS, env["vsproj_name"])
 
     # Check for the existence of headers
     conf = Configure(env)

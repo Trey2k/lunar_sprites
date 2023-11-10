@@ -133,7 +133,7 @@ bool ls_str_to_float32(String str, float32 *out_value) {
 
 	bool decimal = false;
 
-	int32 len = ls_str_length(str);
+	size_t len = ls_str_length(str);
 
 	for (size_t i = 0; i < len; i++) {
 		if (str[i] == '.') {

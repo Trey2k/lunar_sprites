@@ -3,10 +3,7 @@
 
 typedef struct LSWindow LSWindow;
 
-// bool is defined in MSVC
-#if defined(MSVC_ENABLED)
 typedef int bool;
-#endif // bool
 
 #define true 1
 #define false 0

@@ -32,6 +32,7 @@ custom.py
 
 # Editors
 .vscode
+.vs
 .idea/
 .nvim.lua
 .nvimrc
@@ -40,7 +41,10 @@ custom.py
 .cache
 *.cbp
 *.layout
+*.sln
+*.vcxproj*
 compile_commands.json
+/x64/
 
 # Other
 *.log

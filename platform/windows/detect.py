@@ -364,6 +364,9 @@ def configure_msvc(env, vcvars_msvc_config):
     ## Libs
 
     LIBS = [
+        "winmm",
+        "user32",
+        "Ws2_32",
         "gdi32",
         "opengl32"
     ]
