@@ -18,7 +18,7 @@ static void core_check_flags();
 void core_register_flags() {
 	ls_flags_init();
 
-	ls_register_flag("log-level", FLAG_TYPE_STRING, (FlagValue) "INFO",
+	ls_register_flag("log-level", FLAG_TYPE_STRING, (FlagValue){ .string = "INFO" },
 			"The log level to use. Valid values are `INFO`, `DEBUG`, `WARNING` and `ERROR`");
 }
 

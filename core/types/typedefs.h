@@ -3,7 +3,11 @@
 
 typedef struct LSWindow LSWindow;
 
+// bool is defined in MSVC
+#if defined(MSVC_ENABLED)
 typedef int bool;
+#endif // bool
+
 #define true 1
 #define false 0
 
@@ -13,7 +17,12 @@ typedef long long int64;
 typedef unsigned long long uint64;
 typedef float float32;
 typedef double float64;
+
+#if defined(__SIZE_TYPE__)
 typedef __SIZE_TYPE__ size_t;
+#else // __SIZE_TYPE__
+typedef unsigned long long size_t;
+#endif // __SIZE_TYPE__
 
 #ifndef NULL
 #define NULL ((void *)0)

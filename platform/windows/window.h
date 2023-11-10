@@ -7,9 +7,6 @@
 
 struct PlatformWindow {
 	HWND window;
-
-	PlatformInput *input;
-	size_t input_count;
 };
 
 #endif // WINDOWS_WINDOW_H

@@ -63,26 +63,24 @@ LSNativeWindow platform_get_window_handle(const PlatformWindow *window) {
 	return window->window;
 }
 
+static PlatformInput *input = NULL;
+static size_t input_count = 0;
+
 PlatformInput *platform_window_poll(const PlatformWindow *window) {
 	MSG msg;
-	// Hack for windows
-	PlatformWindow *mod_win = (PlatformWindow *)window;
-	mod_win->input = NULL;
-	mod_win->input_count = 0;
+
+	input = NULL;
+	input_count = 0;
 
 	while (PeekMessage(&msg, window->window, 0, 0, PM_REMOVE)) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
 
-	mod_win->input = ls_realloc(mod_win->input, sizeof(PlatformInput) * (mod_win->input_count + 1));
-	mod_win->input[mod_win->input_count].type = PLATFORM_INPUT_NONE;
+	input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+	input[input_count].type = PLATFORM_INPUT_NONE;
 
-	if (window->input) {
-		return window->input;
-	}
-
-	return NULL;
+	return input;
 }
 
 static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param, int64 l_param) {
@@ -96,10 +94,10 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
 			LS_ASSERT(window);
 
-			window->input = ls_realloc(window->input, sizeof(PlatformInput) * (window->input_count + 1));
-			window->input[window->input_count].type = PLATFORM_INPUT_KEYPRESS;
-			window->input[window->input_count].keycode = win_map_key(w_param);
-			window->input_count++;
+			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+			input[input_count].type = PLATFORM_INPUT_KEYPRESS;
+			input[input_count].keycode = win_map_key(w_param);
+			input_count++;
 
 			return 0;
 		} break;
@@ -108,10 +106,10 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
 			LS_ASSERT(window);
 
-			window->input = ls_realloc(window->input, sizeof(PlatformInput) * (window->input_count + 1));
-			window->input[window->input_count].type = PLATFORM_INPUT_KEYRELEASE;
-			window->input[window->input_count].keycode = win_map_key(w_param);
-			window->input_count++;
+			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+			input[input_count].type = PLATFORM_INPUT_KEYRELEASE;
+			input[input_count].keycode = win_map_key(w_param);
+			input_count++;
 
 			return 0;
 		} break;
@@ -120,11 +118,11 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
 			LS_ASSERT(window);
 
-			window->input = ls_realloc(window->input, sizeof(PlatformInput) * (window->input_count + 1));
-			window->input[window->input_count].type = PLATFORM_INPUT_MOUSEMOVE;
-			window->input[window->input_count].position.x = GET_X_LPARAM(l_param);
-			window->input[window->input_count].position.y = GET_Y_LPARAM(l_param);
-			window->input_count++;
+			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+			input[input_count].type = PLATFORM_INPUT_MOUSEMOVE;
+			input[input_count].position.x = GET_X_LPARAM(l_param);
+			input[input_count].position.y = GET_Y_LPARAM(l_param);
+			input_count++;
 
 			return 0;
 		} break;
@@ -133,12 +131,12 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
 			LS_ASSERT(window);
 
-			window->input = ls_realloc(window->input, sizeof(PlatformInput) * (window->input_count + 1));
-			window->input[window->input_count].type = PLATFORM_INPUT_MOUSEPRESS;
-			window->input[window->input_count].button = LS_MOUSE_BUTTON_LEFT;
-			window->input[window->input_count].position.x = GET_X_LPARAM(l_param);
-			window->input[window->input_count].position.y = GET_Y_LPARAM(l_param);
-			window->input_count++;
+			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+			input[input_count].type = PLATFORM_INPUT_MOUSEPRESS;
+			input[input_count].button = LS_MOUSE_BUTTON_LEFT;
+			input[input_count].position.x = GET_X_LPARAM(l_param);
+			input[input_count].position.y = GET_Y_LPARAM(l_param);
+			input_count++;
 
 			return 0;
 		} break;
@@ -147,12 +145,12 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
 			LS_ASSERT(window);
 
-			window->input = ls_realloc(window->input, sizeof(PlatformInput) * (window->input_count + 1));
-			window->input[window->input_count].type = PLATFORM_INPUT_MOUSEPRESS;
-			window->input[window->input_count].button = LS_MOUSE_BUTTON_RIGHT;
-			window->input[window->input_count].position.x = GET_X_LPARAM(l_param);
-			window->input[window->input_count].position.y = GET_Y_LPARAM(l_param);
-			window->input_count++;
+			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+			input[input_count].type = PLATFORM_INPUT_MOUSEPRESS;
+			input[input_count].button = LS_MOUSE_BUTTON_RIGHT;
+			input[input_count].position.x = GET_X_LPARAM(l_param);
+			input[input_count].position.y = GET_Y_LPARAM(l_param);
+			input_count++;
 
 			return 0;
 		} break;
@@ -161,12 +159,12 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
 			LS_ASSERT(window);
 
-			window->input = ls_realloc(window->input, sizeof(PlatformInput) * (window->input_count + 1));
-			window->input[window->input_count].type = PLATFORM_INPUT_MOUSEPRESS;
-			window->input[window->input_count].button = LS_MOUSE_BUTTON_MIDDLE;
-			window->input[window->input_count].position.x = GET_X_LPARAM(l_param);
-			window->input[window->input_count].position.y = GET_Y_LPARAM(l_param);
-			window->input_count++;
+			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+			input[input_count].type = PLATFORM_INPUT_MOUSEPRESS;
+			input[input_count].button = LS_MOUSE_BUTTON_MIDDLE;
+			input[input_count].position.x = GET_X_LPARAM(l_param);
+			input[input_count].position.y = GET_Y_LPARAM(l_param);
+			input_count++;
 
 			return 0;
 		} break;
@@ -175,12 +173,12 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
 			LS_ASSERT(window);
 
-			window->input = ls_realloc(window->input, sizeof(PlatformInput) * (window->input_count + 1));
-			window->input[window->input_count].type = PLATFORM_INPUT_MOUSERELEASE;
-			window->input[window->input_count].button = LS_MOUSE_BUTTON_LEFT;
-			window->input[window->input_count].position.x = GET_X_LPARAM(l_param);
-			window->input[window->input_count].position.y = GET_Y_LPARAM(l_param);
-			window->input_count++;
+			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+			input[input_count].type = PLATFORM_INPUT_MOUSERELEASE;
+			input[input_count].button = LS_MOUSE_BUTTON_LEFT;
+			input[input_count].position.x = GET_X_LPARAM(l_param);
+			input[input_count].position.y = GET_Y_LPARAM(l_param);
+			input_count++;
 
 			return 0;
 		} break;
@@ -189,12 +187,12 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
 			LS_ASSERT(window);
 
-			window->input = ls_realloc(window->input, sizeof(PlatformInput) * (window->input_count + 1));
-			window->input[window->input_count].type = PLATFORM_INPUT_MOUSERELEASE;
-			window->input[window->input_count].button = LS_MOUSE_BUTTON_RIGHT;
-			window->input[window->input_count].position.x = GET_X_LPARAM(l_param);
-			window->input[window->input_count].position.y = GET_Y_LPARAM(l_param);
-			window->input_count++;
+			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+			input[input_count].type = PLATFORM_INPUT_MOUSERELEASE;
+			input[input_count].button = LS_MOUSE_BUTTON_RIGHT;
+			input[input_count].position.x = GET_X_LPARAM(l_param);
+			input[input_count].position.y = GET_Y_LPARAM(l_param);
+			input_count++;
 
 			return 0;
 		} break;
@@ -203,12 +201,12 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
 			LS_ASSERT(window);
 
-			window->input = ls_realloc(window->input, sizeof(PlatformInput) * (window->input_count + 1));
-			window->input[window->input_count].type = PLATFORM_INPUT_MOUSERELEASE;
-			window->input[window->input_count].button = LS_MOUSE_BUTTON_MIDDLE;
-			window->input[window->input_count].position.x = GET_X_LPARAM(l_param);
-			window->input[window->input_count].position.y = GET_Y_LPARAM(l_param);
-			window->input_count++;
+			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
+			input[input_count].type = PLATFORM_INPUT_MOUSERELEASE;
+			input[input_count].button = LS_MOUSE_BUTTON_MIDDLE;
+			input[input_count].position.x = GET_X_LPARAM(l_param);
+			input[input_count].position.y = GET_Y_LPARAM(l_param);
+			input_count++;
 
 			return 0;
 		} break;

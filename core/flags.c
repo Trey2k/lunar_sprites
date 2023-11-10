@@ -25,7 +25,7 @@ void ls_flags_init() {
 	flags.flags_table = hashtable_string_create(32);
 	flags.flags_help_table = hashtable_string_create(32);
 
-	ls_register_flag("help", FLAG_TYPE_BOOL, (FlagValue) false, "Prints this help message.");
+	ls_register_flag("help", FLAG_TYPE_BOOL, (FlagValue){ .boolean = false }, "Prints this help message.");
 }
 
 void ls_flags_deinit() {

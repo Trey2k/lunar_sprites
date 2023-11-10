@@ -350,6 +350,7 @@ def configure_msvc(env, vcvars_msvc_config):
 
     env.AppendUnique(
         CPPDEFINES=[
+            "MSVC_ENABLED",
             "WINDOWS_ENABLED",
             "WIN32",
             "WINVER=%s" % env["target_win_version"],
