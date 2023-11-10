@@ -1,10 +1,7 @@
 #include "platform/windows/window.h"
 #include "platform/windows/keymap.h"
 
-#include "core/debug.h"
-#include "core/log.h"
-#include "core/memory.h"
-
+#include "core/core.h"
 #include <windows.h>
 #include <windowsx.h>
 
@@ -63,24 +60,13 @@ LSNativeWindow platform_get_window_handle(const PlatformWindow *window) {
 	return window->window;
 }
 
-static PlatformInput *input = NULL;
-static size_t input_count = 0;
-
-PlatformInput *platform_window_poll(const PlatformWindow *window) {
+void platform_window_poll(const PlatformWindow *window) {
 	MSG msg;
-
-	input = NULL;
-	input_count = 0;
 
 	while (PeekMessage(&msg, window->window, 0, 0, PM_REMOVE)) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-
-	input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-	input[input_count].type = PLATFORM_INPUT_NONE;
-
-	return input;
 }
 
 static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param, int64 l_param) {
@@ -91,123 +77,53 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 		} break;
 
 		case WM_KEYDOWN: {
-			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-			LS_ASSERT(window);
-
-			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-			input[input_count].type = PLATFORM_INPUT_KEYPRESS;
-			input[input_count].keycode = win_map_key(w_param);
-			input_count++;
-
+			core_handle_press(win_map_key(w_param));
 			return 0;
 		} break;
 
 		case WM_KEYUP: {
-			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-			LS_ASSERT(window);
-
-			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-			input[input_count].type = PLATFORM_INPUT_KEYRELEASE;
-			input[input_count].keycode = win_map_key(w_param);
-			input_count++;
-
+			core_handle_release(win_map_key(w_param));
 			return 0;
 		} break;
 
 		case WM_MOUSEMOVE: {
-			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-			LS_ASSERT(window);
-
-			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-			input[input_count].type = PLATFORM_INPUT_MOUSEMOVE;
-			input[input_count].position.x = GET_X_LPARAM(l_param);
-			input[input_count].position.y = GET_Y_LPARAM(l_param);
-			input_count++;
-
+			core_handle_mouse_move((Vector2i){ GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param) });
 			return 0;
 		} break;
 
 		case WM_LBUTTONDOWN: {
-			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-			LS_ASSERT(window);
-
-			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-			input[input_count].type = PLATFORM_INPUT_MOUSEPRESS;
-			input[input_count].button = LS_MOUSE_BUTTON_LEFT;
-			input[input_count].position.x = GET_X_LPARAM(l_param);
-			input[input_count].position.y = GET_Y_LPARAM(l_param);
-			input_count++;
-
+			core_handle_mouse_press(LS_MOUSE_BUTTON_LEFT,
+					(Vector2i){ GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param) });
 			return 0;
 		} break;
 
 		case WM_RBUTTONDOWN: {
-			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-			LS_ASSERT(window);
-
-			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-			input[input_count].type = PLATFORM_INPUT_MOUSEPRESS;
-			input[input_count].button = LS_MOUSE_BUTTON_RIGHT;
-			input[input_count].position.x = GET_X_LPARAM(l_param);
-			input[input_count].position.y = GET_Y_LPARAM(l_param);
-			input_count++;
-
+			core_handle_mouse_press(LS_MOUSE_BUTTON_RIGHT,
+					(Vector2i){ GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param) });
 			return 0;
 		} break;
 
 		case WM_MBUTTONDOWN: {
-			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-			LS_ASSERT(window);
-
-			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-			input[input_count].type = PLATFORM_INPUT_MOUSEPRESS;
-			input[input_count].button = LS_MOUSE_BUTTON_MIDDLE;
-			input[input_count].position.x = GET_X_LPARAM(l_param);
-			input[input_count].position.y = GET_Y_LPARAM(l_param);
-			input_count++;
-
+			core_handle_mouse_press(LS_MOUSE_BUTTON_MIDDLE,
+					(Vector2i){ GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param) });
 			return 0;
 		} break;
 
 		case WM_LBUTTONUP: {
-			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-			LS_ASSERT(window);
-
-			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-			input[input_count].type = PLATFORM_INPUT_MOUSERELEASE;
-			input[input_count].button = LS_MOUSE_BUTTON_LEFT;
-			input[input_count].position.x = GET_X_LPARAM(l_param);
-			input[input_count].position.y = GET_Y_LPARAM(l_param);
-			input_count++;
-
+			core_handle_mouse_release(LS_MOUSE_BUTTON_LEFT,
+					(Vector2i){ GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param) });
 			return 0;
 		} break;
 
 		case WM_RBUTTONUP: {
-			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-			LS_ASSERT(window);
-
-			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-			input[input_count].type = PLATFORM_INPUT_MOUSERELEASE;
-			input[input_count].button = LS_MOUSE_BUTTON_RIGHT;
-			input[input_count].position.x = GET_X_LPARAM(l_param);
-			input[input_count].position.y = GET_Y_LPARAM(l_param);
-			input_count++;
-
+			core_handle_mouse_release(LS_MOUSE_BUTTON_RIGHT,
+					(Vector2i){ GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param) });
 			return 0;
 		} break;
 
 		case WM_MBUTTONUP: {
-			PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-			LS_ASSERT(window);
-
-			input = ls_realloc(input, sizeof(PlatformInput) * (input_count + 1));
-			input[input_count].type = PLATFORM_INPUT_MOUSERELEASE;
-			input[input_count].button = LS_MOUSE_BUTTON_MIDDLE;
-			input[input_count].position.x = GET_X_LPARAM(l_param);
-			input[input_count].position.y = GET_Y_LPARAM(l_param);
-			input_count++;
-
+			core_handle_mouse_release(LS_MOUSE_BUTTON_MIDDLE,
+					(Vector2i){ GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param) });
 			return 0;
 		} break;
 

@@ -1,66 +1,73 @@
 #include "renderer/renderer.h"
 #include "core/debug.h"
+#include "core/flags.h"
 #include "core/memory.h"
 #include "core/types/typedefs.h"
 
 struct Renderer {
 	const OS *os;
 
+	FlagValue *backend_flag;
+
 	RendererBackend backend;
-	union {
-#if defined(OPENGL_ENABLED)
-		OpenGLRenderer *opengl_renderer;
-#endif
-	};
 };
 
-Renderer *renderer_create(RendererBackend backend, const OS *os) {
-	LS_ASSERT(backend < RENDERER_BACKEND_COUNT && backend >= RENDERER_BACKEND_NONE);
+static struct Renderer renderer;
 
-	Renderer *renderer = ls_malloc(sizeof(Renderer));
-	renderer->os = os;
-	renderer->backend = backend;
+static void check_flags();
 
-	switch (backend) {
+void renderer_init() {
+	renderer.backend_flag = ls_register_flag("renderer-backend", FLAG_TYPE_STRING, (FlagValue){ .string = "OPENGL" },
+			"The renderer backend to use. Valid values are NONE and OPENGL.");
+#if defined(OPENGL_ENABLED)
+	opengl_renderer_init();
+#endif
+}
+
+void renderer_start(const OS *os) {
+	renderer.os = os;
+	check_flags();
+	switch (renderer.backend) {
 		case RENDERER_BACKEND_NONE: {
-			return renderer;
 		} break;
+
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
-			renderer->opengl_renderer = opengl_renderer_create(os);
-			LS_ASSERT(renderer->opengl_renderer);
-			return renderer;
+			opengl_renderer_start(os);
 		} break;
 #endif
+
 		default:
-			ls_log_fatal("Unknown renderer backend: %d\n", backend);
-	}
-
-	ls_free(renderer);
-
-	return NULL;
+			ls_log_fatal("Unknown renderer backend: %d\n", renderer.backend);
+	};
 }
 
-void renderer_destroy(Renderer *renderer) {
-	switch (renderer->backend) {
+void renderer_deinit() {
+	switch (renderer.backend) {
 		case RENDERER_BACKEND_NONE: {
 		} break;
+
 		case RENDERER_BACKEND_OPENGL: {
 #if defined(OPENGL_ENABLED)
-			opengl_renderer_destroy(renderer->opengl_renderer);
+			opengl_renderer_deinit();
 #endif
+
 		} break;
 	}
-
-	ls_free(renderer);
 }
 
-RendererBackend renderer_get_backend(const Renderer *renderer) {
-	return renderer->backend;
+RendererBackend renderer_get_backend() {
+	return renderer.backend;
 }
 
-#if defined(OPENGL_ENABLED)
-const OpenGLRenderer *renderer_get_opengl(const Renderer *renderer) {
-	return renderer->opengl_renderer;
+static void check_flags() {
+	ls_str_to_upper(renderer.backend_flag->string);
+
+	if (ls_str_equals(renderer.backend_flag->string, "NONE")) {
+		renderer.backend = RENDERER_BACKEND_NONE;
+	} else if (ls_str_equals(renderer.backend_flag->string, "OPENGL")) {
+		renderer.backend = RENDERER_BACKEND_OPENGL;
+	} else {
+		ls_log_fatal("Invalid renderer backend: %s\n", renderer.backend_flag->string);
+	}
 }
-#endif

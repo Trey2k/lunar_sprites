@@ -19,7 +19,7 @@ typedef struct {
 	};
 } Context;
 
-Context *renderer_context_create(const Renderer *renderer, const LSWindow *window);
+Context *renderer_context_create(const LSWindow *window);
 void renderer_context_destroy(Context *context);
 
 void renderer_context_make_current(const Context *context);

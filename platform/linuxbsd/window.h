@@ -3,6 +3,7 @@
 
 #include "platform/window.h"
 
+#include "core/types/slice.h"
 #include "platform/linuxbsd/os.h"
 
 #if defined(WAYLAND_ENABLED)

@@ -18,8 +18,7 @@ static const int32 attributes[] = {
 	0
 };
 
-OpenGLContext *opengl_context_create(const OpenGLRenderer *renderer, const LSWindow *window) {
-	LS_ASSERT(renderer);
+OpenGLContext *opengl_context_create(const LSWindow *window) {
 	LS_ASSERT(window);
 
 	LSNativeWindow native_window = window_get_native_window(window);
@@ -111,4 +110,12 @@ void opengl_context_swap_buffers(const OpenGLContext *context) {
 	LS_ASSERT(context);
 
 	SwapBuffers(context->device_context);
+}
+
+void wgl_init(const OS *os) {
+	// Nothing to do here
+}
+
+void wgl_deinit() {
+	// Nothing to do here
 }

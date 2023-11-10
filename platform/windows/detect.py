@@ -54,7 +54,6 @@ def can_build():
         return True
 
     if os.name == "posix":
-        # Cross-compiling with MinGW-w64 (old MinGW32 is not supported)
         prefix = os.getenv("MINGW_PREFIX", "")
 
         if try_cmd("gcc --version", prefix, "") or try_cmd("clang --version", prefix, ""):
@@ -157,9 +156,6 @@ def get_opts():
 
     return [
         ("mingw_prefix", "MinGW prefix", mingw),
-        # Targeted Windows version: 7 (and later), minimum supported version
-        # XP support dropped after EOL due to missing API for IPv6 and other issues
-        # Vista support dropped after EOL due to GH-10243
         (
             "target_win_version",
             "Targeted Windows version, >= 0x0601 (Windows 7)",
@@ -171,7 +167,6 @@ def get_opts():
         BoolVariable("use_asan", "Use address sanitizer (ASAN)", False),
         BoolVariable("debug_crt", "Compile with MSVC's debug CRT (/MDd)", False),
         BoolVariable("incremental_link", "Use MSVC incremental linking. May increase or decrease build times.", False),
-        ("angle_libs", "Path to the ANGLE static libraries", ""),
     ]
 
 
@@ -368,8 +363,12 @@ def configure_msvc(env, vcvars_msvc_config):
         "user32",
         "Ws2_32",
         "gdi32",
-        "opengl32"
     ]
+
+    if env["use_opengl"]:
+        LIBS += [
+            "opengl32",
+        ]
 
     env.Append(LINKFLAGS=[p + env["LIBSUFFIX"] for p in LIBS])
 
@@ -491,9 +490,15 @@ def configure_mingw(env):
     env.Append(
         LIBS=[
             "gdi32",
-            "opengl32"
         ]
     )
+
+    if env["use_opengl"]:
+        env.Append(
+            LIBS=[
+                "opengl32",
+            ]
+        )
 
     env.Append(CPPDEFINES=["MINGW_ENABLED", ("MINGW_HAS_SECURE_API", 1)])
 
@@ -502,10 +507,6 @@ def configure_mingw(env):
 
 
 def configure(env: "Environment"):
-    if env["use_opengl"]:
-        env.opengl_context = "wgl"
-        env.opengl_mode = "gl"
-
     # Validate arch.
     supported_arches = ["x86_32", "x86_64", "arm32", "arm64"]
     if env["arch"] not in supported_arches:

@@ -94,18 +94,18 @@ LSNativeWindow platform_window_get_native_window(const PlatformWindow *window) {
 	};
 }
 
-PlatformInput *platform_window_poll(const PlatformWindow *window) {
+void platform_window_poll(const PlatformWindow *window) {
 	switch (window->display_server) {
 #if defined(WAYLAND_ENABLED)
 		case DISPLAY_SERVER_WAYLAND: {
-			return wayland_window_poll(window->wayland_window, window);
+			wayland_window_poll(window->wayland_window, window);
 			break;
 		} break;
 #endif
 
 #if defined(X11_ENABLED)
 		case DISPLAY_SERVER_X11: {
-			return x11_window_poll(window->x11_window);
+			x11_window_poll(window->x11_window);
 			break;
 		} break;
 #endif
@@ -113,8 +113,6 @@ PlatformInput *platform_window_poll(const PlatformWindow *window) {
 		default:
 			ls_log_fatal("Unknown display server: %d\n", window->display_server);
 	};
-
-	return NULL;
 }
 
 void platform_window_set_title(const PlatformWindow *window, String title) {

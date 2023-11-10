@@ -12,8 +12,8 @@ struct LSWindow {
 	Context *context;
 };
 
-LSWindow *ls_create_window(const Renderer *renderer, String title, int32 width, int32 height) {
-	if (renderer_get_backend(renderer) == RENDERER_BACKEND_NONE) {
+LSWindow *ls_create_window(String title, int32 width, int32 height) {
+	if (renderer_get_backend() == RENDERER_BACKEND_NONE) {
 		ls_log(LOG_LEVEL_WARNING, "Cannot create window with renderer backend NONE\n");
 		return NULL;
 	}
@@ -24,7 +24,7 @@ LSWindow *ls_create_window(const Renderer *renderer, String title, int32 width, 
 	LSWindow *window = ls_malloc(sizeof(LSWindow));
 	window->platform_window = platform_create_window(os_get_platform_os(os), title, width, height);
 
-	window->context = renderer_context_create(renderer, window);
+	window->context = renderer_context_create(window);
 	window_make_current(window);
 	window_swap_buffers(window);
 
@@ -50,55 +50,9 @@ LSNativeWindow window_get_native_window(const LSWindow *window) {
 void window_poll(const LSWindow *window) {
 	LS_ASSERT(window);
 
-	PlatformInput *input = platform_window_poll(window->platform_window);
-	if (!input) {
-		return;
-	}
-
-	PlatformInput *start = input;
-
-	while (input->type != PLATFORM_INPUT_NONE) {
-		switch (input->type) {
-			case PLATFORM_INPUT_NONE: {
-			} break;
-			case PLATFORM_INPUT_KEYPRESS: {
-				core_handle_press(window, input->keycode);
-			} break;
-
-			case PLATFORM_INPUT_KEYRELEASE: {
-				core_handle_release(window, input->keycode);
-			} break;
-
-			case PLATFORM_INPUT_MOUSEPRESS: {
-				core_handle_mouse_press(window, input->button, input->position);
-			} break;
-
-			case PLATFORM_INPUT_MOUSERELEASE: {
-				core_handle_mouse_release(window, input->button, input->position);
-			} break;
-
-			case PLATFORM_INPUT_MOUSEMOVE: {
-				core_handle_mouse_move(window, input->position);
-			} break;
-
-			case PLATFORM_INPUT_MOUSEENTER: {
-				core_handle_mouse_enter(window, input->position);
-			} break;
-
-			case PLATFORM_INPUT_MOUSELEAVE: {
-				core_handle_mouse_leave(window, input->position);
-			} break;
-
-			default: {
-				ls_log(LOG_LEVEL_WARNING, "Unknown platform input type: %d\n", input->type);
-			} break;
-		}
-
-		input++;
-	}
-
-	// We are responsible for freeing the input
-	ls_free(start);
+	core_set_active_window(window);
+	platform_window_poll(window->platform_window);
+	core_set_active_window(NULL);
 }
 
 void window_set_title(const LSWindow *window, String title) {

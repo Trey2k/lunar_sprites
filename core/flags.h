@@ -18,20 +18,13 @@ typedef union {
 	bool boolean;
 } FlagValue;
 
-typedef struct {
-	FlagType type;
-	FlagValue value;
-	String description;
-} Flag;
-
 void ls_flags_init();
 void ls_flags_deinit();
 
-void ls_register_flag(String flag_name, FlagType type, FlagValue value, String description);
+FlagValue *ls_register_flag(String flag_name, FlagType type, FlagValue default_value, String description);
+
 void ls_parse_flags(int argc, char *argv[]);
 void ls_print_flags_help();
-
-const Flag *ls_get_flag(String flag_name);
 
 _FORCE_INLINE_ char *ls_flag_value_to_string(FlagType type, FlagValue value) {
 	switch (type) {

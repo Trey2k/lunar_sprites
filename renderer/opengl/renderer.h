@@ -5,7 +5,8 @@
 
 typedef struct OpenGLRenderer OpenGLRenderer;
 
-OpenGLRenderer *opengl_renderer_create(const OS *os);
-void opengl_renderer_destroy(OpenGLRenderer *renderer);
+void opengl_renderer_init();
+void opengl_renderer_start(const OS *os);
+void opengl_renderer_deinit();
 
 #endif // OPENGL_RENDERER_H

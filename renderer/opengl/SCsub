@@ -3,17 +3,13 @@ import sys
 
 Import("env")
 
-if env.opengl_mode == "gl":
-    env.Append(CPPDEFINES=["OPENGL_MODE_GL"])
-elif env.opengl_mode == "gles":
-    env.Append(CPPDEFINES=["OPENGL_MODE_GLES"])
-
-if env.opengl_context == "egl":
-    SConscript("egl/SCsub")
-elif env.opengl_context == "wgl":
-    SConscript("wgl/SCsub")
-else:
-    print("Unknown OpenGL context method: " + env.opengl_context)
-    sys.exit(255)
-
 env.Append(CPPDEFINES=["OPENGL_ENABLED"])
+
+if env["platform"] != "windows":
+    env.Append(CPPDEFINES=["EGL_ENABLED"])
+    SConscript("egl/SCsub")
+else:
+    env.Append(CPPDEFINES=["WGL_ENABLED"])
+    SConscript("wgl/SCsub")
+
+env.add_source_files(env.renderer_sources, "*.c")

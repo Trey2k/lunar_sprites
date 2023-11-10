@@ -1,6 +1,7 @@
 #ifndef X11_WINDOW_H
 #define X11_WINDOW_H
 
+#include "core/types/slice.h"
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
 
@@ -27,7 +28,7 @@ typedef struct {
 X11Window *x11_window_create(const X11Server *server, String title, int32 width, int32 height);
 void x11_window_destroy(X11Window *window);
 
-PlatformInput *x11_window_poll(const X11Window *window);
+void x11_window_poll(const X11Window *window);
 
 void x11_window_set_title(const X11Window *window, String title);
 void x11_window_set_size(const X11Window *window, int32 width, int32 height);

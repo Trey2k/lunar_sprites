@@ -4,6 +4,7 @@
 /* --------------TYPES-------------- */
 #include "core/types/hashtable/hashtable_int.h"
 #include "core/types/hashtable/hashtable_string.h"
+#include "core/types/slice.h"
 #include "core/types/string.h"
 #include "core/types/vector/vector2.h"
 /* --------------------------------- */
@@ -22,24 +23,29 @@
 
 /* --------------COMPONENTS-------------- */
 #include "core/os/os.h"
+#include "core/version.h"
 #include "core/window.h"
 /* -------------------------------------- */
 
 void core_register_flags();
 
-void core_init(int32 argc, char *argv[]);
+void core_init();
+void core_start(int32 argc, char *argv[]);
+
 void core_poll();
 void core_deinit();
 
 const InputManager *core_get_input_manager();
 
-void core_handle_press(const LSWindow *window, LSKeycode keycode);
-void core_handle_release(const LSWindow *window, LSKeycode keycode);
+void core_set_active_window(const LSWindow *window);
 
-void core_handle_mouse_press(const LSWindow *window, LSMouseButton button, Vector2i position);
-void core_handle_mouse_release(const LSWindow *window, LSMouseButton button, Vector2i position);
-void core_handle_mouse_move(const LSWindow *window, Vector2i position);
-void core_handle_mouse_enter(const LSWindow *window, Vector2i position);
-void core_handle_mouse_leave(const LSWindow *window, Vector2i position);
+void core_handle_press(LSKeycode keycode);
+void core_handle_release(LSKeycode keycode);
+
+void core_handle_mouse_press(LSMouseButton button, Vector2i position);
+void core_handle_mouse_release(LSMouseButton button, Vector2i position);
+void core_handle_mouse_move(Vector2i position);
+void core_handle_mouse_enter(Vector2i position);
+void core_handle_mouse_leave(Vector2i position);
 
 #endif // CORE_H

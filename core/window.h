@@ -8,9 +8,7 @@
 
 #include "platform/window.h"
 
-#include "renderer/renderer.h"
-
-LSWindow *ls_create_window(const Renderer *renderer, const char *title, int32 width, int32 height);
+LSWindow *ls_create_window(const char *title, int32 width, int32 height);
 void window_destroy(LSWindow *window);
 
 LSNativeWindow window_get_native_window(const LSWindow *window);

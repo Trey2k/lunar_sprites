@@ -12,4 +12,7 @@ struct OpenGLContext {
 	LSNativeWindow native_window;
 };
 
+void wgl_init(const OS *os);
+void wgl_deinit();
+
 #endif // WGL_CONTEXT_H

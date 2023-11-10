@@ -15,7 +15,12 @@ typedef enum {
 	RENDERER_BACKEND_OPENGL,
 } RendererBackend;
 
-typedef struct Renderer Renderer;
+void renderer_init();
+void renderer_start(const OS *os);
+
+void renderer_deinit();
+
+RendererBackend renderer_get_backend();
 
 _FORCE_INLINE_ String renderer_backend_to_string(RendererBackend backend) {
 	switch (backend) {
@@ -27,14 +32,5 @@ _FORCE_INLINE_ String renderer_backend_to_string(RendererBackend backend) {
 			return "UNKNOWN";
 	}
 }
-
-Renderer *renderer_create(RendererBackend backend, const OS *os);
-void renderer_destroy(Renderer *renderer);
-
-RendererBackend renderer_get_backend(const Renderer *renderer);
-
-#if defined(OPENGL_ENABLED)
-const OpenGLRenderer *renderer_get_opengl(const Renderer *renderer);
-#endif
 
 #endif // RENDERER_H

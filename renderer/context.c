@@ -8,23 +8,21 @@
 #include "renderer/opengl/context.h"
 #endif
 
-Context *renderer_context_create(const Renderer *renderer, const LSWindow *window) {
-	const RendererBackend backend = renderer_get_backend(renderer);
-
+Context *renderer_context_create(const LSWindow *window) {
 	Context *context = ls_malloc(sizeof(Context));
-	context->backend = backend;
+	context->backend = renderer_get_backend();
 	context->window = window;
 
-	switch (backend) {
+	switch (context->backend) {
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
-			context->opengl_context = opengl_context_create(renderer_get_opengl(renderer), window);
+			context->opengl_context = opengl_context_create(window);
 			LS_ASSERT(context->opengl_context);
 		} break;
 #endif
 
 		default:
-			ls_log_fatal("Unknown renderer backend: %d\n", backend);
+			ls_log_fatal("Unknown renderer backend: %d\n", context->backend);
 	};
 
 	return context;

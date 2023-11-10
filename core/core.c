@@ -8,24 +8,21 @@ struct LunarSprites {
 	EventManager *event_manager;
 	InputManager *input_manager;
 	OS *os;
+
+	const LSWindow *active_window;
+
+	FlagValue *log_level;
 };
 
 static struct LunarSprites ls;
 
 static void core_check_flags();
 
-// Must be called before core_init.
-void core_register_flags() {
+void core_init() {
 	ls_flags_init();
 
-	ls_register_flag("log-level", FLAG_TYPE_STRING, (FlagValue){ .string = "INFO" },
+	ls.log_level = ls_register_flag("log-level", FLAG_TYPE_STRING, (FlagValue){ .string = "INFO" },
 			"The log level to use. Valid values are `INFO`, `DEBUG`, `WARNING` and `ERROR`");
-}
-
-void core_init(int32 argc, char *argv[]) {
-	ls_parse_flags(argc, argv);
-
-	core_check_flags();
 
 	ls.event_manager = ls_create_event_manager();
 	LS_ASSERT(ls.event_manager);
@@ -35,6 +32,11 @@ void core_init(int32 argc, char *argv[]) {
 
 	ls.input_manager = ls_create_input_manager(ls.event_manager);
 	LS_ASSERT(ls.input_manager);
+}
+
+void core_start(int32 argc, char *argv[]) {
+	ls_parse_flags(argc, argv);
+	core_check_flags();
 }
 
 void core_poll() {
@@ -64,71 +66,73 @@ const OS *ls_get_os() {
 	return ls.os;
 }
 
-void core_handle_press(const LSWindow *window, LSKeycode keycode) {
-	LS_ASSERT(window);
-	LS_ASSERT(ls.input_manager);
-
-	input_handle_press(ls.input_manager, window, keycode);
+void core_set_active_window(const LSWindow *window) {
+	ls.active_window = window;
 }
 
-void core_handle_release(const LSWindow *window, LSKeycode keycode) {
-	LS_ASSERT(window);
+void core_handle_press(LSKeycode keycode) {
+	LS_ASSERT(ls.active_window);
 	LS_ASSERT(ls.input_manager);
 
-	input_handle_release(ls.input_manager, window, keycode);
+	input_handle_press(ls.input_manager, ls.active_window, keycode);
 }
 
-void core_handle_mouse_press(const LSWindow *window, LSMouseButton button, Vector2i position) {
-	LS_ASSERT(window);
+void core_handle_release(LSKeycode keycode) {
+	LS_ASSERT(ls.active_window);
 	LS_ASSERT(ls.input_manager);
 
-	input_handle_mouse_press(ls.input_manager, window, button, position);
+	input_handle_release(ls.input_manager, ls.active_window, keycode);
 }
 
-void core_handle_mouse_release(const LSWindow *window, LSMouseButton button, Vector2i position) {
-	LS_ASSERT(window);
+void core_handle_mouse_press(LSMouseButton button, Vector2i position) {
+	LS_ASSERT(ls.active_window);
 	LS_ASSERT(ls.input_manager);
 
-	input_handle_mouse_release(ls.input_manager, window, button, position);
+	input_handle_mouse_press(ls.input_manager, ls.active_window, button, position);
 }
 
-void core_handle_mouse_move(const LSWindow *window, Vector2i position) {
-	LS_ASSERT(window);
+void core_handle_mouse_release(LSMouseButton button, Vector2i position) {
+	LS_ASSERT(ls.active_window);
 	LS_ASSERT(ls.input_manager);
 
-	input_handle_mouse_move(ls.input_manager, window, position);
+	input_handle_mouse_release(ls.input_manager, ls.active_window, button, position);
 }
 
-void core_handle_mouse_enter(const LSWindow *window, Vector2i position) {
-	LS_ASSERT(window);
+void core_handle_mouse_move(Vector2i position) {
+	LS_ASSERT(ls.active_window);
 	LS_ASSERT(ls.input_manager);
 
-	input_handle_mouse_enter(ls.input_manager, window, position);
+	input_handle_mouse_move(ls.input_manager, ls.active_window, position);
 }
 
-void core_handle_mouse_leave(const LSWindow *window, Vector2i position) {
-	LS_ASSERT(window);
+void core_handle_mouse_enter(Vector2i position) {
+	LS_ASSERT(ls.active_window);
 	LS_ASSERT(ls.input_manager);
 
-	input_handle_mouse_leave(ls.input_manager, window, position);
+	input_handle_mouse_enter(ls.input_manager, ls.active_window, position);
+}
+
+void core_handle_mouse_leave(Vector2i position) {
+	LS_ASSERT(ls.active_window);
+	LS_ASSERT(ls.input_manager);
+
+	input_handle_mouse_leave(ls.input_manager, ls.active_window, position);
 }
 
 static void core_check_flags() {
-	const Flag *log_level = ls_get_flag("log-level");
-	char *log_level_string = ls_str_copy(log_level->value.string);
-	ls_str_to_upper(log_level_string);
+	ls_str_to_upper(ls.log_level->string);
 
-	ls_str_to_upper(log_level_string);
-	if (ls_str_equals(log_level_string, "INFO")) {
+	ls_str_to_upper(ls.log_level->string);
+	if (ls_str_equals(ls.log_level->string, "INFO")) {
 		ls_set_log_level(LOG_LEVEL_INFO);
-	} else if (ls_str_equals(log_level_string, "DEBUG")) {
+	} else if (ls_str_equals(ls.log_level->string, "DEBUG")) {
 		ls_set_log_level(LOG_LEVEL_DEBUG);
-	} else if (ls_str_equals(log_level_string, "WARNING")) {
+	} else if (ls_str_equals(ls.log_level->string, "WARNING")) {
 		ls_set_log_level(LOG_LEVEL_WARNING);
-	} else if (ls_str_equals(log_level_string, "ERROR")) {
+	} else if (ls_str_equals(ls.log_level->string, "ERROR")) {
 		ls_set_log_level(LOG_LEVEL_ERROR);
 	} else {
-		ls_log_fatal("Invalid log level `%s`.\n", log_level->value.string);
+		ls_log_fatal("Invalid log level `%s`.\n", ls.log_level->string);
 	}
-	ls_free(log_level_string);
+	ls_free(ls.log_level->string);
 }
