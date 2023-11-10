@@ -4,8 +4,8 @@
 #include "core/window.h"
 #include "renderer/renderer.h"
 
-#if defined(GLES2_ENABLED)
-#include "renderer/gles3/context.h"
+#if defined(OPENGL_ENABLED)
+#include "renderer/opengl/context.h"
 #endif
 
 typedef struct {
@@ -13,8 +13,8 @@ typedef struct {
 
 	RendererBackend backend;
 	union {
-#if defined(GLES2_ENABLED)
-		GLES2Context *gles3_context;
+#if defined(OPENGL_ENABLED)
+		OpenGLContext *opengl_context;
 #endif
 	};
 } Context;

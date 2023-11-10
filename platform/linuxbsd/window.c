@@ -1,6 +1,7 @@
 #include "platform/linuxbsd/window.h"
 #include "core/log.h"
 #include "core/memory.h"
+#include "platform/window.h"
 
 #if defined(WAYLAND_ENABLED)
 #include "platform/linuxbsd/wayland/window.h"
@@ -69,7 +70,7 @@ void platform_destroy_window(PlatformWindow *window) {
 	ls_free(window);
 }
 
-unsigned long platform_window_get_native_window(const PlatformWindow *window) {
+LSNativeWindow platform_window_get_native_window(const PlatformWindow *window) {
 	switch (window->display_server) {
 #if defined(WAYLAND_ENABLED)
 

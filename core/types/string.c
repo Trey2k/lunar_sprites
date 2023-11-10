@@ -48,7 +48,7 @@ char *ls_str_copy(String string) {
 
 	size_t length = ls_str_length(string);
 	char *copy = ls_malloc(length + 1);
-	strncpy(copy, string, length);
+	strncpy(copy, string, length + 1);
 	copy[length] = '\0';
 
 	return copy;

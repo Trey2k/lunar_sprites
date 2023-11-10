@@ -34,6 +34,7 @@ def get_opts():
         BoolVariable("use_llvm", "Use the LLVM compiler", False),
         BoolVariable("use_x11", "Use X11 display server", True),
         BoolVariable("use_wayland", "Use Wayland display server", False),
+        BoolVariable("use_gles", "Use OpenGL ES 3.2 instead of OpenGL 3.2", False),
     ]
 
 
@@ -44,6 +45,10 @@ def get_flags():
 
 
 def configure(env: "Environment"):
+    if env["use_opengl"]:
+        env.opengl_context = "egl"
+        env.opengl_mode = "gl" if not env["use_gles"] else "gles"
+
     # Validate arch.
     supported_arches = ["x86_32", "x86_64", "arm32", "arm64"]
     if env["arch"] not in supported_arches:

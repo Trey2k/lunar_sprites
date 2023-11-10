@@ -6,12 +6,14 @@
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
 
+#include "platform/window.h"
+
 #include "renderer/renderer.h"
 
 LSWindow *ls_create_window(const Renderer *renderer, const char *title, int32 width, int32 height);
 void window_destroy(LSWindow *window);
 
-unsigned long window_get_native_window(const LSWindow *window);
+LSNativeWindow window_get_native_window(const LSWindow *window);
 
 void window_poll(const LSWindow *window);
 

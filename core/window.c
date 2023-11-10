@@ -2,8 +2,6 @@
 #include "core/debug.h"
 #include "core/memory.h"
 
-#include "platform/window.h"
-
 #include "renderer/context.h"
 
 #include "core/core.h"
@@ -43,7 +41,7 @@ void window_destroy(LSWindow *window) {
 	ls_free(window);
 }
 
-unsigned long window_get_native_window(const LSWindow *window) {
+LSNativeWindow window_get_native_window(const LSWindow *window) {
 	LS_ASSERT(window);
 
 	return platform_window_get_native_window(window->platform_window);

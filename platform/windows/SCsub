@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+
+Import("env")
+
+common_linuxbsd = [
+    "os.c",
+    "window.c",
+]
+
+prog = env.add_program("#bin/lunar_sprites", ["main.c"] + common_linuxbsd)

@@ -1,11 +1,23 @@
-#include "renderer/gles3/renderer.h"
+#include "renderer/opengl/egl/renderer.h"
 #include "core/debug.h"
 #include "core/log.h"
 #include "core/memory.h"
 #include "core/os/os.h"
 #include "glad/egl.h"
 
-GLES2Renderer *gles3_renderer_create(const OS *os) {
+static const EGLint attribs[] = {
+	EGL_BUFFER_SIZE,
+	32,
+#if defined(OPENGL_MODE_GLES)
+	EGL_RENDERABLE_TYPE,
+	EGL_OPENGL_ES3_BIT,
+#endif
+	EGL_SURFACE_TYPE,
+	EGL_WINDOW_BIT | EGL_PBUFFER_BIT,
+	EGL_NONE,
+};
+
+OpenGLRenderer *opengl_renderer_create(const OS *os) {
 	int32 version = gladLoaderLoadEGL(NULL);
 	if (!version) {
 		ls_log(LOG_LEVEL_ERROR, "Failed to load EGL.\n");
@@ -47,12 +59,19 @@ GLES2Renderer *gles3_renderer_create(const OS *os) {
 	eglGetConfigAttrib(egl_display, egl_config, EGL_RENDERABLE_TYPE, &renderable_type);
 	eglGetConfigAttrib(egl_display, egl_config, EGL_SURFACE_TYPE, &surface_type);
 
+#if defined(OPENGL_MODE_GLES)
 	if (!eglBindAPI(EGL_OPENGL_ES_API)) {
 		ls_log(LOG_LEVEL_ERROR, "Failed to bind OpenGL ES API (eglError: 0x%X)\n", eglGetError());
 		return NULL;
 	}
+#else
+	if (!eglBindAPI(EGL_OPENGL_API)) {
+		ls_log(LOG_LEVEL_ERROR, "Failed to bind OpenGL API (eglError: 0x%X)\n", eglGetError());
+		return NULL;
+	}
+#endif
 
-	GLES2Renderer *renderer = ls_malloc(sizeof(GLES2Renderer));
+	OpenGLRenderer *renderer = ls_malloc(sizeof(OpenGLRenderer));
 	renderer->egl_display = egl_display;
 	renderer->egl_config = egl_config;
 
@@ -61,7 +80,7 @@ GLES2Renderer *gles3_renderer_create(const OS *os) {
 	return renderer;
 }
 
-void gles3_renderer_destroy(GLES2Renderer *renderer) {
+void opengl_renderer_destroy(OpenGLRenderer *renderer) {
 	LS_ASSERT(renderer);
 
 	eglTerminate(renderer->egl_display);

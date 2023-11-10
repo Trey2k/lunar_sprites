@@ -30,10 +30,16 @@ typedef struct {
 	Vector2i position;
 } PlatformInput;
 
+#if defined(LINUXBSD_ENABLED)
+typedef unsigned long LSNativeWindow;
+#elif defined(WINDOWS_ENABLED)
+typedef void *LSNativeWindow;
+#endif // LINUXBSD_ENABLED
+
 PlatformWindow *platform_create_window(const PlatformOS *os, String title, int32 width, int32 height);
 void platform_destroy_window(PlatformWindow *window);
 
-unsigned long platform_window_get_native_window(const PlatformWindow *window);
+LSNativeWindow platform_window_get_native_window(const PlatformWindow *window);
 
 PlatformInput *platform_window_poll(const PlatformWindow *window);
 

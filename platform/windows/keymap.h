@@ -1,0 +1,279 @@
+#ifndef WINDOWS_KEYMAP_H
+#define WINDOWS_KEYMAP_H
+
+#include "core/input/keycodes.h"
+#include "core/types/typedefs.h"
+
+#include <windows.h>
+
+_FORCE_INLINE_ LSKeycode win_map_key(uint64 windows_keycode) {
+	switch (windows_keycode) {
+		case 0x30:
+			return LS_KEY_0;
+		case 0x31:
+			return LS_KEY_1;
+		case 0x32:
+			return LS_KEY_2;
+		case 0x33:
+			return LS_KEY_3;
+		case 0x34:
+			return LS_KEY_4;
+		case 0x35:
+			return LS_KEY_5;
+		case 0x36:
+			return LS_KEY_6;
+		case 0x37:
+			return LS_KEY_7;
+		case 0x38:
+			return LS_KEY_8;
+		case 0x39:
+			return LS_KEY_9;
+		case 0x41:
+			return LS_KEY_A;
+		case 0x42:
+			return LS_KEY_B;
+		case 0x43:
+			return LS_KEY_C;
+		case 0x44:
+			return LS_KEY_D;
+		case 0x45:
+			return LS_KEY_E;
+		case 0x46:
+			return LS_KEY_F;
+		case 0x47:
+			return LS_KEY_G;
+		case 0x48:
+			return LS_KEY_H;
+		case 0x49:
+			return LS_KEY_I;
+		case 0x4A:
+			return LS_KEY_J;
+		case 0x4B:
+			return LS_KEY_K;
+		case 0x4C:
+			return LS_KEY_L;
+		case 0x4D:
+			return LS_KEY_M;
+		case 0x4E:
+			return LS_KEY_N;
+		case 0x4F:
+			return LS_KEY_O;
+		case 0x50:
+			return LS_KEY_P;
+		case 0x51:
+			return LS_KEY_Q;
+		case 0x52:
+			return LS_KEY_R;
+		case 0x53:
+			return LS_KEY_S;
+		case 0x54:
+			return LS_KEY_T;
+		case 0x55:
+			return LS_KEY_U;
+		case 0x56:
+			return LS_KEY_V;
+		case 0x57:
+			return LS_KEY_W;
+		case 0x58:
+			return LS_KEY_X;
+		case 0x59:
+			return LS_KEY_Y;
+		case 0x5A:
+			return LS_KEY_Z;
+		case VK_BACK:
+			return LS_KEY_BACKSPACE;
+		case VK_TAB:
+			return LS_KEY_TAB;
+		case VK_RETURN:
+			return LS_KEY_ENTER;
+		case VK_SHIFT: {
+			if (GetKeyState(VK_RSHIFT) & 0x8000) {
+				return LS_KEY_RIGHT_SHIFT;
+			}
+			return LS_KEY_LEFT_SHIFT;
+		};
+		case VK_CONTROL: {
+			if (GetKeyState(VK_RCONTROL) & 0x8000) {
+				return LS_KEY_RIGHT_CONTROL;
+			}
+			return LS_KEY_LEFT_CONTROL;
+		} break;
+		case VK_MENU:
+			return LS_KEY_MENU;
+		case VK_PAUSE:
+			return LS_KEY_PAUSE;
+		case VK_CAPITAL:
+			return LS_KEY_CAPS_LOCK;
+		case VK_ESCAPE:
+			return LS_KEY_ESCAPE;
+		case VK_SPACE:
+			return LS_KEY_SPACE;
+		case VK_PRIOR:
+			return LS_KEY_PAGE_UP;
+		case VK_NEXT:
+			return LS_KEY_PAGE_DOWN;
+		case VK_END:
+			return LS_KEY_END;
+		case VK_HOME:
+			return LS_KEY_HOME;
+		case VK_LEFT:
+			return LS_KEY_LEFT;
+		case VK_UP:
+			return LS_KEY_UP;
+		case VK_RIGHT:
+			return LS_KEY_RIGHT;
+		case VK_DOWN:
+			return LS_KEY_DOWN;
+		case VK_SNAPSHOT:
+			return LS_KEY_PRINT_SCREEN;
+		case VK_INSERT:
+			return LS_KEY_INSERT;
+		case VK_DELETE:
+			return LS_KEY_DELETE;
+		case VK_LWIN:
+			return LS_KEY_LEFT_SUPER;
+		case VK_RWIN:
+			return LS_KEY_RIGHT_SUPER;
+		case VK_APPS:
+			return LS_KEY_MENU;
+		case VK_NUMPAD0:
+			return LS_KEY_KP_0;
+		case VK_NUMPAD1:
+			return LS_KEY_KP_1;
+		case VK_NUMPAD2:
+			return LS_KEY_KP_2;
+		case VK_NUMPAD3:
+			return LS_KEY_KP_3;
+		case VK_NUMPAD4:
+			return LS_KEY_KP_4;
+		case VK_NUMPAD5:
+			return LS_KEY_KP_5;
+		case VK_NUMPAD6:
+			return LS_KEY_KP_6;
+		case VK_NUMPAD7:
+			return LS_KEY_KP_7;
+		case VK_NUMPAD8:
+			return LS_KEY_KP_8;
+		case VK_NUMPAD9:
+			return LS_KEY_KP_9;
+		case VK_MULTIPLY:
+			return LS_KEY_KP_MULTIPLY;
+		case VK_ADD:
+			return LS_KEY_KP_ADD;
+		case VK_SEPARATOR:
+			return LS_KEY_KP_DECIMAL;
+		case VK_SUBTRACT:
+			return LS_KEY_KP_SUBTRACT;
+		case VK_DECIMAL:
+			return LS_KEY_KP_DECIMAL;
+		case VK_DIVIDE:
+			return LS_KEY_KP_DIVIDE;
+		case VK_F1:
+			return LS_KEY_F1;
+		case VK_F2:
+			return LS_KEY_F2;
+		case VK_F3:
+			return LS_KEY_F3;
+		case VK_F4:
+			return LS_KEY_F4;
+		case VK_F5:
+			return LS_KEY_F5;
+		case VK_F6:
+			return LS_KEY_F6;
+		case VK_F7:
+			return LS_KEY_F7;
+		case VK_F8:
+			return LS_KEY_F8;
+		case VK_F9:
+			return LS_KEY_F9;
+		case VK_F10:
+			return LS_KEY_F10;
+		case VK_F11:
+			return LS_KEY_F11;
+		case VK_F12:
+			return LS_KEY_F12;
+		case VK_F13:
+			return LS_KEY_F13;
+		case VK_F14:
+			return LS_KEY_F14;
+		case VK_F15:
+			return LS_KEY_F15;
+		case VK_F16:
+			return LS_KEY_F16;
+		case VK_F17:
+			return LS_KEY_F17;
+		case VK_F18:
+			return LS_KEY_F18;
+		case VK_F19:
+			return LS_KEY_F19;
+		case VK_F20:
+			return LS_KEY_F20;
+		case VK_F21:
+			return LS_KEY_F21;
+		case VK_F22:
+			return LS_KEY_F22;
+		case VK_F23:
+			return LS_KEY_F23;
+		case VK_F24:
+			return LS_KEY_F24;
+		case VK_NUMLOCK:
+			return LS_KEY_NUM_LOCK;
+		case VK_SCROLL:
+			return LS_KEY_SCROLL_LOCK;
+		case VK_LSHIFT:
+			return LS_KEY_LEFT_SHIFT;
+		case VK_RSHIFT:
+			return LS_KEY_RIGHT_SHIFT;
+		case VK_LCONTROL:
+			return LS_KEY_LEFT_CONTROL;
+		case VK_RCONTROL:
+			return LS_KEY_RIGHT_CONTROL;
+		case VK_LMENU:
+			return LS_KEY_LEFT_ALT;
+		case VK_RMENU:
+			return LS_KEY_RIGHT_ALT;
+		case VK_OEM_1:
+			return LS_KEY_SEMICOLON;
+		case VK_OEM_PLUS:
+			return LS_KEY_EQUAL;
+		case VK_OEM_COMMA:
+			return LS_KEY_COMMA;
+		case VK_OEM_MINUS:
+			return LS_KEY_MINUS;
+		case VK_OEM_PERIOD:
+			return LS_KEY_PERIOD;
+		case VK_OEM_2:
+			return LS_KEY_SLASH;
+		case VK_OEM_3:
+			return LS_KEY_GRAVE_ACCENT;
+		case VK_OEM_4:
+			return LS_KEY_LEFT_BRACKET;
+		case VK_OEM_5:
+			return LS_KEY_BACKSLASH;
+		case VK_OEM_6:
+			return LS_KEY_RIGHT_BRACKET;
+		case VK_OEM_7:
+			return LS_KEY_APOSTROPHE;
+		default:
+			return LS_KEY_UNKNOWN;
+	}
+}
+
+_FORCE_INLINE_ LSMouseButton win_map_mbutton(uint64 win_button) {
+	switch (win_button) {
+		case VK_LBUTTON:
+			return LS_MOUSE_BUTTON_1;
+		case VK_RBUTTON:
+			return LS_MOUSE_BUTTON_2;
+		case VK_MBUTTON:
+			return LS_MOUSE_BUTTON_3;
+		case VK_XBUTTON1:
+			return LS_MOUSE_BUTTON_4;
+		case VK_XBUTTON2:
+			return LS_MOUSE_BUTTON_5;
+		default:
+			return LS_MOUSE_BUTTON_NONE;
+	}
+}
+
+#endif // WINDOWS_KEYMAP_H

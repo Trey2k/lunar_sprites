@@ -8,8 +8,8 @@ struct Renderer {
 
 	RendererBackend backend;
 	union {
-#if defined(GLES2_ENABLED)
-		GLES2Renderer *gles3_renderer;
+#if defined(OPENGL_ENABLED)
+		OpenGLRenderer *opengl_renderer;
 #endif
 	};
 };
@@ -25,10 +25,10 @@ Renderer *renderer_create(RendererBackend backend, const OS *os) {
 		case RENDERER_BACKEND_NONE: {
 			return renderer;
 		} break;
-#if defined(GLES2_ENABLED)
-		case RENDERER_BACKEND_GLES2: {
-			renderer->gles3_renderer = gles3_renderer_create(os);
-			LS_ASSERT(renderer->gles3_renderer);
+#if defined(OPENGL_ENABLED)
+		case RENDERER_BACKEND_OPENGL: {
+			renderer->opengl_renderer = opengl_renderer_create(os);
+			LS_ASSERT(renderer->opengl_renderer);
 			return renderer;
 		} break;
 #endif
@@ -45,9 +45,9 @@ void renderer_destroy(Renderer *renderer) {
 	switch (renderer->backend) {
 		case RENDERER_BACKEND_NONE: {
 		} break;
-		case RENDERER_BACKEND_GLES2: {
-#if defined(GLES2_ENABLED)
-			gles3_renderer_destroy(renderer->gles3_renderer);
+		case RENDERER_BACKEND_OPENGL: {
+#if defined(OPENGL_ENABLED)
+			opengl_renderer_destroy(renderer->opengl_renderer);
 #endif
 		} break;
 	}
@@ -59,8 +59,8 @@ RendererBackend renderer_get_backend(const Renderer *renderer) {
 	return renderer->backend;
 }
 
-#if defined(GLES2_ENABLED)
-const GLES2Renderer *renderer_get_gles3(const Renderer *renderer) {
-	return renderer->gles3_renderer;
+#if defined(OPENGL_ENABLED)
+const OpenGLRenderer *renderer_get_opengl(const Renderer *renderer) {
+	return renderer->opengl_renderer;
 }
 #endif

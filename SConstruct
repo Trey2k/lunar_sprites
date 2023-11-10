@@ -131,7 +131,7 @@ opts.Add(EnumVariable("lto", "Link-time optimization (production builds)", "none
 opts.Add(BoolVariable("production", "Set defaults to build Lunar Sprites for use in production", False))
 
 # Components
-opts.Add(BoolVariable("use_gles3", "Use OpenGL ES v3.2", True))
+opts.Add(BoolVariable("use_opengl", "Use OpenGL ES v3.2", True))
 
 opts.Add(EnumVariable("precision", "Set the floating-point precision level", "single", ("single", "double")))
 opts.Add(BoolVariable("disable_exceptions", "Force disabliplatform_apisng exception handling code", True))

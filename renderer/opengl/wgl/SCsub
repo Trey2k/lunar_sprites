@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+Import("env")
+
+env.Append(CPPPATH=[
+    "#thirdparty/glad",
+])
+
+env.add_source_files(env.renderer_sources, "#thirdparty/glad/wgl.c")
+env.add_source_files(env.renderer_sources, "#thirdparty/glad/gl.c")
+env.add_source_files(env.renderer_sources, "*.c")

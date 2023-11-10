@@ -79,7 +79,7 @@ static void deinit() {
 }
 
 static RendererBackend get_render_backend() {
-	RendererBackend renderer_backend = RENDERER_BACKEND_GLES2;
+	RendererBackend renderer_backend = RENDERER_BACKEND_OPENGL;
 
 	const Flag *flag = ls_get_flag("renderer");
 
@@ -89,7 +89,7 @@ static RendererBackend get_render_backend() {
 	if (ls_str_equals(renderer_string, "NONE")) {
 		renderer_backend = RENDERER_BACKEND_NONE;
 	} else if (ls_str_equals(renderer_string, "GLES2")) {
-		renderer_backend = RENDERER_BACKEND_GLES2;
+		renderer_backend = RENDERER_BACKEND_OPENGL;
 	} else {
 		ls_log_fatal("Invalid value for flag `renderer`. Exepected `NONE` or `OPENGL3`. Got `%s`\n", flag->value.string);
 	}
