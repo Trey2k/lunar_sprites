@@ -8,9 +8,7 @@ env.Append(CPPPATH=[
 
 env.add_source_files(env.renderer_sources, "#thirdparty/glad/egl.c")
 
-if env.opengl_mode == "gles":
-    env.add_source_files(env.renderer_sources, "#thirdparty/glad/gles2.c")
-else:
-    env.add_source_files(env.renderer_sources, "#thirdparty/glad/gl.c")
+env.add_source_files(env.renderer_sources, "#thirdparty/glad/gles2.c")
+env.add_source_files(env.renderer_sources, "#thirdparty/glad/gl.c")
 
 env.add_source_files(env.renderer_sources, "*.c")

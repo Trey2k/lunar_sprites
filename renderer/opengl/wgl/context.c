@@ -7,7 +7,6 @@
 #include "platform/window.h"
 #include "renderer/opengl/context.h"
 
-#include <glad/gl.h>
 #include <glad/wgl.h>
 
 static const int32 attributes[] = {
@@ -65,6 +64,7 @@ OpenGLContext *opengl_context_create(const LSWindow *window) {
 	OpenGLContext *context = ls_malloc(sizeof(OpenGLContext));
 	context->device_context = device_context;
 	context->opengl_context = opengl_context;
+	context->native_window = native_window;
 
 	opengl_context_make_current(NULL);
 	wglDeleteContext(temp_context);

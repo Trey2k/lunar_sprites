@@ -42,11 +42,9 @@
 #endif
 #define __gles2_gl2_h_ 1
 #ifdef __gl3_h_
-  #error OpenGL ES 3 header already included (API: gles2), remove previous include!
 #endif
 #define __gl3_h_ 1
 #ifdef __gles2_gl3_h_
-  #error OpenGL ES 3 header already included (API: gles2), remove previous include!
 #endif
 #define __gles2_gl3_h_ 1
 #ifdef __clang__

@@ -7,12 +7,8 @@
 #include "core/window.h"
 
 #include <glad/egl.h>
-
-#if defined(OPENGL_MODE_GLES)
-#include <glad/gles2.h>
-#else
 #include <glad/gl.h>
-#endif
+#include <glad/gles2.h>
 
 static const EGLint gles_egl_attribs[] = {
 	EGL_BUFFER_SIZE,
@@ -47,18 +43,13 @@ static const EGLint gl_context_attribs[] = {
 };
 
 static String api_name = "OpenGL";
+EGLenum egl_api = EGL_OPENGL_API;
 
 static const EGLint *egl_attribs = gl_egl_attribs;
 static const EGLint *context_attribs = gl_context_attribs;
 
 static EGLDisplay egl_display;
 static EGLConfig egl_config;
-
-#if defined(OPENGL_MODE_GLES)
-#define OPENGL_NAME "OpenGL ES"
-#else
-#define OPENGL_NAME "OpenGL"
-#endif
 
 OpenGLContext *opengl_context_create(const LSWindow *window) {
 	LS_ASSERT(window);
@@ -82,20 +73,16 @@ OpenGLContext *opengl_context_create(const LSWindow *window) {
 
 	opengl_context_make_current(context);
 
-#if defined(OPENGL_MODE_GLES)
-	int32 version = gladLoaderLoadGLES2();
-	if (!version) {
-		ls_log_fatal("Failed to load OpenGL ES.\n");
-		return NULL;
+	int32 version = 0;
+	if (egl_api == EGL_OPENGL_ES_API) {
+		version = gladLoaderLoadGLES2();
+	} else {
+		version = gladLoaderLoadGL();
 	}
-#else
-	int32 version = gladLoaderLoadGL();
+
 	if (!version) {
-		opengl_context_destroy(context);
-		ls_log_fatal("Failed to load OpenGL.\n");
-		return NULL;
+		ls_log_fatal("Failed to load %s.\n", api_name);
 	}
-#endif
 
 	ls_log(LOG_LEVEL_INFO, "Loaded %s version %d.%d\n", api_name, GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
@@ -138,8 +125,6 @@ void opengl_context_swap_buffers(const OpenGLContext *context) {
 
 void egl_init(const OS *os, OpenGLAPI api) {
 	LS_ASSERT(os);
-
-	EGLenum egl_api;
 
 	switch (api) {
 		case LS_OPENGL_API_GLES:
