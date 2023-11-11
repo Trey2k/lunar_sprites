@@ -8,7 +8,6 @@
 
 #include <glad/egl.h>
 #include <glad/gl.h>
-#include <glad/gles2.h>
 
 static const EGLint gles_egl_attribs[] = {
 	EGL_BUFFER_SIZE,
@@ -76,8 +75,6 @@ OpenGLContext *opengl_context_create(const LSWindow *window) {
 	int32 version = 0;
 	if (egl_api == EGL_OPENGL_ES_API) {
 		version = gladLoaderLoadGLES2();
-	} else {
-		version = gladLoaderLoadGL();
 	}
 
 	if (!version) {

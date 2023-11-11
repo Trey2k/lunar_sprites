@@ -13,7 +13,7 @@ static const int32 attributes[] = {
 	WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
 	WGL_CONTEXT_MINOR_VERSION_ARB, 2,
 	WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-	WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+	WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_ES_PROFILE_BIT_EXT,
 	0
 };
 
@@ -70,7 +70,7 @@ OpenGLContext *opengl_context_create(const LSWindow *window) {
 	wglDeleteContext(temp_context);
 	opengl_context_make_current(context);
 
-	int32 version = gladLoaderLoadGL();
+	int32 version = gladLoaderLoadGLES2();
 	if (!version) {
 		opengl_context_destroy(context);
 		ls_log_fatal("Failed to load OpenGL.\n");

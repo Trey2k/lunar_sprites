@@ -71,7 +71,6 @@ FlagValue *ls_register_flag(String flag_name, FlagType type, FlagValue default_v
 	return flag->value;
 }
 
-// Returns weather program should exit early or not
 void ls_parse_flags(int argc, char *argv[]) {
 	for (int i = 1; i < argc; i++) {
 		if (ls_str_length(argv[i]) <= 2 || argv[i][0] != '-' || argv[i][1] != '-') {

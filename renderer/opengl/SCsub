@@ -6,10 +6,8 @@ Import("env")
 env.Append(CPPDEFINES=["OPENGL_ENABLED"])
 
 if env["platform"] != "windows":
-    env.Append(CPPDEFINES=["EGL_ENABLED"])
     SConscript("egl/SCsub")
 else:
-    env.Append(CPPDEFINES=["WGL_ENABLED"])
     SConscript("wgl/SCsub")
 
 env.add_source_files(env.renderer_sources, "*.c")
