@@ -26,5 +26,5 @@ jobs:
   
   linux-build:
     needs: static-checks
-    name: 🐧 Linux build
-    uses: ./.github/workflows/linux-build.yml
+    name: ⚙️ Builds
+    uses: ./.github/workflows/builds.yml

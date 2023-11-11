@@ -1,0 +1,176 @@
+name: ⚙️ Builds
+on:
+  workflow_call:
+
+env:
+  BASE_BRANCH: main
+  SCONS_CACHE_LIMIT: 7168
+
+jobs:
+  linux-builds:
+    runs-on: ubuntu-20.04
+    name: 🐧 LinuxBSD builds
+    strategy:
+      fail-fast: false
+      matrix:
+        opts:
+          - name: LinuxBSD x86_64 Debug
+            args: platform=linuxbsd target=debug arch=x86_64 dev_build=yes
+            cache-name: linuxbsd-amd64-debug
+            artifact-name: linuxbsd-amd64-debug
+
+          - name: LinuxBSD x86_64
+            args: platform=linuxbsd target=release arch=x86_64 dev_build=yes
+            cache-name: linuxbsd-amd64-release
+            artifact-name: linuxbsd-amd64-release
+          
+          - name: LinuxBSD x86_64 Debug
+            args: platform=linuxbsd target=debug arch=x86_64 dev_build=yes use_mingw=yes
+            cache-name: linuxbsd-amd64-debug-mingw
+            artifact-name: linuxbsd-amd64-debug-mingw
+          
+          - name: LinuxBSD x86_64
+            args: platform=linuxbsd target=release arch=x86_64 dev_build=yes use_mingw=yes
+            cache-name: linuxbsd-amd64-release-mingw
+            artifact-name: linuxbsd-amd64-release-mingw
+          
+          - name: Windows x86_65 (Cross-compile)
+            args: platform=windows target=release arch=x86_64 dev_build=yes
+            cache-name: windows-amd64-release-cross
+            artifact-name: windows-amd64-release-cross
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: (Windows) Install mingw64
+        if: ${{ startsWith(matrix.opts.cache-name, 'windows-') }}
+        shell: sh
+        run: |
+          sudo apt-get update
+          sudo apt-get install mingw-w64
+          sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
+
+      - name: Install buildroot x86_64
+        shell: sh
+        run: |
+          sudo apt-get update
+          sudo apt-get install yasm
+          cd /opt
+          curl -LO https://downloads.tuxfamily.org/godotengine/toolchains/linux/2021-02-11/x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          tar xf x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          rm -f x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          mv x86_64-godot-linux-gnu_sdk-buildroot buildroot
+          cd buildroot
+          ./relocate-sdk.sh
+
+      - name: Load .scons_cache directory
+        uses: actions/cache@v3
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{matrix.opts.cache-name}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{matrix.opts.cache-name}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{matrix.opts.cache-name}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{matrix.opts.cache-name}}-${{env.BASE_BRANCH}}
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+
+      - name: Build Lunar Sprites
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+        run: |
+          PATH=/opt/buildroot/bin:$PATH scons ${{ matrix.opts.args }}
+
+      - name: Prepare artifacts
+        run: |
+          mkdir out/
+          cp README.md out/
+          cp LICENSE.md out/
+          cp bin/* out/
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.opts.artifact-name }}
+          path: out/*
+
+  windows-builds:
+    runs-on: windows-latest
+    name: 🎨 Windows builds
+    strategy:
+      fail-fast: false
+      matrix:
+        opts:
+          - name: Windows x86_64 Debug (MSVC)
+            args: platform=windows target=debug arch=x86_64 dev_build=yes
+            cache-name: windows-amd64-debug
+            artifact-name: windows-amd64-debug
+
+          - name: Windows x86_64 (MSVC)
+            args: platform=windows target=release arch=x86_64 dev_build=yes
+            cache-name: windows-amd64-release
+            artifact-name: windows-amd64-release
+          
+          - name: Windows x86_64 Debug (MinGW)
+            args: platform=windows target=debug arch=x86_64 dev_build=yes use_mingw=yes
+            cache-name: windows-amd64-debug-mingw
+            artifact-name: windows-amd64-debug-mingw
+          
+          - name: Windows x86_64 (MinGW)
+            args: platform=windows target=release arch=x86_64 dev_build=yes use_mingw=yes
+            cache-name: windows-amd64-release-mingw
+            artifact-name: windows-amd64-release-mingw
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Load .scons_cache directory
+        uses: actions/cache@v3
+        with:
+          path: ${{github.workspace}}/.scons_cache/
+          key: ${{matrix.opts.cache-name}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{matrix.opts.cache-name}}-${{env.BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{matrix.opts.cache-name}}-${{env.BASE_BRANCH}}-${{github.ref}}
+            ${{matrix.opts.cache-name}}-${{env.BASE_BRANCH}}
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+
+      - name: Build Lunar Sprites
+        env:
+          SCONS_CACHE: ${{github.workspace}}/.scons_cache/
+        run: |
+          scons ${{ matrix.opts.args }}
+
+      - name: Prepare artifacts
+        run: |
+          mkdir out/
+          cp README.md out/
+          cp LICENSE.md out/
+          cp bin/*.exe out/
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.opts.artifact-name }}
+          path: out/*
