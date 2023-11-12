@@ -1,0 +1,49 @@
+#include "renderer/opengl/wgl/extensions.h"
+
+#include "core/debug.h"
+#include "core/memory.h"
+#include "core/types/slice.h"
+
+#include <glad/wgl.h>
+
+void append_extension(Slice *extensions, String extension);
+
+void wgl_print_extensions(HDC device_context) {
+	Slice *extensions = wgl_get_extensions(device_context);
+
+	ls_printf("WGL Extensions:\n");
+
+	for (size_t i = 0; i < slice_get_size(extensions); i++) {
+		String extension = slice_get(extensions, i).str;
+		ls_printf("\t%s\n", extension);
+	}
+
+	slice_destroy(extensions);
+}
+
+Slice *wgl_get_extensions(HDC device_context) {
+	Slice *extensions = slice_create(16, true);
+
+	String arb = wglGetExtensionsStringARB(device_context);
+	LS_ASSERT(arb);
+	append_extension(extensions, arb);
+
+	String ext = wglGetExtensionsStringEXT();
+	LS_ASSERT(ext);
+	append_extension(extensions, ext);
+
+	return extensions;
+}
+
+void append_extension(Slice *slice, String extensions) {
+	int32 start = 0;
+	for (int32 i = 0; i < ls_str_length(extensions); i++) {
+		if (extensions[i] == ' ') {
+			char *extension = ls_malloc(sizeof(char) * (i - start + 1));
+			ls_memcpy(extension, extensions + start, i - start);
+			extension[i - start] = '\0';
+			slice_append(slice, (SliceValue){ .ptr = extension });
+			start = i + 1;
+		}
+	}
+}

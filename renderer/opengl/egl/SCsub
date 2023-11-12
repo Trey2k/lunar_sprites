@@ -2,13 +2,7 @@
 
 Import("env")
 
-env.Append(CPPPATH=[
-    "#thirdparty/glad",
-])
-
-# Enable OpenGL ES 2.0 in glad.
-env.Append(CPPDEFINES=["EGL_ENABLED", "GLAD_GLES2"])
+env.Append(CPPDEFINES=["EGL_ENABLED"])
 
 env.add_source_files(env.renderer_sources, "#thirdparty/glad/egl.c")
-env.add_source_files(env.renderer_sources, "#thirdparty/glad/gl.c")
 env.add_source_files(env.renderer_sources, "*.c")

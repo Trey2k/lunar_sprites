@@ -1,8 +1,6 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
-typedef struct LSWindow LSWindow;
-
 typedef int bool;
 
 #define true 1

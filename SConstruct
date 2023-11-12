@@ -620,10 +620,10 @@ if selected_platform in platform_list:
     Export("env")
 
     # Build subdirs, the build order is dependent on link order.
-    SConscript("renderer/SCsub")
-    SConscript("modules/SCsub")
     SConscript("core/SCsub")
     SConscript("platform/SCsub")
+    SConscript("renderer/SCsub")
+    SConscript("modules/SCsub")
     if env["tests"]:
         SConscript("tests/SCsub")
     SConscript("main/SCsub")

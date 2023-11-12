@@ -7,6 +7,10 @@ void *ls_malloc(size_t size);
 void *ls_realloc(void *ptr, size_t size);
 void *ls_calloc(size_t count, size_t size);
 
+void ls_memcpy(void *dest, const void *src, size_t size);
+void ls_memset(void *dest, int value, size_t size);
+void ls_memmove(void *dest, const void *src, size_t size);
+
 void ls_free(void *ptr);
 
 #endif // MEMORY_H
