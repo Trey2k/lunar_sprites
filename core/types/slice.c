@@ -46,6 +46,15 @@ void slice_append(Slice *slice, SliceValue element) {
 	slice->data[slice->size++] = element;
 }
 
+void slice_append_slice(Slice *slice, const Slice *other) {
+	LS_ASSERT(slice);
+	LS_ASSERT(other);
+
+	for (size_t i = 0; i < other->size; i++) {
+		slice_append(slice, other->data[i]);
+	}
+}
+
 void slice_insert(Slice *slice, size_t index, SliceValue data) {
 	LS_ASSERT(slice);
 	LS_ASSERT(index <= slice->size);
@@ -213,6 +222,15 @@ void slice32_append(Slice32 *slice, SliceValue32 element) {
 	}
 
 	slice->data[slice->size++] = element;
+}
+
+void slice32_append_slice(Slice32 *slice, const Slice32 *other) {
+	LS_ASSERT(slice);
+	LS_ASSERT(other);
+
+	for (size_t i = 0; i < other->size; i++) {
+		slice32_append(slice, other->data[i]);
+	}
 }
 
 void slice32_insert(Slice32 *slice, size_t index, SliceValue32 data) {

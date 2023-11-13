@@ -18,10 +18,6 @@
 static bool choose_pixel_format(LSNativeWindow native_window, HDC device_context, PIXELFORMATDESCRIPTOR *pfd);
 static uint32 load_wgl(PIXELFORMATDESCRIPTOR *pfd);
 
-static SliceValue32 atrib_to_svalue(int32 atrib) {
-	return (SliceValue32){ .i32 = atrib };
-}
-
 LSWGLContext *wgl_context_create(const LSWindow *window) {
 	LS_ASSERT(window);
 
@@ -50,25 +46,25 @@ LSWGLContext *wgl_context_create(const LSWindow *window) {
 	}
 
 	Slice32 *attributes = slice32_create(10);
-	slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_MAJOR_VERSION_ARB));
-	slice32_append(attributes, atrib_to_svalue(3));
+	slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_MAJOR_VERSION_ARB));
+	slice32_append(attributes, SLICE_VAL32(i32, 3));
 
 	if (wgl_has_extension(device_context, "WGL_EXT_create_context_es2_profile")) {
-		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_MINOR_VERSION_ARB));
-		slice32_append(attributes, atrib_to_svalue(2));
-		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_PROFILE_MASK_ARB));
-		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_ES2_PROFILE_BIT_EXT));
+		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_MINOR_VERSION_ARB));
+		slice32_append(attributes, SLICE_VAL32(i32, 2));
+		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_PROFILE_MASK_ARB));
+		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_ES2_PROFILE_BIT_EXT));
 	} else {
 		ls_log(LOG_LEVEL_WARNING, "WGL_EXT_create_context_es2_profile is not supported. Using OpenGL 3.3\n");
-		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_MINOR_VERSION_ARB));
-		slice32_append(attributes, atrib_to_svalue(3));
-		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_PROFILE_MASK_ARB));
-		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_CORE_PROFILE_BIT_ARB));
+		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_MINOR_VERSION_ARB));
+		slice32_append(attributes, SLICE_VAL32(i32, 3));
+		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_PROFILE_MASK_ARB));
+		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_CORE_PROFILE_BIT_ARB));
 	}
 
-	slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_FLAGS_ARB));
-	slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB));
-	slice32_append(attributes, atrib_to_svalue(0));
+	slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_FLAGS_ARB));
+	slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB));
+	slice32_append(attributes, SLICE_VAL32(i32, 0));
 
 	HGLRC opengl_context = wglCreateContextAttribsARB(device_context, NULL, slice32_get_data(attributes));
 	if (!opengl_context) {
@@ -76,6 +72,8 @@ LSWGLContext *wgl_context_create(const LSWindow *window) {
 		ls_log(LOG_LEVEL_WARNING, "Failed to create the OpenGL context. 0x%X\n", GetLastError());
 		return NULL;
 	}
+
+	slice32_destroy(attributes);
 
 	LSWGLContext *context = ls_malloc(sizeof(LSWGLContext));
 	context->device_context = device_context;
@@ -144,14 +142,23 @@ static bool choose_pixel_format(LSNativeWindow native_window, HDC device_context
 	return true;
 }
 
-static uint32 load_wgl(PIXELFORMATDESCRIPTOR *pfd) {
+static const WindowConfig TEMP_WINDOW_CONFIG = {
+	.title = "Temp",
+	.size = { 1, 1 },
+	.position = { 0, 0 },
+	.hidden = true,
+	.fullscreen = false,
+};
+
+static uint32
+load_wgl(PIXELFORMATDESCRIPTOR *pfd) {
 	const PlatformOS *os = os_get_platform_os(ls_get_os());
 
 	// WGL requires us to create another window for the temporary context.
 	// We use PlatformWindow and not LSWindow as LSWindow will trigger context creation recureivly.
 
 	// TODO: Make this window invisible
-	PlatformWindow *window = platform_create_window(os, "Temp", 0, 0);
+	PlatformWindow *window = platform_create_window(os, TEMP_WINDOW_CONFIG);
 	LSNativeWindow native_window = platform_window_get_native_window(window);
 	HDC device_context = GetDC(native_window);
 
@@ -169,8 +176,6 @@ static uint32 load_wgl(PIXELFORMATDESCRIPTOR *pfd) {
 	if (!gladLoaderLoadWGL(device_context)) {
 		return 69001;
 	}
-
-	Slice *extensions = wgl_get_extensions(device_context);
 
 	wgl_context_make_current(NULL);
 	wglDeleteContext(temp_context);

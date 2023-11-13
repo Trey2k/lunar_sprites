@@ -14,7 +14,7 @@ void ls_destroy_os(OS *os);
 
 void *os_get_native_display(const OS *os);
 
-PlatformOS *os_get_platform_os(const OS *os);
+const PlatformOS *os_get_platform_os(const OS *os);
 
 // Defined in core/lunar_sprites.c
 const OS *ls_get_os();

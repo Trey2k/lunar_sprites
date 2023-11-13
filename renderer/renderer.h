@@ -17,8 +17,10 @@ typedef enum {
 
 void renderer_init();
 void renderer_start(const OS *os);
-
 void renderer_deinit();
+
+void renderer_set_clear_color(float32 r, float32 g, float32 b, float32 a);
+void renderer_clear();
 
 RendererBackend renderer_get_backend();
 

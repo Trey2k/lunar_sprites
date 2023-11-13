@@ -1,4 +1,6 @@
 #include "core/core.h"
+#include "core/events/event_manager.h"
+#include "core/events/events.h"
 #include "core/flags.h"
 #include "core/input/input_manager.h"
 #include "core/log.h"
@@ -66,6 +68,10 @@ const OS *ls_get_os() {
 	return ls.os;
 }
 
+void core_add_event_handler(EventHandler handler, void *user_data) {
+	events_add_handler(ls.event_manager, handler, user_data);
+}
+
 void core_set_active_window(const LSWindow *window) {
 	ls.active_window = window;
 }
@@ -117,6 +123,16 @@ void core_handle_mouse_leave(Vector2i position) {
 	LS_ASSERT(ls.input_manager);
 
 	input_handle_mouse_leave(ls.input_manager, ls.active_window, position);
+}
+
+void core_handle_window_close() {
+	LS_ASSERT(ls.active_window);
+	LS_ASSERT(ls.event_manager);
+
+	Event e;
+	e.type = EVENT_WINDOW_CLOSE;
+	e.window = ls.active_window;
+	events_emit(ls.event_manager, &e);
 }
 
 static void core_check_flags() {

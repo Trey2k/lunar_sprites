@@ -2,6 +2,7 @@
 #include "core/log.h"
 #include "core/memory.h"
 #include "platform/window.h"
+#include "renderer/window.h"
 
 #if defined(WAYLAND_ENABLED)
 #include "platform/linuxbsd/wayland/window.h"
@@ -11,14 +12,14 @@
 #include "platform/linuxbsd/x11/window.h"
 #endif
 
-PlatformWindow *platform_create_window(const PlatformOS *os, String title, int32 width, int32 height) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 	window->display_server = os->display_server;
 
 	switch (window->display_server) {
 #if defined(WAYLAND_ENABLED)
 		case DISPLAY_SERVER_WAYLAND: {
-			WaylandWindow *win = wayland_window_create(os->wayland_server, title, width, height);
+			WaylandWindow *win = wayland_window_create(os->wayland_server, config);
 			if (!win) {
 				ls_log(LOG_LEVEL_ERROR, "Failed to create Wayland window\n");
 				return NULL;
@@ -30,7 +31,7 @@ PlatformWindow *platform_create_window(const PlatformOS *os, String title, int32
 #if defined(X11_ENABLED)
 		case DISPLAY_SERVER_X11: {
 			// TODO: Pass in X11Server
-			X11Window *win = x11_window_create(os->x11_server, title, width, height);
+			X11Window *win = x11_window_create(os->x11_server, config);
 			if (!win) {
 				ls_log(LOG_LEVEL_ERROR, "Failed to create X11 window\n");
 				return NULL;
@@ -115,7 +116,7 @@ void platform_window_poll(const PlatformWindow *window) {
 	};
 }
 
-void platform_window_set_title(const PlatformWindow *window, String title) {
+void platform_window_set_title(PlatformWindow *window, String title) {
 	switch (window->display_server) {
 #if defined(X11_ENABLED)
 		case DISPLAY_SERVER_X11: {
@@ -129,7 +130,7 @@ void platform_window_set_title(const PlatformWindow *window, String title) {
 	};
 }
 
-void platform_window_set_size(const PlatformWindow *window, int32 width, int32 height) {
+void platform_window_set_size(PlatformWindow *window, int32 width, int32 height) {
 	switch (window->display_server) {
 #if defined(X11_ENABLED)
 		case DISPLAY_SERVER_X11: {
@@ -140,5 +141,76 @@ void platform_window_set_size(const PlatformWindow *window, int32 width, int32 h
 
 		default:
 			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+	};
+}
+
+void platform_window_set_fullscreen(PlatformWindow *window, bool fullscreen) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			x11_window_set_fullscreen(window->x11_window, fullscreen);
+			break;
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+	};
+}
+
+void platform_window_show(PlatformWindow *window) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			x11_window_show(window->x11_window);
+			break;
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+	};
+}
+
+void platform_window_hide(PlatformWindow *window) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			x11_window_hide(window->x11_window);
+			break;
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+	};
+}
+
+bool platform_window_is_visible(const PlatformWindow *window) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			return x11_window_is_visible(window->x11_window);
+		} break;
+
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+			return false;
+	};
+}
+
+bool platform_window_is_fullscreen(const PlatformWindow *window) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			return x11_window_is_fullscreen(window->x11_window);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+			return false;
 	};
 }

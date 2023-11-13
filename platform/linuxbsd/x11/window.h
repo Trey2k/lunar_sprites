@@ -7,6 +7,7 @@
 
 #include "platform/linuxbsd/x11/display_server.h"
 #include "platform/window.h"
+#include "renderer/window.h"
 
 #include <X11/Xlib.h>
 
@@ -20,17 +21,26 @@ typedef struct {
 	int32 height;
 	String title;
 
-	bool maximized;
+	bool fullscreen;
+	bool hidden;
 
 	Display *display;
 } X11Window;
 
-X11Window *x11_window_create(const X11Server *server, String title, int32 width, int32 height);
+X11Window *x11_window_create(const X11Server *server, WindowConfig config);
 void x11_window_destroy(X11Window *window);
 
 void x11_window_poll(const X11Window *window);
 
-void x11_window_set_title(const X11Window *window, String title);
-void x11_window_set_size(const X11Window *window, int32 width, int32 height);
+void x11_window_set_title(X11Window *window, String title);
+void x11_window_set_size(X11Window *window, int32 width, int32 height);
+
+void x11_window_set_fullscreen(X11Window *window, bool fullscreen);
+
+void x11_window_show(X11Window *window);
+void x11_window_hide(X11Window *window);
+
+bool x11_window_is_visible(const X11Window *window);
+bool x11_window_is_fullscreen(const X11Window *window);
 
 #endif // X11_WINDOW_H

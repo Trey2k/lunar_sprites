@@ -17,7 +17,7 @@ typedef struct {
 	LSKeycode keycode;
 	bool repeat;
 
-	LSWindow *window;
+	const LSWindow *window;
 } EventKey;
 
 typedef enum {
@@ -33,13 +33,14 @@ typedef struct {
 	LSMouseButton button;
 	Vector2i position;
 
-	LSWindow *window;
+	const LSWindow *window;
 } EventMouse;
 
 typedef enum {
 	EVENT_NONE,
 	EVENT_KEY,
-	EVENT_MOUSE
+	EVENT_MOUSE,
+	EVENT_WINDOW_CLOSE,
 } EventType;
 
 struct Event {
@@ -47,6 +48,7 @@ struct Event {
 	union {
 		EventKey key;
 		EventMouse mouse;
+		const LSWindow *window;
 	};
 
 	bool handled;

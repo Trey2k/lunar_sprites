@@ -9,22 +9,26 @@
 
 #include "platform/os.h"
 
+#include "renderer/window.h"
+
 typedef struct PlatformWindow PlatformWindow;
 
-#if defined(LINUXBSD_ENABLED)
-typedef unsigned long LSNativeWindow;
-#elif defined(WINDOWS_ENABLED)
-typedef void *LSNativeWindow;
-#endif // LINUXBSD_ENABLED
-
-PlatformWindow *platform_create_window(const PlatformOS *os, String title, int32 width, int32 height);
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config);
 void platform_destroy_window(PlatformWindow *window);
 
 LSNativeWindow platform_window_get_native_window(const PlatformWindow *window);
 
 void platform_window_poll(const PlatformWindow *window);
 
-void platform_window_set_title(const PlatformWindow *window, String title);
-void platform_window_set_size(const PlatformWindow *window, int32 width, int32 height);
+void platform_window_set_title(PlatformWindow *window, String title);
+void platform_window_set_size(PlatformWindow *window, int32 width, int32 height);
+
+void platform_window_set_fullscreen(PlatformWindow *window, bool fullscreen);
+
+void platform_window_show(PlatformWindow *window);
+void platform_window_hide(PlatformWindow *window);
+
+bool platform_window_is_visible(const PlatformWindow *window);
+bool platform_window_is_fullscreen(const PlatformWindow *window);
 
 #endif // PLATFORM_WINDOW_H

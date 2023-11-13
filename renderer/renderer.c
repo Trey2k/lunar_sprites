@@ -56,6 +56,34 @@ void renderer_deinit() {
 	}
 }
 
+void renderer_set_clear_color(float32 r, float32 g, float32 b, float32 a) {
+	switch (renderer.backend) {
+		case RENDERER_BACKEND_NONE: {
+		} break;
+
+		case RENDERER_BACKEND_OPENGL: {
+#if defined(OPENGL_ENABLED)
+			opengl_set_clear_color(r, g, b, a);
+#endif
+
+		} break;
+	}
+}
+
+void renderer_clear() {
+	switch (renderer.backend) {
+		case RENDERER_BACKEND_NONE: {
+		} break;
+
+		case RENDERER_BACKEND_OPENGL: {
+#if defined(OPENGL_ENABLED)
+			opengl_clear();
+#endif
+
+		} break;
+	}
+}
+
 RendererBackend renderer_get_backend() {
 	return renderer.backend;
 }

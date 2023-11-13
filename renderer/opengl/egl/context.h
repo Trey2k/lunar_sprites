@@ -1,5 +1,5 @@
-#ifndef GLES3_CONTEXT_H
-#define GLES3_CONTEXT_H
+#ifndef EGL_CONTEXT_H
+#define EGL_CONTEXT_H
 
 #include <glad/egl.h>
 
@@ -20,4 +20,4 @@ void egl_context_destroy(LSEGLContext *context);
 void egl_context_make_current(const LSEGLContext *context);
 void egl_context_swap_buffers(const LSEGLContext *context);
 
-#endif // GLES3_CONTEXT_H
+#endif // EGL_CONTEXT_H

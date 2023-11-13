@@ -25,7 +25,7 @@ void *os_get_native_display(const OS *os) {
 	return platform_get_native_display(os->platform_os);
 }
 
-PlatformOS *os_get_platform_os(const OS *os) {
+const PlatformOS *os_get_platform_os(const OS *os) {
 	LS_ASSERT(os);
 
 	return os->platform_os;

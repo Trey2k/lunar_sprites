@@ -95,6 +95,16 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			return 0;
 		} break;
 
+		case WM_MOUSELEAVE: {
+			core_handle_mouse_leave((Vector2i){ GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param) });
+			return 0;
+		} break;
+
+		case WM_CLOSE: {
+			core_handle_window_close();
+			return 0;
+		} break;
+
 		default:
 			return DefWindowProc(native_window, message, w_param, l_param);
 	};

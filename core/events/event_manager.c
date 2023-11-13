@@ -26,7 +26,7 @@ void ls_destroy_event_manager(EventManager *event_manager) {
 	ls_free(event_manager);
 }
 
-void ls_emit_event(const EventManager *event_manager, Event *event) {
+void events_emit(const EventManager *event_manager, Event *event) {
 	for (size_t i = event_manager->handler_count; i > 0; i--) {
 		event_manager->handlers[i - 1](event, event_manager->user_data[i - 1]);
 		if (event->handled) {

@@ -7,7 +7,6 @@
 #include <glad/wgl.h>
 
 static void append_extension(Slice *extensions, String extension);
-static bool extension_compare(const SliceValue a, const SliceValue b);
 
 void wgl_print_extensions(HDC device_context) {
 	Slice *extensions = wgl_get_extensions(device_context);
@@ -24,7 +23,7 @@ void wgl_print_extensions(HDC device_context) {
 
 bool wgl_has_extension(HDC device_context, String extension) {
 	Slice *extensions = wgl_get_extensions(device_context);
-	bool has_extension = slice_contains(extensions, (SliceValue){ .str = extension }, extension_compare);
+	bool has_extension = slice_contains(extensions, SLICE_VAL(str, extension), slice_string_compare);
 	slice_destroy(extensions);
 	return has_extension;
 }
@@ -53,12 +52,8 @@ static void append_extension(Slice *slice, String extensions) {
 			char *extension = ls_malloc(sizeof(char) * (i - start + 1));
 			ls_memcpy(extension, extensions + start, i - start);
 			extension[i - start] = '\0';
-			slice_append(slice, (SliceValue){ .ptr = extension });
+			slice_append(slice, SLICE_VAL(ptr, extension));
 			start = i + 1;
 		}
 	}
-}
-
-static bool extension_compare(const SliceValue a, const SliceValue b) {
-	return ls_str_equals(a.str, b.str);
 }
