@@ -1,8 +1,8 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
-#include "core/window.h"
 #include "renderer/renderer.h"
+#include "renderer/window.h"
 
 #if defined(OPENGL_ENABLED)
 #include "renderer/opengl/context.h"

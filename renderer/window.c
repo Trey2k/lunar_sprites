@@ -1,4 +1,4 @@
-#include "core/window.h"
+#include "renderer/window.h"
 #include "core/debug.h"
 #include "core/memory.h"
 
@@ -6,13 +6,15 @@
 
 #include "core/core.h"
 
+// Implemented in main because use of the renderer is required.
+
 struct LSWindow {
 	PlatformWindow *platform_window;
 
 	Context *context;
 };
 
-LSWindow *ls_create_window(String title, int32 width, int32 height) {
+LSWindow *renderer_create_window(String title, int32 width, int32 height) {
 	if (renderer_get_backend() == RENDERER_BACKEND_NONE) {
 		ls_log(LOG_LEVEL_WARNING, "Cannot create window with renderer backend NONE\n");
 		return NULL;

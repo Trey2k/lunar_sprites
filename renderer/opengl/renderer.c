@@ -6,59 +6,60 @@
 
 #if defined(EGL_ENABLED)
 #include "renderer/opengl/egl/context.h"
-#elif defined(WGL_ENABLED)
-#include "renderer/opengl/wgl/context.h"
 #endif // EGL_ENABLED
 
-#if defined(EGL_ENABLED)
+#if defined(WGL_ENABLED)
+#include "renderer/opengl/wgl/context.h"
+#endif // WGL_ENABLED
 
 struct OpenGLRenderer {
-	FlagValue *api_flag;
-	OpenGLAPI api;
+#if defined(EGL_ENABLED)
+	bool egl_enabled;
+#endif // EGL_ENABLED
+
+#if defined(WGL_ENABLED)
+	bool wgl_enabled;
+#endif // WGL_ENABLED
 };
 
 static struct OpenGLRenderer opengl;
 
-static void check_flags();
-
-#endif // EGL_ENABLED
-
 void opengl_renderer_init() {
-#if defined(EGL_ENABLED)
-	opengl.api_flag = ls_register_flag("opengl-api", FLAG_TYPE_STRING, (FlagValue){ .string = "GL" },
-			"The OpenGL API to use. Valid values are GL and GLES.");
-#endif // WINDOWS_ENABLED
+	// Flag registration would go here.
 }
 
 void opengl_renderer_start(const OS *os) {
 #if defined(EGL_ENABLED)
-	check_flags();
-	egl_init(os, opengl.api);
-#elif defined(WGL_ENABLED)
-	wgl_init(os);
+	opengl.egl_enabled = egl_init(os);
 #endif // EGL_ENABLED
+
+#if defined(WGL_ENABLED)
+	opengl.wgl_enabled = wgl_init(os);
+#endif // WGL_ENABLED
 }
 
 void opengl_renderer_deinit() {
 #if defined(EGL_ENABLED)
-	egl_deinit();
-#elif defined(WGL_ENABLED)
-	wgl_deinit();
+	if (opengl.egl_enabled) {
+		egl_deinit();
+	}
 #endif // EGL_ENABLED
+
+#if defined(WGL_ENABLED)
+	if (opengl.wgl_enabled) {
+		wgl_deinit();
+	}
+#endif // WGL_ENABLED
 }
 
 #if defined(EGL_ENABLED)
-
-static void check_flags() {
-	ls_str_to_upper(opengl.api_flag->string);
-
-	if (ls_str_equals(opengl.api_flag->string, "GL")) {
-		opengl.api = LS_OPENGL_API_GL;
-	} else if (ls_str_equals(opengl.api_flag->string, "GLES")) {
-		opengl.api = LS_OPENGL_API_GLES;
-	} else {
-		ls_log_fatal("Invalid OpenGL API: %s\n", opengl.api_flag->string);
-	}
+bool opengl_egl_enabled() {
+	return opengl.egl_enabled;
 }
-
 #endif // EGL_ENABLED
+
+#if defined(WGL_ENABLED)
+bool opengl_wgl_enabled() {
+	return opengl.wgl_enabled;
+}
+#endif // WGL_ENABLED

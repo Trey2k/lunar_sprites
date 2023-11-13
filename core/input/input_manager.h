@@ -5,6 +5,7 @@
 #include "core/input/keycodes.h"
 #include "core/types/typedefs.h"
 #include "core/types/vector/vector2.h"
+#include "core/window.h"
 
 typedef struct InputManager InputManager;
 

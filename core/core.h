@@ -24,7 +24,6 @@
 /* --------------COMPONENTS-------------- */
 #include "core/os/os.h"
 #include "core/version.h"
-#include "core/window.h"
 /* -------------------------------------- */
 
 void core_register_flags();

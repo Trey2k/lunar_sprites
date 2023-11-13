@@ -1,8 +1,8 @@
 #ifndef OPENGL3_CONTEXT_H
 #define OPENGL3_CONTEXT_H
 
-#include "core/window.h"
 #include "renderer/opengl/renderer.h"
+#include "renderer/window.h"
 
 typedef struct OpenGLContext OpenGLContext;
 

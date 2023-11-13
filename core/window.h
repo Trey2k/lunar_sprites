@@ -1,24 +1,8 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef CORE_WINDOW_H
+#define CORE_WINDOW_H
 
-#include "core/input/input_manager.h"
-#include "core/os/os.h"
-#include "core/types/string.h"
-#include "core/types/typedefs.h"
+// This is needed because core passes around the window type a lot. But cannot depend on renderer.
 
-#include "platform/window.h"
+typedef struct LSWindow LSWindow;
 
-LSWindow *ls_create_window(const char *title, int32 width, int32 height);
-void window_destroy(LSWindow *window);
-
-LSNativeWindow window_get_native_window(const LSWindow *window);
-
-void window_poll(const LSWindow *window);
-
-void window_set_title(const LSWindow *window, const char *title);
-void window_set_size(const LSWindow *window, int32 width, int32 height);
-
-void window_make_current(const LSWindow *window);
-void window_swap_buffers(const LSWindow *window);
-
-#endif // WINDOW_H
+#endif // CORE_WINDOW_H

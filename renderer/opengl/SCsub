@@ -1,15 +1,17 @@
 #!/usr/bin/env python
-import sys
-
 Import("env")
 
+
+env.Append(CPPPATH=["#thirdparty/glad"])
 env.Append(CPPDEFINES=["OPENGL_ENABLED"])
 
-if env["platform"] != "windows":
-    env.Append(CPPDEFINES=["EGL_ENABLED"])
-    SConscript("egl/SCsub")
-else:
-    env.Append(CPPDEFINES=["WGL_ENABLED"])
+env.add_source_files(env.renderer_sources, "#thirdparty/glad/gl.c")
+
+SConscript("egl/SCsub")
+if env["platform"] == "windows":
     SConscript("wgl/SCsub")
+
+# Enable OpenGL ES 2.0 in glad.
+env.Append(CPPDEFINES=["GLAD_GLES2"])
 
 env.add_source_files(env.renderer_sources, "*.c")

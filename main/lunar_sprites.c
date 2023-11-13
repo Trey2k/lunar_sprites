@@ -4,10 +4,10 @@
 #include "core/flags.h"
 #include "core/log.h"
 #include "core/types/string.h"
-#include "core/window.h"
 
 #include "renderer/context.h"
 #include "renderer/renderer.h"
+#include "renderer/window.h"
 
 #include "modules/register_module_types.h"
 
@@ -57,7 +57,7 @@ static void start(int32 argc, char *argv[]) {
 	RendererBackend renderer_backend = renderer_get_backend();
 
 	if (renderer_backend != RENDERER_BACKEND_NONE) {
-		main.root_window = ls_create_window("Lunar Sprites", 1280, 720);
+		main.root_window = renderer_create_window("Lunar Sprites", 1280, 720);
 		if (!main.root_window) {
 			ls_log_fatal("Failed to create window!\n");
 		}
