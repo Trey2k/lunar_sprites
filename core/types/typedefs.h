@@ -1,12 +1,11 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
-typedef int bool;
-
 #define true 1
 #define false 0
 
 typedef int int32;
+typedef int32 bool;
 typedef unsigned char uint8;
 typedef unsigned int uint32;
 typedef long long int64;

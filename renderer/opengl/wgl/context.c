@@ -15,16 +15,12 @@
 #include <glad/wgl.h>
 #include <wingdi.h>
 
-static const int32 attributes[] = {
-	WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-	WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-	WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-	WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_ES2_PROFILE_BIT_EXT,
-	0
-};
-
 static bool choose_pixel_format(LSNativeWindow native_window, HDC device_context, PIXELFORMATDESCRIPTOR *pfd);
 static uint32 load_wgl(PIXELFORMATDESCRIPTOR *pfd);
+
+static SliceValue32 atrib_to_svalue(int32 atrib) {
+	return (SliceValue32){ .i32 = atrib };
+}
 
 LSWGLContext *wgl_context_create(const LSWindow *window) {
 	LS_ASSERT(window);
@@ -53,9 +49,28 @@ LSWGLContext *wgl_context_create(const LSWindow *window) {
 		ls_log(LOG_LEVEL_WARNING, "Failed to set pixel format.\n");
 	}
 
-	wglGetExtensionsStringEXT();
+	Slice32 *attributes = slice32_create(10);
+	slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_MAJOR_VERSION_ARB));
+	slice32_append(attributes, atrib_to_svalue(3));
 
-	HGLRC opengl_context = wglCreateContextAttribsARB(device_context, NULL, attributes);
+	if (wgl_has_extension(device_context, "WGL_EXT_create_context_es2_profile")) {
+		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_MINOR_VERSION_ARB));
+		slice32_append(attributes, atrib_to_svalue(2));
+		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_PROFILE_MASK_ARB));
+		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_ES2_PROFILE_BIT_EXT));
+	} else {
+		ls_log(LOG_LEVEL_WARNING, "WGL_EXT_create_context_es2_profile is not supported. Using OpenGL 3.3\n");
+		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_MINOR_VERSION_ARB));
+		slice32_append(attributes, atrib_to_svalue(3));
+		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_PROFILE_MASK_ARB));
+		slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_CORE_PROFILE_BIT_ARB));
+	}
+
+	slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_FLAGS_ARB));
+	slice32_append(attributes, atrib_to_svalue(WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB));
+	slice32_append(attributes, atrib_to_svalue(0));
+
+	HGLRC opengl_context = wglCreateContextAttribsARB(device_context, NULL, slice32_get_data(attributes));
 	if (!opengl_context) {
 		ReleaseDC(native_window, device_context);
 		ls_log(LOG_LEVEL_WARNING, "Failed to create the OpenGL context. 0x%X\n", GetLastError());
@@ -67,7 +82,6 @@ LSWGLContext *wgl_context_create(const LSWindow *window) {
 	context->opengl_context = opengl_context;
 	context->native_window = native_window;
 
-	wgl_context_make_current(NULL);
 	wgl_context_make_current(context);
 
 	int32 version = gladLoaderLoadGL();
@@ -136,6 +150,7 @@ static uint32 load_wgl(PIXELFORMATDESCRIPTOR *pfd) {
 	// WGL requires us to create another window for the temporary context.
 	// We use PlatformWindow and not LSWindow as LSWindow will trigger context creation recureivly.
 
+	// TODO: Make this window invisible
 	PlatformWindow *window = platform_create_window(os, "Temp", 0, 0);
 	LSNativeWindow native_window = platform_window_get_native_window(window);
 	HDC device_context = GetDC(native_window);
@@ -155,7 +170,7 @@ static uint32 load_wgl(PIXELFORMATDESCRIPTOR *pfd) {
 		return 69001;
 	}
 
-	wgl_print_extensions(device_context);
+	Slice *extensions = wgl_get_extensions(device_context);
 
 	wgl_context_make_current(NULL);
 	wglDeleteContext(temp_context);

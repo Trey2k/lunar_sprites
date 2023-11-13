@@ -5,9 +5,13 @@
 
 #include <windows.h>
 
-// Enable high performance GPU on windows systems with both integrated and discrete GPUs.
-// https://developer.nvidia.com/optimus
+// Enable high performance NVidia GPU on windows systems with both integrated and discrete GPUs.
+// https://developer.download.nvidia.com/devzone/devcenter/gamegraphics/files/OptimusRenderingPolicies.pdf
 __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+
+// Enable high performance AMD GPU on windows systems with both integrated and discrete GPUs.
+// https://gpuopen.com/learn/amdpowerxpressrequesthighperformance/
+__declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 
 int main(int argc, char *argv[]) {
 	lunar_spriates_main(argc, argv);
