@@ -51,7 +51,7 @@ void platform_destroy_os(PlatformOS *os) {
 	};
 }
 
-void *platform_get_native_display(const PlatformOS *os) {
+LSNativeDisplayType platform_get_native_display(const PlatformOS *os) {
 	switch (os->display_server) {
 #if defined(WAYLAND_ENABLED)
 		case DISPLAY_SERVER_WAYLAND:

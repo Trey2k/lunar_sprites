@@ -33,7 +33,7 @@ void platform_destroy_os(PlatformOS *os) {
 	ls_free(os);
 }
 
-void *platform_get_native_display(const PlatformOS *os) {
+LSNativeDisplayType platform_get_native_display(const PlatformOS *os) {
 	return CreateCompatibleDC(NULL);
 }
 

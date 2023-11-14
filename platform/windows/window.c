@@ -45,10 +45,6 @@ void platform_destroy_window(PlatformWindow *window) {
 	ls_free(window);
 }
 
-LSNativeWindow platform_get_window_handle(const PlatformWindow *window) {
-	return window->window;
-}
-
 void platform_window_poll(const PlatformWindow *window) {
 	MSG msg;
 
@@ -113,8 +109,4 @@ bool platform_window_is_visible(const PlatformWindow *window) {
 
 bool platform_window_is_fullscreen(const PlatformWindow *window) {
 	return window->fullscreen;
-}
-
-bool platform_window_is_focused(const PlatformWindow *window) {
-	return GetFocus() == window->window;
 }
