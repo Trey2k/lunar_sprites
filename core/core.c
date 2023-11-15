@@ -54,6 +54,8 @@ void core_deinit() {
 
 	ls_destroy_event_manager(ls.event_manager);
 	ls.event_manager = NULL;
+
+	ls_flags_deinit();
 }
 
 const EventManager *ls_get_event_manager() {

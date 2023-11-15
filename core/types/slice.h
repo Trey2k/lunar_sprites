@@ -3,9 +3,11 @@
 
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
+#include "core/types/vector/vector2.h"
 
 #define SLICE_VAL(type, val) ((SliceValue){ .type = val })
 #define SLICE_VAL32(type, val) ((SliceValue32){ .type = val })
+#define SLICE_VAL128(type, val) ((SliceValue128){ .type.x = val.x, .type.y = val.y })
 
 typedef union {
 	union {
@@ -85,5 +87,38 @@ bool slice32_contains(const Slice32 *slice, SliceValue32 data, SliceCompareFunc3
 
 size_t slice32_get_size(const Slice32 *slice);
 size_t slice32_get_capacity(const Slice32 *slice);
+
+typedef union {
+	union {
+		Vector2 v2;
+		Vector2i v2i;
+	};
+} SliceValue128;
+
+typedef bool (*SliceCompareFunc128)(const SliceValue128 a, const SliceValue128 b);
+typedef struct Slice128 Slice128;
+
+Slice128 *slice128_create(size_t inital_size);
+void slice128_destroy(Slice128 *slice);
+
+void slice128_append(Slice128 *slice, SliceValue128 data);
+void slice128_append_slice(Slice128 *slice, const Slice128 *other);
+void slice128_insert(Slice128 *slice, size_t index, SliceValue128 data);
+void slice128_remove(Slice128 *slice, size_t index);
+void slice128_remove_range(Slice128 *slice, size_t index, size_t count);
+void slice128_clear(Slice128 *slice);
+void slice128_sort(Slice128 *slice, SliceCompareFunc128 compare_func);
+
+const void *slice128_get_data(const Slice128 *slice);
+
+SliceValue128 slice128_get(const Slice128 *slice, size_t index);
+SliceValue128 slice128_get_last(const Slice128 *slice);
+SliceValue128 slice128_get_first(const Slice128 *slice);
+
+bool slice128_is_empty(const Slice128 *slice);
+bool slice128_contains(const Slice128 *slice, SliceValue128 data, SliceCompareFunc128 compare_func);
+
+size_t slice128_get_size(const Slice128 *slice);
+size_t slice128_get_capacity(const Slice128 *slice);
 
 #endif // SLICE_H

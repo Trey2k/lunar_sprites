@@ -1,18 +1,11 @@
 #include "renderer/renderer.h"
 #include "core/debug.h"
-#include "core/flags.h"
 #include "core/memory.h"
 #include "core/types/typedefs.h"
 
-struct Renderer {
-	const OS *os;
+#include "renderer/internal.h"
 
-	FlagValue *backend_flag;
-
-	RendererBackend backend;
-};
-
-static struct Renderer renderer;
+static Renderer renderer;
 
 static void check_flags();
 
@@ -98,4 +91,8 @@ static void check_flags() {
 	} else {
 		ls_log_fatal("Invalid renderer backend: %s\n", renderer.backend_flag->string);
 	}
+}
+
+Renderer *get_renderer() {
+	return &renderer;
 }

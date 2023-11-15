@@ -19,10 +19,6 @@ struct Main {
 
 static struct Main main;
 
-static void init();
-static void start(int32 argc, char *argv[]);
-static void deinit();
-
 static void input_handler(Event *event, void *user_data);
 static void check_input();
 
@@ -32,46 +28,17 @@ static const WindowConfig ROOT_WINDOW_CONFIG = {
 	.title = "Lunar Sprites",
 	.fullscreen = false,
 	.hidden = false,
+	.root_window = true,
 };
 
-void lunar_spriates_main(int32 argc, char *argv[]) {
-	init();
-	start(argc, argv);
-
-	core_add_event_handler(input_handler, NULL);
-	renderer_set_clear_color(0.0f, 1.0f, 0.0f, 0.5f);
-
-	while (main.running) {
-		core_poll();
-
-		if (main.root_window) {
-			window_poll(main.root_window);
-			check_input();
-		}
-
-		renderer_clear();
-
-		if (main.root_window) {
-			window_make_current(main.root_window);
-			window_swap_buffers(main.root_window);
-		}
-	}
-
-	deinit();
-
-	ls_flags_deinit();
-}
-
-static void init() {
+void ls_main_init(int32 argc, char *argv[]) {
 	core_init();
 	renderer_init();
 
 	main.input_manager = core_get_input_manager();
 
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
-}
 
-static void start(int32 argc, char *argv[]) {
 	core_start(argc, argv);
 	renderer_start(ls_get_os());
 
@@ -85,14 +52,37 @@ static void start(int32 argc, char *argv[]) {
 	}
 
 	main.running = true;
+
+	core_add_event_handler(input_handler, NULL);
+	renderer_set_clear_color(0.0f, 1.0f, 0.0f, 0.5f);
 }
 
-static void deinit() {
+void ls_main_loop() {
+	core_poll();
+
+	if (main.root_window) {
+		window_poll(main.root_window);
+		check_input();
+	}
+
+	renderer_clear();
+
+	if (main.root_window) {
+		window_make_current(main.root_window);
+		window_swap_buffers(main.root_window);
+	}
+}
+
+void ls_main_deinit() {
 	window_destroy(main.root_window);
 	renderer_deinit();
 
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
 	core_deinit();
+}
+
+bool ls_should_quit() {
+	return !main.running;
 }
 
 static void input_handler(Event *e, void *user_data) {
@@ -101,6 +91,46 @@ static void input_handler(Event *e, void *user_data) {
 	switch (e->type) {
 		case EVENT_WINDOW_CLOSE: {
 			main.running = false;
+		} break;
+
+		case EVENT_KEY: {
+			switch (e->key.type) {
+				case EVENT_KEY_PRESSED: {
+					if (!e->key.repeat) {
+						ls_printf("Key pressed: %s\n", keycode_to_string(e->key.keycode));
+					} else {
+						ls_printf("Key repeated: %s\n", keycode_to_string(e->key.keycode));
+					}
+				} break;
+
+				case EVENT_KEY_RELEASED: {
+					ls_printf("Key released: %s\n", keycode_to_string(e->key.keycode));
+				} break;
+			}
+		} break;
+
+		case EVENT_MOUSE: {
+			switch (e->mouse.type) {
+				case EVENT_MOUSE_PRESSED: {
+					ls_printf("Mouse pressed: %s\n", mouse_button_to_string(e->mouse.button));
+				} break;
+
+				case EVENT_MOUSE_RELEASED: {
+					ls_printf("Mouse released: %s\n", mouse_button_to_string(e->mouse.button));
+				} break;
+
+				case EVENT_MOUSE_MOVED: {
+					ls_printf("Mouse moved: %d, %d\n", e->mouse.position.x, e->mouse.position.y);
+				} break;
+
+				case EVENT_MOUSE_ENTERED: {
+					ls_printf("Mouse entered: %d, %d\n", e->mouse.position.x, e->mouse.position.y);
+				} break;
+
+				case EVENT_MOUSE_LEFT: {
+					ls_printf("Mouse left: %d, %d\n", e->mouse.position.x, e->mouse.position.y);
+				} break;
+			}
 		} break;
 
 		default: {

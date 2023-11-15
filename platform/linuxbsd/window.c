@@ -95,7 +95,7 @@ LSNativeWindow platform_window_get_native_window(const PlatformWindow *window) {
 	};
 }
 
-void platform_window_poll(const PlatformWindow *window) {
+void platform_window_poll(PlatformWindow *window) {
 	switch (window->display_server) {
 #if defined(WAYLAND_ENABLED)
 		case DISPLAY_SERVER_WAYLAND: {

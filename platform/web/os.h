@@ -4,6 +4,8 @@
 #include "core/os/os.h"
 #include "platform/os.h"
 
+#include "platform/web/window.h"
+
 struct PlatformOS {
 };
 

@@ -4,6 +4,7 @@
 
 PlatformOS *platform_create_os() {
 	PlatformOS *os = ls_malloc(sizeof(PlatformOS));
+
 	return os;
 }
 

@@ -4,5 +4,11 @@ Import("env")
 
 env.Append(CPPDEFINES=["EGL_ENABLED"])
 
-env.add_source_files(env.renderer_sources, "#thirdparty/glad/egl.c")
-env.add_source_files(env.renderer_sources, "*.c")
+env.add_source_files(env.renderer_sources, "context.c")
+env.add_source_files(env.renderer_sources, "extensions.c")
+
+if env["platform"] == "web":
+    env.add_source_files(env.renderer_sources, "egl_web.c")
+else:
+    env.add_source_files(env.renderer_sources, "#thirdparty/glad/egl.c")
+    env.add_source_files(env.renderer_sources, "egl.c")

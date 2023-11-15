@@ -430,7 +430,7 @@ if selected_platform in platform_list:
         print("Using LTO: " + env["lto"])
 
     if not env.msvc:
-        env.Prepend(CFLAGS=["-std=c17"])
+        env.Prepend(CFLAGS=["-std=gnu17"])
     else:
         env.Prepend(CCFLAGS=["/std:c17"])
 

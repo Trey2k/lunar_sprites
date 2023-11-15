@@ -19,7 +19,11 @@ if "serve" in COMMAND_LINE_TARGETS or "run" in COMMAND_LINE_TARGETS:
 web_files = [
     "window.c",
     "os.c",
+    "js_methods.c",
 ]
+
+if env["use_opengl"]:
+    web_files += ["webgl.c"]
 
 sys_env = env.Clone()
 sys_env.AddJSLibraries([])

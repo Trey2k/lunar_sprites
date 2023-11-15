@@ -18,7 +18,7 @@ void platform_destroy_window(PlatformWindow *window);
 
 LSNativeWindow platform_window_get_native_window(const PlatformWindow *window);
 
-void platform_window_poll(const PlatformWindow *window);
+void platform_window_poll(PlatformWindow *window);
 
 void platform_window_set_title(PlatformWindow *window, String title);
 void platform_window_set_size(PlatformWindow *window, int32 width, int32 height);

@@ -19,9 +19,13 @@ typedef int32 LSNativeWindow;
 typedef struct {
 	Vector2i position;
 	Vector2i size;
+
 	String title;
+
 	bool fullscreen;
 	bool hidden;
+
+	bool root_window;
 } WindowConfig;
 
 LSWindow *renderer_create_window(WindowConfig config);

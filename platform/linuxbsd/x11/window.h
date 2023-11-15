@@ -30,7 +30,7 @@ typedef struct {
 X11Window *x11_window_create(const X11Server *server, WindowConfig config);
 void x11_window_destroy(X11Window *window);
 
-void x11_window_poll(const X11Window *window);
+void x11_window_poll(X11Window *window);
 
 void x11_window_set_title(X11Window *window, String title);
 void x11_window_set_size(X11Window *window, int32 width, int32 height);

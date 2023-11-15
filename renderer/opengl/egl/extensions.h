@@ -4,7 +4,7 @@
 #include "core/types/slice.h"
 #include "core/types/string.h"
 
-#include <glad/egl.h>
+#include "renderer/opengl/egl/egl.h"
 
 void egl_print_extensions(EGLDisplay egl_display);
 

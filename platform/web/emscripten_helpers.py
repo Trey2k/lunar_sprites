@@ -37,13 +37,13 @@ def create_engine_file(env, target, source, externs):
     return env.Textfile(target, [env.File(s) for s in source])
 
 
-def create_template_zip(env, js, wasm, wokrer):
+def create_template_zip(env, js, wasm, worker):
     binary_name = "lunar_sprites.release" if env["target"] == "release" else "lunar_sprites.debug"
     zip_dir = env.Dir("#bin/.web_zip")
     in_files = [
         js,
         wasm,
-        wokrer,
+        worker,
     ]
     out_files = [
         zip_dir.File(binary_name + ".js"),

@@ -14,6 +14,12 @@ __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 
 int main(int argc, char *argv[]) {
-	lunar_spriates_main(argc, argv);
+	ls_main_init(argc, argv);
+
+	while (!ls_should_quit()) {
+		ls_main_loop();
+	}
+
+	ls_main_deinit();
 	return 0;
 }
