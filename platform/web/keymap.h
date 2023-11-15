@@ -6,6 +6,7 @@
 
 #include <emscripten/html5.h>
 
+// TODO: This is not great. Should probably use a hashmap here.
 _FORCE_INLINE_ LSKeycode web_map_key(String keycode) {
 	if (ls_str_equals(keycode, "Escape")) {
 		return LS_KEY_ESCAPE;
@@ -217,7 +218,7 @@ _FORCE_INLINE_ LSKeycode web_map_key(String keycode) {
 		return LS_KEY_KP_ENTER;
 	}
 
-	return 0;
+	return LS_KEY_UNKNOWN;
 }
 
 _FORCE_INLINE_ LSMouseButton web_map_mbutton(uint32 keycode) {
@@ -225,13 +226,13 @@ _FORCE_INLINE_ LSMouseButton web_map_mbutton(uint32 keycode) {
 		case 0:
 			return LS_MOUSE_BUTTON_LEFT;
 		case 1:
-			return LS_MOUSE_BUTTON_MIDDLE;
-		case 2:
 			return LS_MOUSE_BUTTON_RIGHT;
+		case 2:
+			return LS_MOUSE_BUTTON_MIDDLE;
 		default:
 			break;
 	}
-	return 0;
+	return LS_MOUSE_BUTTON_NONE;
 }
 
 #endif // WEB_KEYMAP_H
