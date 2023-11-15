@@ -27,7 +27,31 @@ static int mouseleave_callback(int eventType, const EmscriptenMouseEvent *e, voi
 
 static void register_callbacks(PlatformWindow *window);
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config) {
+typedef enum {
+	WEBW_EVENT_NONE,
+	WEBW_EVENT_KEYDOWN,
+	WEBW_EVENT_KEYUP,
+	WEBW_EVENT_MOUSEDOWN,
+	WEBW_EVENT_MOUSEUP,
+	WEBW_EVENT_MOUSEMOVE,
+	WEBW_EVENT_MOUSEENTER,
+	WEBW_EVENT_MOUSELEAVE,
+} WebWindowEventType;
+
+typedef struct {
+	WebWindowEventType type;
+
+	union {
+		LSKeycode keycode;
+		LSMouseButton mbutton;
+	};
+
+	Vector2i position;
+
+} WebWindowEvent;
+
+PlatformWindow *
+platform_create_window(const PlatformOS *os, WindowConfig config) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 
 	window->title = config.title;
@@ -39,18 +63,7 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 	window->fullscreen = false;
 	window->os = os;
 
-	window->keydown_codes = slice_create(16, false);
-	window->keyup_codes = slice_create(16, false);
-
-	window->mousedown_codes = slice32_create(16);
-	window->mousedown_positions = slice128_create(16);
-	window->mouseup_codes = slice32_create(16);
-	window->mouseup_positions = slice128_create(16);
-
-	window->mouse_move_positions = slice128_create(16);
-
-	window->mouse_leave_positions = slice128_create(16);
-	window->mouse_enter_positions = slice128_create(16);
+	window->events = slice_create(16, true);
 
 	if (window->root_window) {
 		if (root_window_created) {
@@ -122,51 +135,45 @@ void platform_destroy_window(PlatformWindow *window) {
 void platform_window_poll(PlatformWindow *window) {
 	LS_ASSERT(window);
 
-	for (int32 i = 0; i < slice_get_size(window->keydown_codes); i++) {
-		String code = slice_get(window->keydown_codes, i).str;
-		core_handle_press(web_map_key(code));
-	}
-	slice_clear(window->keydown_codes);
+	for (int32 i = 0; i < slice_get_size(window->events); i++) {
+		WebWindowEvent *event = slice_get(window->events, i).ptr;
+		LS_ASSERT(event);
 
-	for (int32 i = 0; i < slice_get_size(window->keyup_codes); i++) {
-		String code = slice_get(window->keyup_codes, i).str;
-		core_handle_release(web_map_key(code));
-	}
-	slice_clear(window->keyup_codes);
+		switch (event->type) {
+			case WEBW_EVENT_KEYDOWN: {
+				core_handle_press(event->keycode);
+			} break;
 
-	for (int32 i = 0; i < slice32_get_size(window->mousedown_codes); i++) {
-		uint32 code = slice32_get(window->mousedown_codes, i).u32;
-		Vector2i position = slice128_get(window->mousedown_positions, i).v2i;
-		core_handle_mouse_press(web_map_mbutton(code), position);
-	}
-	slice32_clear(window->mousedown_codes);
-	slice128_clear(window->mousedown_positions);
+			case WEBW_EVENT_KEYUP: {
+				core_handle_release(event->keycode);
+			} break;
 
-	for (int32 i = 0; i < slice32_get_size(window->mouseup_codes); i++) {
-		uint32 code = slice32_get(window->mouseup_codes, i).u32;
-		Vector2i position = slice128_get(window->mouseup_positions, i).v2i;
-		core_handle_mouse_release(web_map_mbutton(code), position);
-	}
-	slice32_clear(window->mouseup_codes);
-	slice128_clear(window->mouseup_positions);
+			case WEBW_EVENT_MOUSEDOWN: {
+				core_handle_mouse_press(event->mbutton, event->position);
+			} break;
 
-	for (int32 i = 0; i < slice128_get_size(window->mouse_move_positions); i++) {
-		Vector2i position = slice128_get(window->mouse_move_positions, i).v2i;
-		core_handle_mouse_move(position);
-	}
-	slice128_clear(window->mouse_move_positions);
+			case WEBW_EVENT_MOUSEUP: {
+				core_handle_mouse_release(event->mbutton, event->position);
+			} break;
 
-	for (int32 i = 0; i < slice128_get_size(window->mouse_leave_positions); i++) {
-		Vector2i position = slice128_get(window->mouse_leave_positions, i).v2i;
-		core_handle_mouse_leave(position);
-	}
-	slice128_clear(window->mouse_leave_positions);
+			case WEBW_EVENT_MOUSEMOVE: {
+				core_handle_mouse_move(event->position);
+			} break;
 
-	for (int32 i = 0; i < slice128_get_size(window->mouse_enter_positions); i++) {
-		Vector2i position = slice128_get(window->mouse_enter_positions, i).v2i;
-		core_handle_mouse_enter(position);
+			case WEBW_EVENT_MOUSEENTER: {
+				core_handle_mouse_enter(event->position);
+			} break;
+
+			case WEBW_EVENT_MOUSELEAVE: {
+				core_handle_mouse_leave(event->position);
+			} break;
+
+			default:
+				ls_log(LOG_LEVEL_WARNING, "Unknown event type: %d\n", event->type);
+				break;
+		}
 	}
-	slice128_clear(window->mouse_enter_positions);
+	slice_clear(window->events);
 }
 
 LSNativeWindow platform_window_get_native_window(const PlatformWindow *window) {
@@ -247,62 +254,93 @@ static void register_callbacks(PlatformWindow *window) {
 	emscripten_set_mousemove_callback(window->canvas_id, window, true, mousemove_callback);
 	emscripten_set_mouseenter_callback(window->canvas_id, window, true, mouseenter_callback);
 	emscripten_set_mouseleave_callback(window->canvas_id, window, true, mouseleave_callback);
-
-	ls_printf("Registered callbacks for window: %s\n", window->canvas_id);
 }
 
 static int keydown_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
-	slice_append(window->keydown_codes, SLICE_VAL(str, e->code));
+	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
+
+	web_event->type = WEBW_EVENT_KEYDOWN;
+	web_event->keycode = web_map_key(e->code);
+
+	slice_append(window->events, SLICE_VAL(ptr, web_event));
+
 	return 0;
 }
 
 static int keyup_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
-	slice_append(window->keyup_codes, SLICE_VAL(str, e->code));
+	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
+
+	web_event->type = WEBW_EVENT_KEYUP;
+	web_event->keycode = web_map_key(e->code);
+
+	slice_append(window->events, SLICE_VAL(ptr, web_event));
+
 	return 0;
 }
 
 static int mousedown_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
-	slice32_append(window->mousedown_codes, SLICE_VAL32(u32, e->button));
-	Vector2i pos = (Vector2i){ e->clientX, e->clientY };
-	slice128_append(window->mousedown_positions, SLICE_VAL128(v2i, pos));
+	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
+
+	web_event->type = WEBW_EVENT_MOUSEDOWN;
+	web_event->mbutton = web_map_mbutton(e->button);
+	web_event->position = (Vector2i){ e->clientX, e->clientY };
+
+	slice_append(window->events, SLICE_VAL(ptr, web_event));
+
 	return 0;
 }
 
 static int mouseup_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
-	slice32_append(window->mouseup_codes, SLICE_VAL32(u32, e->button));
-	Vector2i pos = (Vector2i){ e->clientX, e->clientY };
-	slice128_append(window->mouseup_positions, SLICE_VAL128(v2i, pos));
+	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
+
+	web_event->type = WEBW_EVENT_MOUSEUP;
+	web_event->mbutton = web_map_mbutton(e->button);
+	web_event->position = (Vector2i){ e->clientX, e->clientY };
+
+	slice_append(window->events, SLICE_VAL(ptr, web_event));
 	return 0;
 }
 
 static int mousemove_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
-	Vector2i pos = (Vector2i){ e->clientX, e->clientY };
-	slice128_append(window->mouse_move_positions, SLICE_VAL128(v2i, pos));
+	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
+
+	web_event->type = WEBW_EVENT_MOUSEMOVE;
+	web_event->position = (Vector2i){ e->clientX, e->clientY };
+
+	slice_append(window->events, SLICE_VAL(ptr, web_event));
 	return 0;
 }
 
 static int mouseenter_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
-	Vector2i pos = (Vector2i){ e->clientX, e->clientY };
-	slice128_append(window->mouse_enter_positions, SLICE_VAL128(v2i, pos));
+	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
+
+	web_event->type = WEBW_EVENT_MOUSEENTER;
+	web_event->position = (Vector2i){ e->clientX, e->clientY };
+
+	slice_append(window->events, SLICE_VAL(ptr, web_event));
 	return 0;
 }
 
 static int mouseleave_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
-	Vector2i pos = (Vector2i){ e->clientX, e->clientY };
-	slice128_append(window->mouse_leave_positions, SLICE_VAL128(v2i, pos));
+	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
+
+	web_event->type = WEBW_EVENT_MOUSELEAVE;
+	web_event->position = (Vector2i){ e->clientX, e->clientY };
+
+	slice_append(window->events, SLICE_VAL(ptr, web_event));
 	return 0;
 }

@@ -17,6 +17,7 @@ if "serve" in COMMAND_LINE_TARGETS or "run" in COMMAND_LINE_TARGETS:
     sys.exit(0)
 
 web_files = [
+    "keymap.c",
     "window.c",
     "os.c",
     "js_methods.c",

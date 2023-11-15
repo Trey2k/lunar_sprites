@@ -2,8 +2,7 @@
 #define CORE_H
 
 /* --------------TYPES-------------- */
-#include "core/types/hashtable/hashtable_int.h"
-#include "core/types/hashtable/hashtable_string.h"
+#include "core/types/hashtable.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"
 #include "core/types/vector/vector2.h"

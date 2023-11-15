@@ -26,17 +26,7 @@ struct PlatformWindow {
 
 	const PlatformOS *os;
 
-	Slice *keydown_codes;
-	Slice *keyup_codes;
-
-	Slice32 *mousedown_codes;
-	Slice128 *mousedown_positions;
-	Slice32 *mouseup_codes;
-	Slice128 *mouseup_positions;
-
-	Slice128 *mouse_move_positions;
-	Slice128 *mouse_enter_positions;
-	Slice128 *mouse_leave_positions;
+	Slice *events;
 };
 
 #endif // WEB_WINDOW_H
