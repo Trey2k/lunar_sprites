@@ -57,7 +57,7 @@ void x11_window_destroy(X11Window *window) {
 	ls_free(window);
 }
 
-void x11_window_poll(const X11Window *window) {
+void x11_window_poll(X11Window *window) {
 	XEvent event;
 
 	while (XPending(window->display)) {

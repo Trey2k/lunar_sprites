@@ -3,6 +3,11 @@
 
 #include "core/flags.h"
 
-void lunar_spriates_main(int32 argc, char *argv[]);
+void ls_main_init(int32 argc, char *argv[]);
+void ls_main_deinit();
+
+void ls_main_loop();
+
+bool ls_should_quit();
 
 #endif // MAIN_H

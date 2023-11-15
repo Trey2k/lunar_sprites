@@ -12,7 +12,7 @@ typedef struct OS OS;
 OS *ls_create_os();
 void ls_destroy_os(OS *os);
 
-void *os_get_native_display(const OS *os);
+LSNativeDisplayType os_get_native_display(const OS *os);
 
 const PlatformOS *os_get_platform_os(const OS *os);
 

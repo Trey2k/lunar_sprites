@@ -1,7 +1,7 @@
 #ifndef EGL_CONTEXT_H
 #define EGL_CONTEXT_H
 
-#include <glad/egl.h>
+#include "renderer/opengl/egl/egl.h"
 
 #include "renderer/opengl/context.h"
 #include "renderer/opengl/renderer.h"
@@ -10,9 +10,6 @@ typedef struct {
 	EGLSurface egl_surface;
 	EGLContext egl_context;
 } LSEGLContext;
-
-bool egl_init(const OS *os);
-void egl_deinit();
 
 LSEGLContext *egl_context_create(const LSWindow *window);
 void egl_context_destroy(LSEGLContext *context);

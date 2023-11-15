@@ -6,6 +6,11 @@
 
 #include "platform/window.h"
 
+// TODO: We might not need this
+// #if defined(WEB_ENABLED)
+// #include "platform/web/webgl.h"
+// #endif // WEB_ENABLED
+
 // Implemented in main because use of the renderer is required.
 
 struct LSWindow {

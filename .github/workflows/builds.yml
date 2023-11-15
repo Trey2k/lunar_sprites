@@ -17,27 +17,38 @@ jobs:
           - name: LinuxBSD x86_64 Debug
             args: platform=linuxbsd target=debug arch=x86_64 dev_build=yes
             cache-name: linuxbsd-amd64-debug
+            artifact-path: bin
             artifact-name: linuxbsd-amd64-debug
 
           - name: LinuxBSD x86_64
-            args: platform=linuxbsd target=release arch=x86_64 dev_build=yes
+            args: platform=linuxbsd target=release arch=x86_64
             cache-name: linuxbsd-amd64-release
+            artifact-path: bin
             artifact-name: linuxbsd-amd64-release
           
           - name: LinuxBSD x86_64 Debug
             args: platform=linuxbsd target=debug arch=x86_64 dev_build=yes use_mingw=yes
             cache-name: linuxbsd-amd64-debug-mingw
+            artifact-path: bin
             artifact-name: linuxbsd-amd64-debug-mingw
           
           - name: LinuxBSD x86_64
-            args: platform=linuxbsd target=release arch=x86_64 dev_build=yes use_mingw=yes
+            args: platform=linuxbsd target=release arch=x86_64 use_mingw=yes
             cache-name: linuxbsd-amd64-release-mingw
+            artifact-path: bin
             artifact-name: linuxbsd-amd64-release-mingw
           
           - name: Windows x86_65 (Cross-compile)
-            args: platform=windows target=release arch=x86_64 dev_build=yes
+            args: platform=windows target=release arch=x86_64
             cache-name: windows-amd64-release-cross
+            artifact-path: bin
             artifact-name: windows-amd64-release-cross
+          
+          - name: Web wasm32
+            args: platform=web target=release arch=wasm32 optimize=size
+            cache-name: web-wasm32-release
+            artifact-path: bin/.web_zip
+            artifact-name: web-wasm32-release
 
     steps:
       - uses: actions/checkout@v3
@@ -46,17 +57,25 @@ jobs:
         if: ${{ startsWith(matrix.opts.cache-name, 'windows-') }}
         shell: sh
         run: |
+          sudo sed -i 's/azure\.//' /etc/apt/sources.list
           sudo apt-get update
           sudo apt-get install mingw-w64
           sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
+        
+      - name: (Web) Install Emscripten
+        if: ${{ startsWith(matrix.opts.cache-name, 'web-') }}
+        uses: mymindstorm/setup-emsdk@v12
+        with:
+          version: latest
 
       - name: Install buildroot x86_64
         shell: sh
         run: |
+          sudo sed -i 's/azure\.//' /etc/apt/sources.list
           sudo apt-get update
           sudo apt-get install yasm
           cd /opt
-          curl -LO https://downloads.tuxfamily.org/godotengine/toolchains/linux/2021-02-11/x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
+          curl -LO --insecure https://downloads.tuxfamily.org/godotengine/toolchains/linux/2023-11-01/x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
           tar xf x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
           rm -f x86_64-godot-linux-gnu_sdk-buildroot.tar.bz2
           mv x86_64-godot-linux-gnu_sdk-buildroot buildroot
@@ -97,7 +116,12 @@ jobs:
           mkdir out/
           cp README.md out/
           cp LICENSE.md out/
-          cp bin/* out/
+          cp ${{ matrix.opts.artifact-path }}/* out/
+      
+      - name: Prepare artifacts (web)
+        if: ${{ startsWith(matrix.opts.cache-name, 'web-') }}
+        run: |
+          cp platform/web/serve.py out/
 
       - uses: actions/upload-artifact@v3
         with:

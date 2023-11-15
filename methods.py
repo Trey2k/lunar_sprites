@@ -453,31 +453,31 @@ def no_verbose(sys, env):
     colors = {}
 
     if sys.stdout.isatty():
-        colors["blue"] = "\033[94m"
-        colors["bold_blue"] = "\033[1;94m"
+        colors["yellow"] = "\033[93m"
+        colors["bold_yellow"] = "\033[1;93m"
         colors["reset"] = "\033[0m"
     else:
-        colors["blue"] = ""
-        colors["bold_blue"] = ""
+        colors["yellow"] = ""
+        colors["bold_yellow"] = ""
         colors["reset"] = ""
 
     compile_source_message = "{}Compiling {}$SOURCE{} ...{}".format(
-        colors["bold_blue"], colors["blue"], colors["bold_blue"], colors["reset"]
+        colors["bold_yellow"], colors["yellow"], colors["bold_yellow"], colors["reset"]
     )
     compile_shared_source_message = "{}Compiling shared {}$SOURCE{} ...{}".format(
-        colors["bold_blue"], colors["blue"], colors["bold_blue"], colors["reset"]
+        colors["bold_yellow"], colors["yellow"], colors["bold_yellow"], colors["reset"]
     )
     link_program_message = "{}Linking Program {}$TARGET{} ...{}".format(
-        colors["bold_blue"], colors["blue"], colors["bold_blue"], colors["reset"]
+        colors["bold_yellow"], colors["yellow"], colors["bold_yellow"], colors["reset"]
     )
     link_library_message = "{}Linking Static Library {}$TARGET{} ...{}".format(
-        colors["bold_blue"], colors["blue"], colors["bold_blue"], colors["reset"]
+        colors["bold_yellow"], colors["yellow"], colors["bold_yellow"], colors["reset"]
     )
     ranlib_library_message = "{}Ranlib Library {}$TARGET{} ...{}".format(
-        colors["bold_blue"], colors["blue"], colors["bold_blue"], colors["reset"]
+        colors["bold_yellow"], colors["yellow"], colors["bold_yellow"], colors["reset"]
     )
     link_shared_library_message = "{}Linking Shared Library {}$TARGET{} ...{}".format(
-        colors["bold_blue"], colors["blue"], colors["bold_blue"], colors["reset"]
+        colors["bold_yellow"], colors["yellow"], colors["bold_yellow"], colors["reset"]
     )
 
     env.Append(CXXCOMSTR=[compile_source_message])

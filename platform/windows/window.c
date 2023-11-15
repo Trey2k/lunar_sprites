@@ -12,7 +12,7 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 	window->title = config.title;
 	window->width = config.size.x;
 	window->height = config.size.y;
-	window->hidden = config.hidden;
+	window->hidden = true;
 	window->fullscreen = false;
 
 	window->window = CreateWindowEx(
@@ -45,11 +45,7 @@ void platform_destroy_window(PlatformWindow *window) {
 	ls_free(window);
 }
 
-LSNativeWindow platform_get_window_handle(const PlatformWindow *window) {
-	return window->window;
-}
-
-void platform_window_poll(const PlatformWindow *window) {
+void platform_window_poll(PlatformWindow *window) {
 	MSG msg;
 
 	while (PeekMessage(&msg, window->window, 0, 0, PM_REMOVE)) {
@@ -87,10 +83,22 @@ void platform_window_set_fullscreen(PlatformWindow *window, bool fullscreen) {
 }
 
 void platform_window_show(PlatformWindow *window) {
+	if (!window->hidden) {
+		return;
+	}
+
+	window->hidden = false;
+
 	ShowWindow(window->window, SW_SHOW);
 }
 
 void platform_window_hide(PlatformWindow *window) {
+	if (window->hidden) {
+		return;
+	}
+
+	window->hidden = true;
+
 	ShowWindow(window->window, SW_HIDE);
 }
 
@@ -113,8 +121,4 @@ bool platform_window_is_visible(const PlatformWindow *window) {
 
 bool platform_window_is_fullscreen(const PlatformWindow *window) {
 	return window->fullscreen;
-}
-
-bool platform_window_is_focused(const PlatformWindow *window) {
-	return GetFocus() == window->window;
 }

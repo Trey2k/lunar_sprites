@@ -1,6 +1,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include "core/flags.h"
 #include "core/os/os.h"
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
@@ -10,10 +11,19 @@
 #endif
 
 #define RENDERER_BACKEND_COUNT 2
+
 typedef enum {
 	RENDERER_BACKEND_NONE,
 	RENDERER_BACKEND_OPENGL,
 } RendererBackend;
+
+typedef struct {
+	const OS *os;
+
+	FlagValue *backend_flag;
+
+	RendererBackend backend;
+} Renderer;
 
 void renderer_init();
 void renderer_start(const OS *os);

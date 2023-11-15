@@ -51,7 +51,7 @@ LSWGLContext *wgl_context_create(const LSWindow *window) {
 
 	if (wgl_has_extension(device_context, "WGL_EXT_create_context_es2_profile")) {
 		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_MINOR_VERSION_ARB));
-		slice32_append(attributes, SLICE_VAL32(i32, 2));
+		slice32_append(attributes, SLICE_VAL32(i32, 0));
 		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_PROFILE_MASK_ARB));
 		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_ES2_PROFILE_BIT_EXT));
 	} else {

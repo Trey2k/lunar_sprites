@@ -1,6 +1,7 @@
 #include "core/os/os.h"
 #include "core/debug.h"
 #include "core/memory.h"
+#include "platform/os.h"
 
 struct OS {
 	PlatformOS *platform_os;
@@ -19,7 +20,7 @@ void ls_destroy_os(OS *os) {
 	ls_free(os);
 }
 
-void *os_get_native_display(const OS *os) {
+LSNativeDisplayType os_get_native_display(const OS *os) {
 	LS_ASSERT(os);
 
 	return platform_get_native_display(os->platform_os);

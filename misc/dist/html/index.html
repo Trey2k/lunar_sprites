@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no">
+		<title>@LUNAR_NAME@</title>
+		<style>
+body {
+	touch-action: none;
+	margin: 0;
+	border: 0 none;
+	padding: 0;
+	text-align: center;
+	background-color: black;
+}
+
+canvas {
+	display: block;
+	margin: 0;
+	color: white;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+.lunar_sprites {
+	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+	color: #e0e0e0;
+	background-color: #3b3943;
+	background-image: linear-gradient(to bottom, #403e48, #35333c);
+	border: 1px solid #45434e;
+	box-shadow: 0 0 1px 1px #2f2d35;
+}
+		</style>
+	</head>
+	<body>
+		<canvas id="root_window" oncontextmenu="event.preventDefault()" class="lunar_sprites" tabindex=-1>
+			HTML5 canvas appears to be unsupported in the current browser.<br >
+			Please try updating or use a different browser.
+		</canvas>
+		
+		<script src="@LUNAR_URL@"></script>
+		<script>
+
+const engine = new Engine("@LUNAR_BASE_PATH@");
+
+(async function () {
+	await engine.init();
+	engine.start(["--log-level", "info"]);
+}());
+		</script>
+	</body>
+</html>

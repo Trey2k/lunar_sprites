@@ -12,14 +12,20 @@
 typedef unsigned long LSNativeWindow;
 #elif defined(WINDOWS_ENABLED)
 typedef void *LSNativeWindow;
+#elif defined(WEB_ENABLED)
+typedef int32 LSNativeWindow;
 #endif // LINUXBSD_ENABLED
 
 typedef struct {
 	Vector2i position;
 	Vector2i size;
+
 	String title;
+
 	bool fullscreen;
 	bool hidden;
+
+	bool root_window;
 } WindowConfig;
 
 LSWindow *renderer_create_window(WindowConfig config);
