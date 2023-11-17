@@ -7,7 +7,7 @@
 #include "renderer/renderer.h"
 #include "renderer/window.h"
 
-#include "modules/register_module_types.h"
+#include "modules/initialize_modules.h"
 
 struct Main {
 	LSWindow *root_window;
@@ -33,15 +33,14 @@ static const WindowConfig ROOT_WINDOW_CONFIG = {
 
 void ls_main_init(int32 argc, char *argv[]) {
 	core_init();
+	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
 	renderer_init();
+	initialize_modules(MODULE_INITIALIZATION_LEVEL_RENDER);
 
 	main.input_manager = core_get_input_manager();
 
-	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
-
 	core_start(argc, argv);
 	renderer_start(ls_get_os());
-
 	RendererBackend renderer_backend = renderer_get_backend();
 
 	if (renderer_backend != RENDERER_BACKEND_NONE) {
@@ -55,6 +54,8 @@ void ls_main_init(int32 argc, char *argv[]) {
 
 	core_add_event_handler(input_handler, NULL);
 	renderer_set_clear_color(0.0f, 1.0f, 0.0f, 0.5f);
+
+	initialize_modules(MODULE_INITIALIZATION_LEVEL_MAIN);
 }
 
 void ls_main_loop() {
@@ -74,7 +75,10 @@ void ls_main_loop() {
 }
 
 void ls_main_deinit() {
+	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_MAIN);
 	window_destroy(main.root_window);
+
+	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_RENDER);
 	renderer_deinit();
 
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);

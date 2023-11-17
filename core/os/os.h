@@ -1,11 +1,11 @@
 #ifndef OS_H
 #define OS_H
 
+#include "core/api.h"
+#include "core/input/input_manager.h"
 #include "core/types/typedefs.h"
 
 #include "platform/os.h"
-
-#include "core/input/input_manager.h"
 
 typedef struct OS OS;
 
@@ -17,6 +17,6 @@ LSNativeDisplayType os_get_native_display(const OS *os);
 const PlatformOS *os_get_platform_os(const OS *os);
 
 // Defined in core/lunar_sprites.c
-const OS *ls_get_os();
+LS_EXPORT const OS *ls_get_os();
 
 #endif // OS_H

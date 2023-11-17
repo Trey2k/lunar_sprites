@@ -11,6 +11,7 @@ typedef struct PlatformOS PlatformOS;
 
 PlatformOS *platform_create_os();
 void platform_destroy_os(PlatformOS *os);
+
 LSNativeDisplayType platform_get_native_display(const PlatformOS *os);
 
 #endif // PLATFORM_OS_H

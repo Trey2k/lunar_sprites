@@ -1,6 +1,8 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include "core/api.h"
+
 /* --------------TYPES-------------- */
 #include "core/types/hashtable.h"
 #include "core/types/slice.h"
@@ -21,7 +23,6 @@
 /* ------------------------------------ */
 
 /* --------------COMPONENTS-------------- */
-#include "core/events/events.h"
 #include "core/os/os.h"
 #include "core/version.h"
 /* -------------------------------------- */
@@ -36,7 +37,7 @@ void core_deinit();
 
 const InputManager *core_get_input_manager();
 
-void core_add_event_handler(EventHandler handler, void *user_data);
+LS_EXPORT void core_add_event_handler(EventHandler handler, void *user_data);
 
 void core_set_active_window(const LSWindow *window);
 

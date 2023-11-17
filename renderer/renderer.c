@@ -1,16 +1,15 @@
 #include "renderer/renderer.h"
+
 #include "core/debug.h"
 #include "core/memory.h"
 #include "core/types/typedefs.h"
-
-#include "renderer/internal.h"
 
 static Renderer renderer;
 
 static void check_flags();
 
 void renderer_init() {
-	renderer.backend_flag = ls_register_flag("renderer-backend", FLAG_TYPE_STRING, (FlagValue){ .string = "OPENGL" },
+	renderer.backend_flag = ls_register_flag("renderer-backend", FLAG_TYPE_STRING, (FlagValue){ .str = "OPENGL" },
 			"The renderer backend to use. Valid values are NONE and OPENGL.");
 #if defined(OPENGL_ENABLED)
 	opengl_renderer_init();
@@ -82,17 +81,13 @@ RendererBackend renderer_get_backend() {
 }
 
 static void check_flags() {
-	ls_str_to_upper(renderer.backend_flag->string);
+	ls_str_to_upper(renderer.backend_flag->str);
 
-	if (ls_str_equals(renderer.backend_flag->string, "NONE")) {
+	if (ls_str_equals(renderer.backend_flag->str, "NONE")) {
 		renderer.backend = RENDERER_BACKEND_NONE;
-	} else if (ls_str_equals(renderer.backend_flag->string, "OPENGL")) {
+	} else if (ls_str_equals(renderer.backend_flag->str, "OPENGL")) {
 		renderer.backend = RENDERER_BACKEND_OPENGL;
 	} else {
-		ls_log_fatal("Invalid renderer backend: %s\n", renderer.backend_flag->string);
+		ls_log_fatal("Invalid renderer backend: %s\n", renderer.backend_flag->str);
 	}
-}
-
-Renderer *get_renderer() {
-	return &renderer;
 }

@@ -27,7 +27,7 @@ static struct FlagManager flag_manager;
 static void parse_flag_value(struct Flag *flag, String flag_name, String raw_value);
 
 void ls_flags_init() {
-	flag_manager.help = ls_register_flag("help", FLAG_TYPE_BOOL, (FlagValue){ .boolean = false }, "Prints this help message.");
+	flag_manager.help = ls_register_flag("help", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Prints this help message.");
 }
 
 void ls_flags_deinit() {
@@ -47,7 +47,7 @@ FlagValue *ls_register_flag(String flag_name, FlagType type, FlagValue default_v
 	flag->value = ls_malloc(sizeof(FlagValue));
 	flag->type = type;
 	if (type == FLAG_TYPE_STRING) {
-		flag->value->string = ls_str_copy(default_value.string);
+		flag->value->str = ls_str_copy(default_value.str);
 	} else {
 		*flag->value = default_value;
 	}
@@ -103,7 +103,7 @@ void ls_parse_flags(int argc, char *argv[]) {
 		parse_flag_value(flag, flag_name, raw_value);
 	}
 
-	if (flag_manager.help->boolean) {
+	if (flag_manager.help->b) {
 		ls_print_flags_help();
 		exit(1);
 	}
@@ -126,8 +126,8 @@ static void parse_flag_value(struct Flag *flag, String flag_name, String raw_val
 				ls_log_fatal("Expected value for flag `%s`.\n", flag_name);
 			}
 
-			if (!ls_str_to_int32(raw_value, &flag->value->integer)) {
-				ls_log_fatal("Invalid value for flag `%s`. Expected integer but got `%s`.\n", flag_name, raw_value);
+			if (!ls_str_to_int32(raw_value, &flag->value->i32)) {
+				ls_log_fatal("Invalid value for flag `%s`. Expected int but got `%s`.\n", flag_name, raw_value);
 			}
 		} break;
 
@@ -136,7 +136,7 @@ static void parse_flag_value(struct Flag *flag, String flag_name, String raw_val
 				ls_log_fatal("Expected value for flag `%s`.\n", flag_name);
 			}
 
-			if (!ls_str_to_float32(raw_value, &flag->value->floating)) {
+			if (!ls_str_to_float32(raw_value, &flag->value->f32)) {
 				ls_log_fatal("Invalid value for flag `%s`. Expected floating point but got `%s`.\n", flag_name, raw_value);
 			}
 		} break;
@@ -146,17 +146,17 @@ static void parse_flag_value(struct Flag *flag, String flag_name, String raw_val
 				ls_log_fatal("Expected value for flag `%s`.\n", flag_name);
 			}
 
-			flag->value->string = ls_str_copy(raw_value);
+			flag->value->str = ls_str_copy(raw_value);
 		} break;
 
 		case FLAG_TYPE_BOOL: {
 			if (!raw_value) {
 				// Toggle whatever default value is if no value is provided.
-				flag->value->boolean = !flag->value->boolean;
+				flag->value->b = !flag->value->b;
 				break;
 			}
 
-			if (!ls_str_to_bool(raw_value, &flag->value->boolean)) {
+			if (!ls_str_to_bool(raw_value, &flag->value->b)) {
 				ls_log_fatal("Invalid value for flag `%s`. Expected boolean but got `%s`.\n", flag_name, raw_value);
 			}
 		} break;

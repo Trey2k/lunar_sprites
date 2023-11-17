@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+
+from native_api_builders import make_native_api_gen
+
+Import("env")
+Import("env_modules")
+
+env_native_api = env.Clone()
+
+make_native_api_gen()
+
+env_native_api.add_source_files(env.modules_sources, "*.c")
+env_native_api.add_source_files(env.modules_sources, "native_api.gen.c")
+
+Export("env_native_api")
+
+if env["api_test_client"]:
+    SConscript("test/SCsub")

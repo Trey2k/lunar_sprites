@@ -51,6 +51,6 @@ if env["tests"]:
     )
 
 env.modules_sources = []
-env_modules.add_source_files(env.modules_sources, "register_module_types.gen.c")
+env_modules.add_source_files(env.modules_sources, "initialize_modules.gen.c")
 lib = env_modules.add_library("modules", env.modules_sources)
 env.Prepend(LIBS=[lib])

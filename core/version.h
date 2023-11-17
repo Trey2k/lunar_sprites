@@ -1,6 +1,7 @@
 #ifndef VERSION_H
 #define VERSION_H
 
+#include "core/api.h"
 #include "core/version_info.gen.h"
 
 #define VERSION_BRANCH _MKSTR(VERSION_MAJOR) "." _MKSTR(VERSION_MINOR)
@@ -19,6 +20,7 @@
 
 #define VERSION_FULL_NAME VERSION_NAME " v" VERSION_FULL_BUILD
 
-extern const char *const VERSION_HASH;
+// TODO: Test if this needs to be exported
+LS_EXPORT extern const char *const VERSION_HASH;
 
 #endif // VERSION_H

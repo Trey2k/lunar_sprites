@@ -1,7 +1,8 @@
 #ifndef EVENT_MANAGER_H
 #define EVENT_MANAGER_H
 
-typedef struct Event Event;
+#include "core/api.h"
+#include "core/events/events.h"
 
 typedef struct EventManager EventManager;
 typedef void (*EventHandler)(Event *event, void *user_data);

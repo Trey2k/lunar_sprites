@@ -3,6 +3,8 @@
 
 typedef enum {
 	MODULE_INITIALIZATION_LEVEL_CORE = 0,
+	MODULE_INITIALIZATION_LEVEL_RENDER,
+	MODULE_INITIALIZATION_LEVEL_MAIN,
 } ModuleInitializationLevel;
 
 void initialize_modules(ModuleInitializationLevel p_level);

@@ -23,7 +23,7 @@ static void core_check_flags();
 void core_init() {
 	ls_flags_init();
 
-	ls.log_level = ls_register_flag("log-level", FLAG_TYPE_STRING, (FlagValue){ .string = "INFO" },
+	ls.log_level = ls_register_flag("log-level", FLAG_TYPE_STRING, (FlagValue){ .str = "INFO" },
 			"The log level to use. Valid values are `INFO`, `DEBUG`, `WARNING` and `ERROR`");
 
 	ls.event_manager = ls_create_event_manager();
@@ -138,19 +138,19 @@ void core_handle_window_close() {
 }
 
 static void core_check_flags() {
-	ls_str_to_upper(ls.log_level->string);
+	ls_str_to_upper(ls.log_level->str);
 
-	ls_str_to_upper(ls.log_level->string);
-	if (ls_str_equals(ls.log_level->string, "INFO")) {
+	ls_str_to_upper(ls.log_level->str);
+	if (ls_str_equals(ls.log_level->str, "INFO")) {
 		ls_set_log_level(LOG_LEVEL_INFO);
-	} else if (ls_str_equals(ls.log_level->string, "DEBUG")) {
+	} else if (ls_str_equals(ls.log_level->str, "DEBUG")) {
 		ls_set_log_level(LOG_LEVEL_DEBUG);
-	} else if (ls_str_equals(ls.log_level->string, "WARNING")) {
+	} else if (ls_str_equals(ls.log_level->str, "WARNING")) {
 		ls_set_log_level(LOG_LEVEL_WARNING);
-	} else if (ls_str_equals(ls.log_level->string, "ERROR")) {
+	} else if (ls_str_equals(ls.log_level->str, "ERROR")) {
 		ls_set_log_level(LOG_LEVEL_ERROR);
 	} else {
-		ls_log_fatal("Invalid log level `%s`.\n", ls.log_level->string);
+		ls_log_fatal("Invalid log level `%s`.\n", ls.log_level->str);
 	}
-	ls_free(ls.log_level->string);
+	ls_free(ls.log_level->str);
 }

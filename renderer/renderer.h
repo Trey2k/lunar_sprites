@@ -1,6 +1,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include "core/api.h"
 #include "core/flags.h"
 #include "core/os/os.h"
 #include "core/types/string.h"
@@ -29,7 +30,7 @@ void renderer_init();
 void renderer_start(const OS *os);
 void renderer_deinit();
 
-void renderer_set_clear_color(float32 r, float32 g, float32 b, float32 a);
+LS_EXPORT void renderer_set_clear_color(float32 r, float32 g, float32 b, float32 a);
 void renderer_clear();
 
 RendererBackend renderer_get_backend();

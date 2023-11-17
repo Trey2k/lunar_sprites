@@ -1,6 +1,7 @@
 #ifndef INPUT_MANAGER_H
 #define INPUT_MANAGER_H
 
+#include "core/api.h"
 #include "core/events/event_manager.h"
 #include "core/input/keycodes.h"
 #include "core/types/typedefs.h"
@@ -23,15 +24,15 @@ void input_handle_mouse_move(InputManager *input_manager, const LSWindow *window
 void input_handle_mouse_enter(InputManager *input_manager, const LSWindow *window, Vector2i position);
 void input_handle_mouse_leave(InputManager *input_manager, const LSWindow *window, Vector2i position);
 
-bool input_is_key_pressed(const InputManager *input_manager, LSKeycode keycode);
-bool input_is_key_just_pressed(const InputManager *input_manager, LSKeycode keycode);
-bool input_is_key_released(const InputManager *input_manager, LSKeycode keycode);
-bool input_is_key_just_released(const InputManager *input_manager, LSKeycode keycode);
+LS_EXPORT bool input_is_key_pressed(const InputManager *input_manager, LSKeycode keycode);
+LS_EXPORT bool input_is_key_just_pressed(const InputManager *input_manager, LSKeycode keycode);
+LS_EXPORT bool input_is_key_released(const InputManager *input_manager, LSKeycode keycode);
+LS_EXPORT bool input_is_key_just_released(const InputManager *input_manager, LSKeycode keycode);
 
-bool input_is_mouse_pressed(const InputManager *input_manager, LSMouseButton button);
-bool input_is_mouse_just_pressed(const InputManager *input_manager, LSMouseButton button);
-bool input_is_mouse_released(const InputManager *input_manager, LSMouseButton button);
-bool input_is_mouse_just_released(const InputManager *input_manager, LSMouseButton button);
+LS_EXPORT bool input_is_mouse_pressed(const InputManager *input_manager, LSMouseButton button);
+LS_EXPORT bool input_is_mouse_just_pressed(const InputManager *input_manager, LSMouseButton button);
+LS_EXPORT bool input_is_mouse_released(const InputManager *input_manager, LSMouseButton button);
+LS_EXPORT bool input_is_mouse_just_released(const InputManager *input_manager, LSMouseButton button);
 
 Vector2i input_get_mouse_position(const InputManager *input_manager);
 
