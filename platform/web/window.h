@@ -25,8 +25,11 @@ struct PlatformWindow {
 #endif // OPENGL_ENABLED
 
 	const PlatformOS *os;
+	const Renderer *renderer;
 
 	Slice *events;
+
+	InputManager *input_manager;
 };
 
 #endif // WEB_WINDOW_H

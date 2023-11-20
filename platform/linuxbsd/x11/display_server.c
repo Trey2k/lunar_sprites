@@ -3,8 +3,9 @@
 #include "core/log.h"
 #include "core/memory.h"
 
-X11Server *x11_server_create() {
+X11Server *x11_server_create(InputManager *input_manager) {
 	X11Server *server = ls_malloc(sizeof(X11Server));
+	server->input_manager = input_manager;
 
 	server->display = XOpenDisplay(NULL);
 	if (!server->display) {

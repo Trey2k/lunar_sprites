@@ -4,8 +4,9 @@
 #include "core/log.h"
 #include "core/memory.h"
 
-PlatformOS *platform_create_os() {
+PlatformOS *platform_create_os(InputManager *input_manager) {
 	PlatformOS *os = ls_malloc(sizeof(PlatformOS));
+	os->input_manager = input_manager;
 
 #if defined(WAYLAND_ENABLED)
 	WaylandServer *wayland_server = NULL;
@@ -18,7 +19,7 @@ PlatformOS *platform_create_os() {
 
 #if defined(X11_ENABLED)
 	X11Server *x11_server = NULL;
-	x11_server = x11_server_create();
+	x11_server = x11_server_create(input_manager);
 	if (x11_server) {
 		os->display_server = DISPLAY_SERVER_X11;
 		os->x11_server = x11_server;

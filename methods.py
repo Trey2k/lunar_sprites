@@ -293,7 +293,7 @@ def write_modules(modules):
             with open(os.path.join(path, "module_initialize.h")):
                 includes_c += '#include "' + path + '/module_initialize.h"\n'
                 initialize_c += "#ifdef MODULE_" + name.upper() + "_ENABLED\n"
-                initialize_c += "\tinitialize_" + name + "_module(p_level);\n"
+                initialize_c += "\tinitialize_" + name + "_module(p_level, p_arg);\n"
                 initialize_c += "#endif\n"
                 uninitialize_c += "#ifdef MODULE_" + name.upper() + "_ENABLED\n"
                 uninitialize_c += "\tuninitialize_" + name + "_module(p_level);\n"
@@ -309,7 +309,7 @@ def write_modules(modules):
 
 %s
 
-void initialize_modules(ModuleInitializationLevel p_level) {
+void initialize_modules(ModuleInitializationLevel p_level, void *p_arg) {
 %s
 }
 

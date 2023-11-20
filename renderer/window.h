@@ -1,13 +1,9 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "core/api.h"
-#include "core/input/input_manager.h"
-#include "core/os/os.h"
-#include "core/types/string.h"
-#include "core/types/typedefs.h"
-#include "core/types/vector/vector2.h"
-#include "core/window.h"
+#include "core/core.h"
+
+#include "renderer/renderer.h"
 
 #if defined(LINUXBSD_ENABLED)
 typedef unsigned long LSNativeWindow;
@@ -29,7 +25,7 @@ typedef struct {
 	bool root_window;
 } WindowConfig;
 
-LS_EXPORT LSWindow *renderer_create_window(WindowConfig config);
+LS_EXPORT LSWindow *renderer_create_window(const Renderer *renderer, WindowConfig config);
 LS_EXPORT void window_destroy(LSWindow *window);
 
 LS_EXPORT LSNativeWindow window_get_native_window(const LSWindow *window);

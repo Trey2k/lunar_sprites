@@ -3,8 +3,9 @@
 
 #include "core/core.h"
 
-PlatformOS *platform_create_os() {
+PlatformOS *platform_create_os(InputManager *input_manager) {
 	PlatformOS *os = ls_malloc(sizeof(PlatformOS));
+	os->input_manager = input_manager;
 	keymap_init();
 
 	return os;

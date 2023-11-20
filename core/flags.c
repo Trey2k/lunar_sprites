@@ -3,6 +3,7 @@
 #include "core/log.h"
 #include "core/memory.h"
 #include "core/types/string.h"
+
 #include <stdlib.h>
 
 struct Flag {
@@ -19,19 +20,22 @@ struct FlagManager {
 	struct Flag *first;
 	struct Flag *last;
 
+	char *program_name;
+
 	FlagValue *help;
 };
 
-static struct FlagManager flag_manager;
-
 static void parse_flag_value(struct Flag *flag, String flag_name, String raw_value);
 
-void ls_flags_init() {
-	flag_manager.help = ls_register_flag("help", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Prints this help message.");
+FlagManager *flag_manager_create() {
+	FlagManager *manager = ls_malloc(sizeof(FlagManager));
+	manager->help = flag_manager_register(manager, "help", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Prints this help message.");
+	return manager;
 }
 
-void ls_flags_deinit() {
-	struct Flag *flag = flag_manager.first;
+void flag_manager_destroy(FlagManager *manager) {
+	ls_free(manager->program_name);
+	struct Flag *flag = manager->first;
 	while (flag) {
 		struct Flag *next = flag->next;
 		ls_free(flag->value);
@@ -42,7 +46,7 @@ void ls_flags_deinit() {
 	}
 }
 
-FlagValue *ls_register_flag(String flag_name, FlagType type, FlagValue default_value, String description) {
+FlagValue *flag_manager_register(FlagManager *manager, String flag_name, FlagType type, FlagValue default_value, String description) {
 	struct Flag *flag = ls_malloc(sizeof(struct Flag));
 	flag->value = ls_malloc(sizeof(FlagValue));
 	flag->type = type;
@@ -60,18 +64,19 @@ FlagValue *ls_register_flag(String flag_name, FlagType type, FlagValue default_v
 			ls_flag_value_to_string(type, default_value));
 	flag->next = NULL;
 
-	if (!flag_manager.first) {
-		flag_manager.first = flag;
-		flag_manager.last = flag;
+	if (!manager->first) {
+		manager->first = flag;
+		manager->last = flag;
 	} else {
-		flag_manager.last->next = flag;
-		flag_manager.last = flag;
+		manager->last->next = flag;
+		manager->last = flag;
 	}
 
 	return flag->value;
 }
 
-void ls_parse_flags(int argc, char *argv[]) {
+void flag_manager_parse(FlagManager *manager, int argc, char *argv[]) {
+	manager->program_name = ls_str_copy(argv[0]);
 	for (int i = 1; i < argc; i++) {
 		if (ls_str_length(argv[i]) <= 2 || argv[i][0] != '-' || argv[i][1] != '-') {
 			ls_log_fatal("Invalid command line option: %s\n", argv[i]);
@@ -85,7 +90,7 @@ void ls_parse_flags(int argc, char *argv[]) {
 			i++;
 		}
 
-		struct Flag *flag = flag_manager.first;
+		struct Flag *flag = manager->first;
 		bool found = false;
 		while (flag) {
 			if (ls_str_equals(flag_name, flag->name)) {
@@ -103,16 +108,16 @@ void ls_parse_flags(int argc, char *argv[]) {
 		parse_flag_value(flag, flag_name, raw_value);
 	}
 
-	if (flag_manager.help->b) {
-		ls_print_flags_help();
+	if (manager->help->b) {
+		flag_manager_print_help(manager);
 		exit(1);
 	}
 }
 
-void ls_print_flags_help() {
-	ls_printf("Usage: lunar_sprites [options]\nOptions:\n");
+void flag_manager_print_help(const FlagManager *manager) {
+	ls_printf("Usage: %s [options]\nOptions:\n", manager->program_name);
 
-	struct Flag *flag = flag_manager.first;
+	struct Flag *flag = manager->first;
 	while (flag) {
 		ls_printf("%s", flag->description);
 		flag = flag->next;

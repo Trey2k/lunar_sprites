@@ -22,13 +22,14 @@ typedef union {
 	bool b;
 } FlagValue;
 
-void ls_flags_init();
-void ls_flags_deinit();
+typedef struct FlagManager FlagManager;
 
-LS_EXPORT FlagValue *ls_register_flag(String flag_name, FlagType type, FlagValue default_value, String description);
+FlagManager *flag_manager_create();
+void flag_manager_destroy(FlagManager *manager);
+void flag_manager_parse(FlagManager *manager, int argc, char *argv[]);
 
-void ls_parse_flags(int argc, char *argv[]);
-LS_EXPORT void ls_print_flags_help();
+LS_EXPORT FlagValue *flag_manager_register(FlagManager *manager, String flag_name, FlagType type, FlagValue default_value, String description);
+LS_EXPORT void flag_manager_print_help(const FlagManager *manager);
 
 _FORCE_INLINE_ char *ls_flag_value_to_string(FlagType type, FlagValue value) {
 	switch (type) {

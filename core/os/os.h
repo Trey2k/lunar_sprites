@@ -9,14 +9,11 @@
 
 typedef struct OS OS;
 
-OS *ls_create_os();
+OS *ls_create_os(InputManager *input_manager);
 void ls_destroy_os(OS *os);
 
 LSNativeDisplayType os_get_native_display(const OS *os);
 
 const PlatformOS *os_get_platform_os(const OS *os);
-
-// Defined in core/lunar_sprites.c
-LS_EXPORT const OS *ls_get_os();
 
 #endif // OS_H

@@ -16,7 +16,7 @@ __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 int main(int argc, char *argv[]) {
 	ls_main_init(argc, argv);
 
-	while (!ls_should_quit()) {
+	while (!ls_should_stop()) {
 		ls_main_loop();
 	}
 

@@ -1,7 +1,7 @@
 
 #/usr/bin/env python
 
-from native_api_builders import make_api_header
+from api_builder import make_api_header
 Import("env_native_api")
 
 with open("ls_api.gen.h", "w") as f:
@@ -18,8 +18,7 @@ if env["platform"] == "windows":
     shsuffix = ".dll"
 
 sources = [
-    "test_initialize.c",
+    "test_app.c",
 ]
 
-api_client = env.SharedLibrary("#/bin/libapi_client%s" % shsuffix, sources)
-Default(api_client)
+env.add_shared_library("#/bin/application%s" % shsuffix, sources)

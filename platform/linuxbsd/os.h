@@ -20,6 +20,8 @@ typedef enum {
 
 struct PlatformOS {
 	DisplayServer display_server;
+	InputManager *input_manager;
+
 	union {
 #if defined(WAYLAND_ENABLED)
 		WaylandServer *wayland_server;

@@ -1,6 +1,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
+#include "core/types/slice.h"
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
 
@@ -25,9 +26,13 @@ typedef union {
 
 typedef union {
 	int32 i32;
+	int64 i64;
 	uint32 u32;
+	uint64 u64;
 	float32 f32;
+	float64 f64;
 	String str;
+
 	void *ptr;
 } HashtableValue;
 
@@ -51,5 +56,10 @@ LS_EXPORT size_t hashtable_get_size(const Hashtable *table);
 LS_EXPORT size_t hashtable_get_capacity(const Hashtable *table);
 
 LS_EXPORT int32 hashtable_get_collisions(const Hashtable *table);
+
+// Returns a slice of the keys in the hash table.
+// The slice should be destroyed by the caller.
+// The slize will contain HashtableKey references.
+LS_EXPORT Slice *hashtable_get_keys(const Hashtable *table);
 
 #endif // HASHTABLE_H

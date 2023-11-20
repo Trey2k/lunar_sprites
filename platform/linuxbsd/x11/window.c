@@ -25,6 +25,7 @@ X11Window *x11_window_create(const X11Server *server, WindowConfig config) {
 	window->hidden = config.hidden;
 	window->fullscreen = false;
 	window->title = config.title;
+	window->input_manager = server->input_manager;
 
 	Colormap colormap = XCreateColormap(display, root, visual, AllocNone);
 
@@ -79,7 +80,7 @@ static void handle_event(const X11Window *window, XEvent *event) {
 		case Expose:
 			break;
 		case KeyPress: {
-			core_handle_press(x11_map_key(event->xkey.keycode));
+			input_handle_press(window->input_manager, x11_map_key(event->xkey.keycode));
 		} break;
 
 		case KeyRelease: {
@@ -91,30 +92,30 @@ static void handle_event(const X11Window *window, XEvent *event) {
 				}
 			}
 
-			core_handle_release(x11_map_key(event->xkey.keycode));
+			input_handle_release(window->input_manager, x11_map_key(event->xkey.keycode));
 		} break;
 
 		case ButtonPress: {
-			core_handle_mouse_press(x11_map_mbutton(event->xbutton.button),
+			input_handle_mouse_press(window->input_manager, x11_map_mbutton(event->xbutton.button),
 					(Vector2i){ event->xbutton.x, event->xbutton.y });
 
 		} break;
 
 		case ButtonRelease: {
-			core_handle_mouse_release(x11_map_mbutton(event->xbutton.button),
+			input_handle_mouse_release(window->input_manager, x11_map_mbutton(event->xbutton.button),
 					(Vector2i){ event->xbutton.x, event->xbutton.y });
 		} break;
 
 		case MotionNotify: {
-			core_handle_mouse_move((Vector2i){ event->xmotion.x, event->xmotion.y });
+			input_handle_mouse_move(window->input_manager, (Vector2i){ event->xmotion.x, event->xmotion.y });
 		} break;
 
 		case EnterNotify: {
-			core_handle_mouse_enter((Vector2i){ event->xcrossing.x, event->xcrossing.y });
+			input_handle_mouse_enter(window->input_manager, (Vector2i){ event->xcrossing.x, event->xcrossing.y });
 		} break;
 
 		case LeaveNotify: {
-			core_handle_mouse_leave((Vector2i){ event->xcrossing.x, event->xcrossing.y });
+			input_handle_mouse_leave(window->input_manager, (Vector2i){ event->xcrossing.x, event->xcrossing.y });
 		} break;
 	}
 }

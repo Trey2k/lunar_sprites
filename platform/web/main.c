@@ -6,7 +6,7 @@
 
 static void main_loop() {
 	ls_main_loop();
-	if (ls_should_quit()) {
+	if (ls_should_stop()) {
 		emscripten_cancel_main_loop();
 
 		// Code after emscripten_set_main_loop is never executed even with simulate_mainloop = true.

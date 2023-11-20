@@ -2,9 +2,9 @@
 
 import os
 
+# List of headers to include in the API header
+# The order of the headers is important
 source_headers = [
-    'modules/native_api/native_api.h',
-
     'core/api.h',
     'core/version_info.gen.h',
     'core/version.h',
@@ -12,9 +12,12 @@ source_headers = [
     'core/types/string.h',
     'core/log.h',
     'core/memory.h',
+    'core/path.h',
+    'core/time.h',
     'core/debug.h',
-    'core/types/hashtable.h',
     'core/types/vector/vector2.h',
+    'core/types/slice.h',
+    'core/types/hashtable.h',
     'core/flags.h',
     'core/window.h',
     'core/input/keycodes.h',
@@ -26,8 +29,17 @@ source_headers = [
 
     'renderer/window.h',
     'renderer/renderer.h',
+
+    'main/application.h',
+    'main/project_settings.h',
+    'main/lunar_sprites.h',
+
+
+    'modules/native_application/native_application.h',
 ]
 
+
+# TODO: Clean this up and capture comments
 def make_api_header():
     api_header_txt = """
 /* THIS FILE IS GENERATED DO NOT EDIT */
@@ -74,14 +86,17 @@ def make_api_header():
 
             in_typedef = False
             typedef_depth = 0
+
             in_export = False
+            export_depth = 0
 
             for line in f:
                 # Skip header guards
                 if in_macro or (
                     line.startswith('#define') and not 
                     line.endswith('_H\n') and not
-                    in_complex_macro):
+                    in_complex_macro and not
+                    "OPENGL_ENABLED" in line):
                 
                     macros += line
                     if line.endswith('\\\n'):
@@ -94,7 +109,8 @@ def make_api_header():
                     (line.startswith('#if') or 
                     line.startswith('#ifdef') or 
                     line.startswith('#ifndef')) and not 
-                    line.endswith('_H\n')):
+                    line.endswith('_H\n') and not
+                    "OPENGL_ENABLED" in line):
                     
                     if not in_complex_macro:
                         in_complex_macro = True
@@ -135,12 +151,20 @@ def make_api_header():
                         in_typedef = False
                         typedefs += '\n'
                     
-                elif in_export or line.startswith('LS_EXPORT'):
+                elif in_export or line.startswith('LS_EXPORT') or line.startswith('_FORCE_INLINE_'):
                     exports += line.replace('LS_EXPORT', 'LS_IMPORT')
+                    if '{' in line:
+                        export_depth += 1
+
                     if ';' not in line:
                         in_export = True
-                    else:
+                    
+                    if '}' in line:
+                        export_depth -= 1
+                    
+                    if (';' in line or '}' in line) and export_depth == 0:
                         in_export = False
+                        exports += '\n'
 
             if len(exports) > 0:
                 exports += '\n'
@@ -155,32 +179,6 @@ def make_api_header():
     api_header_txt += '#endif // LS_API_H\n'
 
     return api_header_txt
-
-
-def make_native_api_gen():
-    api_header_txt = make_api_header()
-    native_api_gen_c = """
-/* THIS FILE IS GENERATED DO NOT EDIT */
-#include "native_api.h"
-
-const unsigned char *LS_API_HEADER = (const unsigned char[%d]){
-""" % (len(api_header_txt) + 1)
-
-    bytes_per_line = 16
-    native_api_gen_c += "\t"
-    for i, c in enumerate(api_header_txt):
-        native_api_gen_c += str(ord(c)) + ', '
-        if i % bytes_per_line == 0 and i != 0:
-            native_api_gen_c += '\n\t'
-    
-    native_api_gen_c += "0"
-    
-    native_api_gen_c += """
-};
-"""
-
-    with open(os.path.join(os.path.dirname(__file__), 'native_api.gen.c'), 'w') as f:
-        f.write(native_api_gen_c)
 
 
 if __name__ == '__main__':

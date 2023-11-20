@@ -11,6 +11,8 @@ static const char LS_WIN_CLASS_NAME[] = "LSWindowClass";
 
 struct PlatformOS {
 	WNDCLASSEX window_class;
+
+	InputManager *input_manager;
 };
 
 #endif // WINDOWS_OS_H

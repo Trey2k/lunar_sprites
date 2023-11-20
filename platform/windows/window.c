@@ -6,7 +6,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 
 	window->title = config.title;
@@ -14,6 +14,8 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 	window->height = config.size.y;
 	window->hidden = true;
 	window->fullscreen = false;
+
+	window->input_manager = os->input_manager;
 
 	window->window = CreateWindowEx(
 			WS_EX_CLIENTEDGE,

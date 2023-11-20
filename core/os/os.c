@@ -7,9 +7,9 @@ struct OS {
 	PlatformOS *platform_os;
 };
 
-OS *ls_create_os() {
+OS *ls_create_os(InputManager *input_manager) {
 	OS *os = ls_malloc(sizeof(OS));
-	os->platform_os = platform_create_os();
+	os->platform_os = platform_create_os(input_manager);
 	return os;
 }
 
