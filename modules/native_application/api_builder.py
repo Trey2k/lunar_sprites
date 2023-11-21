@@ -1,7 +1,10 @@
 #!/usr/bin/env python
-
+ 
 import os
-
+from enum import Enum
+ 
+state = Enum('State', ['Normal', 'Comment', 'MultiComment', 'Macro', 'Typedef', 'Export'])
+ 
 # List of headers to include in the API header
 # The order of the headers is important
 source_headers = [
@@ -13,7 +16,6 @@ source_headers = [
     'core/log.h',
     'core/memory.h',
     'core/path.h',
-    'core/time.h',
     'core/debug.h',
     'core/types/vector/vector2.h',
     'core/types/slice.h',
@@ -26,26 +28,217 @@ source_headers = [
     'core/events/event_manager.h',
     'core/os/os.h',
     'core/core.h',
-
+ 
     'renderer/window.h',
     'renderer/renderer.h',
-
+ 
     'main/application.h',
     'main/project_settings.h',
     'main/lunar_sprites.h',
-
-
+ 
+ 
     'modules/native_application/native_application.h',
 ]
-
-
-# TODO: Clean this up and capture comments
+ 
+def is_line_macro_start(line):
+    return ((line.startswith('#define') or
+                line.startswith('#if') or
+                line.startswith('#ifdef') or
+                line.startswith('#ifndef')
+            ) and not 
+        line.endswith('_H\n') and not 
+        "OPENGL_ENABLED" in line)
+ 
+def is_line_complex_macro_start(line):
+    return ((line.startswith('#if') or
+                line.startswith('#ifdef') or
+                line.startswith('#ifndef')
+            ) and not 
+        line.endswith('_H\n') and not 
+        "OPENGL_ENABLED" in line)
+ 
+ 
+def is_line_export(line):
+    return line.startswith('LS_EXPORT') or line.startswith('_FORCE_INLINE_')
+ 
+ 
+def header_normal_state(last_state, line, info):
+    new_state = state.Normal
+    if line.startswith('/*'):
+        info['comment'] = line
+        if not line.replace(' ', '').endswith('*/\n'):
+            new_state = state.MultiComment
+        else:
+            new_state = state.Comment
+        
+    elif line.startswith('//'):
+        info['comment'] = line
+        new_state = state.Comment
+    elif is_line_macro_start(line):
+        if is_line_complex_macro_start(line):
+            info['depth'] += 1
+        
+        if last_state == state.Comment or last_state == state.MultiComment:
+            info['macros'] += info['comment']
+            info['comment'] = ""
+        info['macros'] += line
+ 
+        new_state = state.Macro
+    elif line.startswith('typedef'):
+        if last_state == state.Comment or last_state == state.MultiComment:
+            info['typedefs'] += info['comment']
+            info['comment'] = ""
+        
+        info['typedefs'] += line
+        if '{' in line:
+            info['depth'] += 1
+ 
+        if '}' in line:
+           info['depth'] -= 1
+        
+        if not ';' in line or info['depth'] != 0:
+            new_state = state.Typedef
+        else:
+            info['typedefs'] += '\n'
+        
+    elif is_line_export(line):
+        if last_state == state.Comment or last_state == state.MultiComment:
+            info['exports'] += info['comment']
+            info['comment'] = ""
+ 
+        info['exports'] += line
+        if '{' in line:
+            info['depth'] += 1
+        
+        if '}' in line:
+            info['depth'] -= 1
+        
+        if not ';' in line or info['depth'] != 0:
+            new_state = state.Export
+ 
+ 
+    return new_state
+ 
+ 
+def header_export_state(last_state, line, info):
+    new_state = state.Export
+ 
+    info['exports'] += line
+ 
+    if '{' in line:
+        info['depth'] += 1
+    
+    if '}' in line:
+        info['depth'] -= 1
+    
+    if (';' in line or '}' in line) and info['depth'] == 0:
+        new_state = state.Normal
+ 
+    return new_state
+ 
+ 
+def header_typedef_state(last_state, line, info):
+    new_state = state.Typedef
+ 
+    info['typedefs'] += line
+ 
+    if '{' in line:
+        info['depth'] += 1
+    
+    if '}' in line:
+        info['depth'] -= 1
+    
+    if ';' in line and info['depth'] == 0:
+        new_state = state.Normal
+        info['typedefs'] += '\n'
+ 
+    return new_state
+ 
+ 
+def header_macro_state(last_state, line, info):
+    new_state = state.Macro
+    
+    info['macros'] += line
+ 
+    if line.startswith('#endif'):
+        info['depth'] -= 1
+ 
+    if not line.endswith('\\\n') and info['depth'] == 0:
+        new_state = state.Normal
+        info['macros'] += '\n'
+ 
+    if is_line_complex_macro_start(line):
+        info['depth'] += 1
+ 
+    return new_state
+ 
+ 
+def header_multi_comment_state(last_state, line, info):
+    info['comment'] += line
+ 
+    if line.endswith('*/'):
+        return state.Normal
+    
+    return state.MultiComment
+ 
+ 
+def header_comment_state(last_state, line, info):
+    if line.startswith('//'):
+        info['comment'] += line
+        return state.Comment
+    
+    # Normal comments seek a line further since we do not know if we are at the end until we are on the line past.
+    # So if the comment is over we invoke the normal state.
+    return header_normal_state(state.Comment, line, info)
+ 
+def get_header_content(header):
+    f = open(header, 'r')
+    if not f:
+        print('ERROR: Could not open header {}'.format(header))
+        return
+    
+    info = {
+        'depth': 0,
+        'comment': "",
+        'macros': "",
+        'typedefs': "",
+        'exports': ""
+    }
+          
+    current_state = state.Normal
+    last_state = state.Normal
+ 
+    for line in f:
+        new_state = current_state
+        match current_state:
+            case state.Normal:
+                new_state = header_normal_state(last_state, line, info)
+            case state.Comment:
+                new_state = header_comment_state(last_state, line, info)
+            case state.MultiComment:
+                new_state = header_multi_comment_state(last_state, line, info)
+            case state.Macro:
+                new_state = header_macro_state(last_state, line, info)
+            case state.Typedef:
+                new_state = header_typedef_state(last_state, line, info)
+            case state.Export:
+                new_state = header_export_state(last_state, line, info)
+        
+        
+        last_state = current_state
+        current_state = new_state
+ 
+    f.close()
+    info['exports'] = info['exports'].replace('LS_EXPORT', 'LS_IMPORT')
+    return info['macros'], info['typedefs'], info['exports']
+ 
+ 
 def make_api_header():
     api_header_txt = """
 /* THIS FILE IS GENERATED DO NOT EDIT */
 #ifndef LS_API_H
 #define LS_API_H
-
+ 
 #if defined(__linux__) || defined(__FreeBSD__)
 #define LINUXBSD_ENABLED
 #elif defined(_WIN32) || defined(WIN32)
@@ -53,7 +246,7 @@ def make_api_header():
 #elif defined(__EMSCRIPTEN__)
 #define WEB_ENABLED
 #endif // defined(__linux__) || defined(__FreeBSD__)
-
+ 
 #if defined(_MSC_VER)
 #define LS_IMPORT __declspec(dllimport)
 #elif defined(__GNUC__)
@@ -61,114 +254,20 @@ def make_api_header():
 #else
 #define LS_IMPORT
 #endif // defined(_MSC_VER)
-
+ 
 """
-
+ 
     all_macros = ""
     all_typedefs = ""
     all_exports = ""
-
+ 
     for header in source_headers:
         header = os.path.join(os.path.dirname(__file__), '../..', header)
         if not os.path.exists(header):
+            print('WARNING: Header {} does not exist'.format(header))
             continue
-        with open(header, 'r') as f:
-            macros = ""
-            typedefs = ""
-            exports = ""
-
-            in_macro = False
-
-            in_complex_macro = False
-            complexy_macro_depth = 0
-            complex_macro_start = 0
-            complex_macro_discard = False
-
-            in_typedef = False
-            typedef_depth = 0
-
-            in_export = False
-            export_depth = 0
-
-            for line in f:
-                # Skip header guards
-                if in_macro or (
-                    line.startswith('#define') and not 
-                    line.endswith('_H\n') and not
-                    in_complex_macro and not
-                    "OPENGL_ENABLED" in line):
-                
-                    macros += line
-                    if line.endswith('\\\n'):
-                        in_macro = True
-                    else:
-                        in_macro = False
-                        macros += '\n'
-                
-                elif in_complex_macro or (
-                    (line.startswith('#if') or 
-                    line.startswith('#ifdef') or 
-                    line.startswith('#ifndef')) and not 
-                    line.endswith('_H\n') and not
-                    "OPENGL_ENABLED" in line):
-                    
-                    if not in_complex_macro:
-                        in_complex_macro = True
-                        complex_macro_start = len(macros)
-
-                    macros += line
-
-                    if '#include' in line:
-                        complex_macro_discard = True
-
-                    if (line.startswith('#if') or
-                        line.startswith('#ifdef') or
-                        line.startswith('#ifndef')):
-                        complexy_macro_depth += 1
-                    
-                    elif line.startswith('#endif'):
-                        complexy_macro_depth -= 1
-                        if complexy_macro_depth == 0:
-                            in_complex_macro = False
-                            macros += '\n'
-
-                            if complex_macro_discard:
-                                macros = macros[:complex_macro_start]
-                                complex_macro_discard = False
-                    
-                elif in_typedef or line.startswith('typedef'):
-                    typedefs += line
-                    if '{' in line:
-                        typedef_depth += 1
-                    
-                    if not ';' in line:
-                            in_typedef = True
-                    
-                    if '}' in line:
-                        typedef_depth -= 1
-                    
-                    if ';' in line and typedef_depth == 0:
-                        in_typedef = False
-                        typedefs += '\n'
-                    
-                elif in_export or line.startswith('LS_EXPORT') or line.startswith('_FORCE_INLINE_'):
-                    exports += line.replace('LS_EXPORT', 'LS_IMPORT')
-                    if '{' in line:
-                        export_depth += 1
-
-                    if ';' not in line:
-                        in_export = True
-                    
-                    if '}' in line:
-                        export_depth -= 1
-                    
-                    if (';' in line or '}' in line) and export_depth == 0:
-                        in_export = False
-                        exports += '\n'
-
-            if len(exports) > 0:
-                exports += '\n'
         
+        macros, typedefs, exports = get_header_content(header)
         all_macros += macros
         all_typedefs += typedefs
         all_exports += exports
@@ -177,10 +276,10 @@ def make_api_header():
     api_header_txt += all_typedefs
     api_header_txt += all_exports
     api_header_txt += '#endif // LS_API_H\n'
-
+ 
     return api_header_txt
-
-
+ 
+ 
 if __name__ == '__main__':
     with open(os.path.join(os.path.dirname(__file__), 'ls_api.h'), 'w') as f:
         f.write(make_api_header())
