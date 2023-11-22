@@ -4,8 +4,6 @@ Import("env")
 
 env.core_sources = []
 
-import os
-
 thirdparty_obj = []
 
 env_thirdparty = env.Clone()

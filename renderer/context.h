@@ -4,22 +4,9 @@
 #include "renderer/renderer.h"
 #include "renderer/window.h"
 
-#if defined(OPENGL_ENABLED)
-#include "renderer/opengl/context.h"
-#endif
+typedef struct Context Context;
 
-typedef struct {
-	const LSWindow *window;
-
-	RendererBackend backend;
-	union {
-#if defined(OPENGL_ENABLED)
-		OpenGLContext *opengl_context;
-#endif
-	};
-} Context;
-
-Context *renderer_context_create(const LSWindow *window);
+Context *renderer_context_create(const Renderer *renderer, const LSWindow *window);
 void renderer_context_destroy(Context *context);
 
 void renderer_context_make_current(const Context *context);

@@ -27,6 +27,8 @@ struct InputManager {
 	Vector2i mouse_position;
 
 	const EventManager *event_manager;
+
+	const LSWindow *active_window;
 };
 
 InputManager *ls_create_input_manager(const EventManager *event_manager) {
@@ -54,9 +56,20 @@ void input_poll(InputManager *input_manager) {
 	}
 }
 
-void input_handle_press(InputManager *input_manager, const LSWindow *window, LSKeycode keycode) {
-	LS_ASSERT(window);
+void input_set_active_window(InputManager *input_manager, const LSWindow *window) {
+	input_manager->active_window = window;
+}
 
+void input_handle_window_close(InputManager *input_manager) {
+	LS_ASSERT(input_manager->active_window);
+
+	Event e;
+	e.type = EVENT_WINDOW_CLOSE;
+	e.window = input_manager->active_window;
+	event_manager_emit(input_manager->event_manager, &e);
+}
+
+void input_handle_press(InputManager *input_manager, LSKeycode keycode) {
 	if (keycode < 0 || keycode > LS_KEY_LAST) {
 		ls_log(LOG_LEVEL_WARNING, "Invalid keycode %d\n", keycode);
 
@@ -75,13 +88,12 @@ void input_handle_press(InputManager *input_manager, const LSWindow *window, LSK
 	e.key.type = EVENT_KEY_PRESSED;
 	e.key.keycode = keycode;
 	e.key.repeat = input_manager->key_state[keycode].repeat_count > 0;
+	e.key.window = input_manager->active_window;
 	e.handled = false;
-	events_emit(input_manager->event_manager, &e);
+	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_release(InputManager *input_manager, const LSWindow *window, LSKeycode keycode) {
-	LS_ASSERT(window);
-
+void input_handle_release(InputManager *input_manager, LSKeycode keycode) {
 	if (keycode < 0 || keycode > LS_KEY_LAST) {
 		ls_log(LOG_LEVEL_WARNING, "Invalid keycode %d\n", keycode);
 
@@ -95,8 +107,9 @@ void input_handle_release(InputManager *input_manager, const LSWindow *window, L
 	e.type = EVENT_KEY;
 	e.key.type = EVENT_KEY_RELEASED;
 	e.key.keycode = keycode;
+	e.key.window = input_manager->active_window;
 	e.handled = false;
-	events_emit(input_manager->event_manager, &e);
+	event_manager_emit(input_manager->event_manager, &e);
 }
 
 bool input_is_key_pressed(const InputManager *input_manager, LSKeycode keycode) {
@@ -139,8 +152,7 @@ bool input_is_key_just_released(const InputManager *input_manager, LSKeycode key
 	return !input_manager->key_state[keycode].pressed && input_manager->previous_key_state[keycode].pressed;
 }
 
-void input_handle_mouse_press(InputManager *input_manager, const LSWindow *window, LSMouseButton button, Vector2i position) {
-	LS_ASSERT(window);
+void input_handle_mouse_press(InputManager *input_manager, LSMouseButton button, Vector2i position) {
 	LS_ASSERT(button >= 0 && button <= LS_MOUSE_BUTTON_LAST);
 
 	if (!input_manager->mouse_button_state[button].pressed) {
@@ -156,12 +168,12 @@ void input_handle_mouse_press(InputManager *input_manager, const LSWindow *windo
 	e.mouse.type = EVENT_MOUSE_PRESSED;
 	e.mouse.button = button;
 	e.mouse.position = position;
+	e.mouse.window = input_manager->active_window;
 	e.handled = false;
-	events_emit(input_manager->event_manager, &e);
+	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_mouse_release(InputManager *input_manager, const LSWindow *window, LSMouseButton button, Vector2i position) {
-	LS_ASSERT(window);
+void input_handle_mouse_release(InputManager *input_manager, LSMouseButton button, Vector2i position) {
 	LS_ASSERT(button >= 0 && button <= LS_MOUSE_BUTTON_LAST);
 
 	input_manager->mouse_button_state[button].pressed = false;
@@ -172,13 +184,12 @@ void input_handle_mouse_release(InputManager *input_manager, const LSWindow *win
 	e.mouse.type = EVENT_MOUSE_RELEASED;
 	e.mouse.button = button;
 	e.mouse.position = position;
+	e.mouse.window = input_manager->active_window;
 	e.handled = false;
-	events_emit(input_manager->event_manager, &e);
+	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_mouse_move(InputManager *input_manager, const LSWindow *window, Vector2i position) {
-	LS_ASSERT(window);
-
+void input_handle_mouse_move(InputManager *input_manager, Vector2i position) {
 	input_manager->mouse_position = position;
 
 	Event e;
@@ -186,13 +197,12 @@ void input_handle_mouse_move(InputManager *input_manager, const LSWindow *window
 	e.mouse.type = EVENT_MOUSE_MOVED;
 	e.mouse.button = LS_MOUSE_BUTTON_NONE;
 	e.mouse.position = position;
+	e.mouse.window = input_manager->active_window;
 	e.handled = false;
-	events_emit(input_manager->event_manager, &e);
+	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_mouse_enter(InputManager *input_manager, const LSWindow *window, Vector2i position) {
-	LS_ASSERT(window);
-
+void input_handle_mouse_enter(InputManager *input_manager, Vector2i position) {
 	input_manager->mouse_position = position;
 
 	Event e;
@@ -200,13 +210,12 @@ void input_handle_mouse_enter(InputManager *input_manager, const LSWindow *windo
 	e.mouse.type = EVENT_MOUSE_ENTERED;
 	e.mouse.button = LS_MOUSE_BUTTON_NONE;
 	e.mouse.position = position;
+	e.mouse.window = input_manager->active_window;
 	e.handled = false;
-	events_emit(input_manager->event_manager, &e);
+	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_mouse_leave(InputManager *input_manager, const LSWindow *window, Vector2i position) {
-	LS_ASSERT(window);
-
+void input_handle_mouse_leave(InputManager *input_manager, Vector2i position) {
 	input_manager->mouse_position = position;
 
 	Event e;
@@ -214,8 +223,9 @@ void input_handle_mouse_leave(InputManager *input_manager, const LSWindow *windo
 	e.mouse.type = EVENT_MOUSE_LEFT;
 	e.mouse.button = LS_MOUSE_BUTTON_NONE;
 	e.mouse.position = position;
+	e.mouse.window = input_manager->active_window;
 	e.handled = false;
-	events_emit(input_manager->event_manager, &e);
+	event_manager_emit(input_manager->event_manager, &e);
 }
 
 bool input_is_mouse_pressed(const InputManager *input_manager, LSMouseButton button) {

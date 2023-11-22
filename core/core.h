@@ -1,18 +1,13 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include "core/api.h"
+
 /* --------------TYPES-------------- */
 #include "core/types/hashtable.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"
 #include "core/types/vector/vector2.h"
-/* --------------------------------- */
-
-/* --------------UTILS-------------- */
-#include "core/debug.h"
-#include "core/flags.h"
-#include "core/log.h"
-#include "core/memory.h"
 /* --------------------------------- */
 
 /* --------------MANAGERS-------------- */
@@ -21,34 +16,27 @@
 /* ------------------------------------ */
 
 /* --------------COMPONENTS-------------- */
-#include "core/events/events.h"
+#include "core/debug.h"
+#include "core/flags.h"
+#include "core/log.h"
+#include "core/memory.h"
 #include "core/os/os.h"
 #include "core/version.h"
 /* -------------------------------------- */
 
-void core_register_flags();
+typedef struct LSCore LSCore;
 
-void core_init();
-void core_start(int32 argc, char *argv[]);
+LSCore *core_create(FlagManager *flag_manager);
+void core_destroy(LSCore *core);
 
-void core_poll();
-void core_deinit();
+void core_start(const LSCore *core);
+void core_poll(const LSCore *core);
 
-const InputManager *core_get_input_manager();
+LS_EXPORT FlagManager *core_get_flag_manager(const LSCore *core);
+LS_EXPORT InputManager *core_get_input_manager(const LSCore *core);
+LS_EXPORT const EventManager *core_get_event_manager(const LSCore *core);
+LS_EXPORT const OS *core_get_os(const LSCore *core);
 
-void core_add_event_handler(EventHandler handler, void *user_data);
-
-void core_set_active_window(const LSWindow *window);
-
-void core_handle_press(LSKeycode keycode);
-void core_handle_release(LSKeycode keycode);
-
-void core_handle_mouse_press(LSMouseButton button, Vector2i position);
-void core_handle_mouse_release(LSMouseButton button, Vector2i position);
-void core_handle_mouse_move(Vector2i position);
-void core_handle_mouse_enter(Vector2i position);
-void core_handle_mouse_leave(Vector2i position);
-
-void core_handle_window_close();
+LS_EXPORT void core_add_event_handler(const LSCore *core, EventHandler handler, void *user_data);
 
 #endif // CORE_H

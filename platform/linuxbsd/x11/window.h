@@ -25,6 +25,8 @@ typedef struct {
 	bool hidden;
 
 	Display *display;
+
+	InputManager *input_manager;
 } X11Window;
 
 X11Window *x11_window_create(const X11Server *server, WindowConfig config);

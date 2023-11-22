@@ -6,7 +6,7 @@
 
 typedef struct OpenGLContext OpenGLContext;
 
-OpenGLContext *opengl_context_create(const LSWindow *window);
+OpenGLContext *opengl_context_create(const OpenGLRenderer *renderer, const LSWindow *window);
 void opengl_context_destroy(OpenGLContext *context);
 
 void opengl_context_make_current(const OpenGLContext *context);

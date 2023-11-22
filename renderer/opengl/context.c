@@ -28,11 +28,11 @@ struct OpenGLContext {
 	};
 };
 
-OpenGLContext *opengl_context_create(const LSWindow *window) {
+OpenGLContext *opengl_context_create(const OpenGLRenderer *renderer, const LSWindow *window) {
 	OpenGLContext *context = ls_malloc(sizeof(OpenGLContext));
 
 #if defined(EGL_ENABLED)
-	if (opengl_egl_enabled()) {
+	if (opengl_egl_enabled(renderer)) {
 		context->egl = egl_context_create(window);
 		if (context->egl) {
 			context->type = EGL_CONTEXT;
@@ -42,8 +42,8 @@ OpenGLContext *opengl_context_create(const LSWindow *window) {
 #endif // EGL_ENABLED
 
 #if defined(WGL_ENABLED)
-	if (opengl_wgl_enabled()) {
-		context->wgl = wgl_context_create(window);
+	if (opengl_wgl_enabled(renderer)) {
+		context->wgl = wgl_context_create(renderer, window);
 		if (context->wgl) {
 			context->type = WGL_CONTEXT;
 			return context;

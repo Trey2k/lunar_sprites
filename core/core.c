@@ -6,7 +6,8 @@
 #include "core/log.h"
 #include "core/types/string.h"
 
-struct LunarSprites {
+struct LSCore {
+	FlagManager *flag_manager;
 	EventManager *event_manager;
 	InputManager *input_manager;
 	OS *os;
@@ -16,141 +17,84 @@ struct LunarSprites {
 	FlagValue *log_level;
 };
 
-static struct LunarSprites ls;
+static void core_check_flags(const LSCore *core);
 
-static void core_check_flags();
+LSCore *core_create(FlagManager *flag_manager) {
+	LSCore *core = ls_malloc(sizeof(LSCore));
 
-void core_init() {
-	ls_flags_init();
+	core->flag_manager = flag_manager;
 
-	ls.log_level = ls_register_flag("log-level", FLAG_TYPE_STRING, (FlagValue){ .string = "INFO" },
+	core->log_level = flag_manager_register(core->flag_manager, "log-level", FLAG_TYPE_STRING, (FlagValue){ .str = "INFO" },
 			"The log level to use. Valid values are `INFO`, `DEBUG`, `WARNING` and `ERROR`");
 
-	ls.event_manager = ls_create_event_manager();
-	LS_ASSERT(ls.event_manager);
+	core->event_manager = event_manager_create();
+	LS_ASSERT(core->event_manager);
 
-	ls.os = ls_create_os();
-	LS_ASSERT(ls.os);
+	core->input_manager = ls_create_input_manager(core->event_manager);
+	LS_ASSERT(core->input_manager);
 
-	ls.input_manager = ls_create_input_manager(ls.event_manager);
-	LS_ASSERT(ls.input_manager);
+	core->os = ls_create_os(core->input_manager);
+	LS_ASSERT(core->os);
+
+	return core;
 }
 
-void core_start(int32 argc, char *argv[]) {
-	ls_parse_flags(argc, argv);
-	core_check_flags();
+void core_start(const LSCore *core) {
+	core_check_flags(core);
 }
 
-void core_poll() {
-	input_poll(ls.input_manager);
+void core_poll(const LSCore *core) {
+	input_poll(core->input_manager);
 }
 
-void core_deinit() {
-	ls_destroy_os(ls.os);
-	ls.os = NULL;
+void core_destroy(LSCore *core) {
+	ls_destroy_os(core->os);
+	core->os = NULL;
 
-	input_manager_destroy(ls.input_manager);
-	ls.input_manager = NULL;
+	input_manager_destroy(core->input_manager);
+	core->input_manager = NULL;
 
-	ls_destroy_event_manager(ls.event_manager);
-	ls.event_manager = NULL;
+	event_manager_destroy(core->event_manager);
+	core->event_manager = NULL;
 
-	ls_flags_deinit();
+	flag_manager_destroy(core->flag_manager);
+	core->flag_manager = NULL;
 }
 
-const EventManager *ls_get_event_manager() {
-	return ls.event_manager;
+FlagManager *core_get_flag_manager(const LSCore *core) {
+	return core->flag_manager;
 }
 
-const InputManager *core_get_input_manager() {
-	return ls.input_manager;
+InputManager *core_get_input_manager(const LSCore *core) {
+	return core->input_manager;
 }
 
-const OS *ls_get_os() {
-	return ls.os;
+const EventManager *core_get_event_manager(const LSCore *core) {
+	return core->event_manager;
 }
 
-void core_add_event_handler(EventHandler handler, void *user_data) {
-	events_add_handler(ls.event_manager, handler, user_data);
+const OS *core_get_os(const LSCore *core) {
+	return core->os;
 }
 
-void core_set_active_window(const LSWindow *window) {
-	ls.active_window = window;
+void core_add_event_handler(const LSCore *core, EventHandler handler, void *user_data) {
+	event_manager_add_handler(core->event_manager, handler, user_data);
 }
 
-void core_handle_press(LSKeycode keycode) {
-	LS_ASSERT(ls.active_window);
-	LS_ASSERT(ls.input_manager);
+static void core_check_flags(const LSCore *core) {
+	ls_str_to_upper(core->log_level->str);
 
-	input_handle_press(ls.input_manager, ls.active_window, keycode);
-}
-
-void core_handle_release(LSKeycode keycode) {
-	LS_ASSERT(ls.active_window);
-	LS_ASSERT(ls.input_manager);
-
-	input_handle_release(ls.input_manager, ls.active_window, keycode);
-}
-
-void core_handle_mouse_press(LSMouseButton button, Vector2i position) {
-	LS_ASSERT(ls.active_window);
-	LS_ASSERT(ls.input_manager);
-
-	input_handle_mouse_press(ls.input_manager, ls.active_window, button, position);
-}
-
-void core_handle_mouse_release(LSMouseButton button, Vector2i position) {
-	LS_ASSERT(ls.active_window);
-	LS_ASSERT(ls.input_manager);
-
-	input_handle_mouse_release(ls.input_manager, ls.active_window, button, position);
-}
-
-void core_handle_mouse_move(Vector2i position) {
-	LS_ASSERT(ls.active_window);
-	LS_ASSERT(ls.input_manager);
-
-	input_handle_mouse_move(ls.input_manager, ls.active_window, position);
-}
-
-void core_handle_mouse_enter(Vector2i position) {
-	LS_ASSERT(ls.active_window);
-	LS_ASSERT(ls.input_manager);
-
-	input_handle_mouse_enter(ls.input_manager, ls.active_window, position);
-}
-
-void core_handle_mouse_leave(Vector2i position) {
-	LS_ASSERT(ls.active_window);
-	LS_ASSERT(ls.input_manager);
-
-	input_handle_mouse_leave(ls.input_manager, ls.active_window, position);
-}
-
-void core_handle_window_close() {
-	LS_ASSERT(ls.active_window);
-	LS_ASSERT(ls.event_manager);
-
-	Event e;
-	e.type = EVENT_WINDOW_CLOSE;
-	e.window = ls.active_window;
-	events_emit(ls.event_manager, &e);
-}
-
-static void core_check_flags() {
-	ls_str_to_upper(ls.log_level->string);
-
-	ls_str_to_upper(ls.log_level->string);
-	if (ls_str_equals(ls.log_level->string, "INFO")) {
+	ls_str_to_upper(core->log_level->str);
+	if (ls_str_equals(core->log_level->str, "INFO")) {
 		ls_set_log_level(LOG_LEVEL_INFO);
-	} else if (ls_str_equals(ls.log_level->string, "DEBUG")) {
+	} else if (ls_str_equals(core->log_level->str, "DEBUG")) {
 		ls_set_log_level(LOG_LEVEL_DEBUG);
-	} else if (ls_str_equals(ls.log_level->string, "WARNING")) {
+	} else if (ls_str_equals(core->log_level->str, "WARNING")) {
 		ls_set_log_level(LOG_LEVEL_WARNING);
-	} else if (ls_str_equals(ls.log_level->string, "ERROR")) {
+	} else if (ls_str_equals(core->log_level->str, "ERROR")) {
 		ls_set_log_level(LOG_LEVEL_ERROR);
 	} else {
-		ls_log_fatal("Invalid log level `%s`.\n", ls.log_level->string);
+		ls_log_fatal("Invalid log level `%s`.\n", core->log_level->str);
 	}
-	ls_free(ls.log_level->string);
+	ls_free(core->log_level->str);
 }

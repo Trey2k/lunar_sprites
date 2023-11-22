@@ -1,6 +1,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
+#include "core/types/slice.h"
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
 
@@ -25,9 +26,13 @@ typedef union {
 
 typedef union {
 	int32 i32;
+	int64 i64;
 	uint32 u32;
+	uint64 u64;
 	float32 f32;
+	float64 f64;
 	String str;
+
 	void *ptr;
 } HashtableValue;
 
@@ -36,20 +41,25 @@ typedef struct Hashtable Hashtable;
 // key_type must always be the same for a given hash table.
 // initial_size is the initial number of elements the hash table can hold.
 // should_free determines whether the hash table should free the value. Assumes value is a pointer.
-Hashtable *hashtable_create(HashtableKeyType key_type, size_t initial_size, bool should_free);
-void hashtable_destroy(Hashtable *table);
+LS_EXPORT Hashtable *hashtable_create(HashtableKeyType key_type, size_t initial_size, bool should_free);
+LS_EXPORT void hashtable_destroy(Hashtable *table);
 
-void hashtable_set(Hashtable *table, HashtableKey key, HashtableValue value);
-void hashtable_clear(Hashtable *table);
+LS_EXPORT void hashtable_set(Hashtable *table, HashtableKey key, HashtableValue value);
+LS_EXPORT void hashtable_clear(Hashtable *table);
 
-bool hashtable_remove(Hashtable *table, HashtableKey key);
-bool hashtable_contains(const Hashtable *table, HashtableKey key);
+LS_EXPORT bool hashtable_remove(Hashtable *table, HashtableKey key);
+LS_EXPORT bool hashtable_contains(const Hashtable *table, HashtableKey key);
 
-HashtableValue hashtable_get(const Hashtable *table, HashtableKey key);
+LS_EXPORT HashtableValue hashtable_get(const Hashtable *table, HashtableKey key);
 
-size_t hashtable_get_size(const Hashtable *table);
-size_t hashtable_get_capacity(const Hashtable *table);
+LS_EXPORT size_t hashtable_get_size(const Hashtable *table);
+LS_EXPORT size_t hashtable_get_capacity(const Hashtable *table);
 
-int32 hashtable_get_collisions(const Hashtable *table);
+LS_EXPORT int32 hashtable_get_collisions(const Hashtable *table);
+
+// Returns a slice of the keys in the hash table.
+// The slice should be destroyed by the caller.
+// The slize will contain HashtableKey references.
+LS_EXPORT Slice *hashtable_get_keys(const Hashtable *table);
 
 #endif // HASHTABLE_H

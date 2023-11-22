@@ -1,19 +1,16 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "core/input/input_manager.h"
-#include "core/os/os.h"
-#include "core/types/string.h"
-#include "core/types/typedefs.h"
-#include "core/types/vector/vector2.h"
-#include "core/window.h"
+#include "core/core.h"
+
+#include "renderer/renderer.h"
 
 #if defined(LINUXBSD_ENABLED)
 typedef unsigned long LSNativeWindow;
 #elif defined(WINDOWS_ENABLED)
 typedef void *LSNativeWindow;
 #elif defined(WEB_ENABLED)
-typedef int32 LSNativeWindow;
+typedef int LSNativeWindow;
 #endif // LINUXBSD_ENABLED
 
 typedef struct {
@@ -28,25 +25,25 @@ typedef struct {
 	bool root_window;
 } WindowConfig;
 
-LSWindow *renderer_create_window(WindowConfig config);
-void window_destroy(LSWindow *window);
+LS_EXPORT LSWindow *renderer_create_window(const Renderer *renderer, WindowConfig config);
+LS_EXPORT void window_destroy(LSWindow *window);
 
-LSNativeWindow window_get_native_window(const LSWindow *window);
+LS_EXPORT LSNativeWindow window_get_native_window(const LSWindow *window);
 
-void window_poll(const LSWindow *window);
+LS_EXPORT void window_poll(const LSWindow *window);
 
-void window_set_title(LSWindow *window, const char *title);
-void window_set_size(LSWindow *window, int32 width, int32 height);
+LS_EXPORT void window_set_title(LSWindow *window, const char *title);
+LS_EXPORT void window_set_size(LSWindow *window, int32 width, int32 height);
 
-void window_make_current(const LSWindow *window);
-void window_swap_buffers(const LSWindow *window);
+LS_EXPORT void window_make_current(const LSWindow *window);
+LS_EXPORT void window_swap_buffers(const LSWindow *window);
 
-void window_set_fullscreen(LSWindow *window, bool fullscreen);
+LS_EXPORT void window_set_fullscreen(LSWindow *window, bool fullscreen);
 
-void window_show(LSWindow *window);
-void window_hide(LSWindow *window);
+LS_EXPORT void window_show(LSWindow *window);
+LS_EXPORT void window_hide(LSWindow *window);
 
-bool window_is_visible(const LSWindow *window);
-bool window_is_fullscreen(const LSWindow *window);
+LS_EXPORT bool window_is_visible(const LSWindow *window);
+LS_EXPORT bool window_is_fullscreen(const LSWindow *window);
 
 #endif // WINDOW_H

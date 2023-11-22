@@ -6,7 +6,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 
 	window->title = config.title;
@@ -15,21 +15,21 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 	window->hidden = true;
 	window->fullscreen = false;
 
+	window->input_manager = os->input_manager;
+
 	window->window = CreateWindowEx(
 			WS_EX_CLIENTEDGE,
 			LS_WIN_CLASS_NAME,
 			window->title,
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT, CW_USEDEFAULT, window->width, window->height,
-			NULL, NULL, NULL, NULL);
+			NULL, NULL, NULL, window);
 	if (!window->window) {
 		ls_log_fatal("Failed to create window!\n");
 		return NULL;
 	}
 
 	platform_window_set_fullscreen(window, config.fullscreen);
-
-	SetWindowLongA(window->window, GWLP_USERDATA, (LONG_PTR)window);
 
 	if (!config.hidden) {
 		platform_window_show(window);

@@ -1,10 +1,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "core/flags.h"
-#include "core/os/os.h"
-#include "core/types/string.h"
-#include "core/types/typedefs.h"
+#include "core/core.h"
 
 #if defined(OPENGL_ENABLED)
 #include "renderer/opengl/renderer.h"
@@ -17,22 +14,22 @@ typedef enum {
 	RENDERER_BACKEND_OPENGL,
 } RendererBackend;
 
-typedef struct {
-	const OS *os;
+typedef struct Renderer Renderer;
 
-	FlagValue *backend_flag;
+Renderer *renderer_create(LSCore *core);
+void renderer_start(Renderer *renderer);
+void renderer_destroy(Renderer *renderer);
 
-	RendererBackend backend;
-} Renderer;
+LS_EXPORT void renderer_set_clear_color(const Renderer *renderer, float32 r, float32 g, float32 b, float32 a);
+LS_EXPORT void renderer_clear(const Renderer *renderer);
 
-void renderer_init();
-void renderer_start(const OS *os);
-void renderer_deinit();
+LS_EXPORT RendererBackend renderer_get_backend(const Renderer *renderer);
 
-void renderer_set_clear_color(float32 r, float32 g, float32 b, float32 a);
-void renderer_clear();
+LSCore *renderer_get_core(const Renderer *renderer);
 
-RendererBackend renderer_get_backend();
+#if defined(OPENGL_ENABLED)
+OpenGLRenderer *renderer_get_opengl(const Renderer *renderer);
+#endif
 
 _FORCE_INLINE_ String renderer_backend_to_string(RendererBackend backend) {
 	switch (backend) {

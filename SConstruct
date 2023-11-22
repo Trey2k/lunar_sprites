@@ -296,6 +296,8 @@ if selected_platform in platform_list:
     import detect
 
     env = env_base.Clone()
+    
+    env.Append(CPPDEFINES=["LS_EXPORT_SYMBOLS"])
 
     # Default num_jobs to local cpu count if not user specified.
     # SCons has a peculiarity where user-specified options won't be overridden
@@ -470,6 +472,7 @@ if selected_platform in platform_list:
 
     # Configure compiler warnings
     if env.msvc:  # MSVC
+        # Export symbols
         if env["warnings"] == "none":
             env.Append(CCFLAGS=["/w"])
         else:

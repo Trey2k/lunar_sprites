@@ -3,10 +3,9 @@
 int32 main(int32 argc, char *argv[]) {
 	ls_main_init(argc, argv);
 
-	while (!ls_should_quit()) {
+	while (!ls_should_stop()) {
 		ls_main_loop();
 	}
 
-	ls_main_deinit();
-	return 0;
+	return ls_main_deinit();
 }

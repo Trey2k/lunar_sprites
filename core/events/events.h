@@ -1,7 +1,6 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
-#include "core/events/event_manager.h"
 #include "core/input/keycodes.h"
 #include "core/types/typedefs.h"
 #include "core/types/vector/vector2.h"
@@ -43,7 +42,7 @@ typedef enum {
 	EVENT_WINDOW_CLOSE,
 } EventType;
 
-struct Event {
+typedef struct {
 	EventType type;
 	union {
 		EventKey key;
@@ -52,6 +51,6 @@ struct Event {
 	};
 
 	bool handled;
-};
+} Event;
 
 #endif // EVENTS_H

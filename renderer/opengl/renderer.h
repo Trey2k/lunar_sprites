@@ -1,21 +1,26 @@
 #ifndef OPENGL_RENDERER_H
 #define OPENGL_RENDERER_H
 
-#include "core/os/os.h"
+#include "core/core.h"
 
-void opengl_renderer_init();
-void opengl_renderer_start(const OS *os);
-void opengl_renderer_deinit();
+#include "renderer/renderer_interface.h"
 
-void opengl_set_clear_color(float32 r, float32 g, float32 b, float32 a);
-void opengl_clear();
+typedef struct OpenGLRenderer OpenGLRenderer;
+
+OpenGLRenderer *opengl_renderer_create(const LSCore *core);
+void opengl_renderer_start(OpenGLRenderer *renderer);
+void opengl_renderer_destroy(OpenGLRenderer *renderer);
+
+void opengl_register_methods(RendererInterface *renderer_interface);
+
+const LSCore *opengl_renderer_get_core(const OpenGLRenderer *renderer);
 
 #if defined(WGL_ENABLED)
-bool opengl_wgl_enabled();
+bool opengl_wgl_enabled(const OpenGLRenderer *renderer);
 #endif // WGL_ENABLED
 
 #if defined(EGL_ENABLED)
-bool opengl_egl_enabled();
+bool opengl_egl_enabled(const OpenGLRenderer *renderer);
 #endif // EGL_ENABLED
 
 #endif // OPENGL_RENDERER_H

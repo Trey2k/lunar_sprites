@@ -123,12 +123,9 @@ static HashtableEntry *hashtable_get_entry(const Hashtable *hashtable, Hashtable
 
 	const size_t index = hashtable_index(hashtable, key);
 	HashtableEntry *entry = &hashtable->entries[index];
-
-	if (!entry->key.u32 || keys_match(hashtable->key_type, entry->key, key)) {
-		return entry;
+	if (!entry->key.u32) {
+		return NULL;
 	}
-
-	entry = entry->next;
 
 	while (entry) {
 		if (keys_match(hashtable->key_type, entry->key, key)) {
@@ -215,44 +212,24 @@ bool hashtable_remove(Hashtable *hashtable, HashtableKey key) {
 
 	const size_t index = hashtable_index(hashtable, key);
 	HashtableEntry *entry = &hashtable->entries[index];
-
 	if (!entry->key.u32) {
 		return false;
 	}
 
-	if (keys_match(hashtable->key_type, entry->key, key)) {
-		HashtableEntry *next = entry->next;
+	while (entry) {
+		if (keys_match(hashtable->key_type, entry->key, key)) {
+			HashtableEntry *next = entry->next;
 
-		if (hashtable->should_free && entry->value.ptr) {
-			ls_free(entry->value.ptr);
-		}
-
-		hashtable->size--;
-
-		if (next) {
-			hashtable->entries[index] = *next;
-			ls_free(next);
-		}
-
-		if (hashtable->size < hashtable->capacity * 0.25f) {
-			hashtable_resize(hashtable, hashtable->capacity / 2);
-		}
-
-		return true;
-	}
-
-	while (entry->next) {
-		if (keys_match(hashtable->key_type, entry->next->key, key)) {
-			HashtableEntry *next = entry->next->next;
-
-			if (hashtable->should_free && entry->next->value.ptr) {
-				ls_free(entry->next->value.ptr);
+			if (hashtable->should_free && entry->value.ptr) {
+				ls_free(entry->value.ptr);
 			}
 
-			ls_free(entry->next);
-
-			entry->next = next;
 			hashtable->size--;
+
+			if (next) {
+				hashtable->entries[index] = *next;
+				ls_free(next);
+			}
 
 			if (hashtable->size < hashtable->capacity * 0.25f) {
 				hashtable_resize(hashtable, hashtable->capacity / 2);
@@ -300,4 +277,22 @@ int32 hashtable_get_collisions(const Hashtable *hashtable) {
 	LS_ASSERT(hashtable);
 
 	return hashtable->collision_count;
+}
+
+Slice *hashtable_get_keys(const Hashtable *table) {
+	LS_ASSERT(table);
+
+	Slice *slice = slice_create(table->size, false);
+
+	for (size_t i = 0; i < table->capacity; i++) {
+		HashtableEntry *entry = &table->entries[i];
+		while (entry) {
+			if (entry->key.u32) {
+				slice_append(slice, SLICE_VAL(ptr, &entry->key));
+			}
+			entry = entry->next;
+		}
+	}
+
+	return slice;
 }

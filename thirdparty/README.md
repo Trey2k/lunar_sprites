@@ -5,7 +5,7 @@
 Used to generate WGL, EGL and GLES3 extension loaders.
 
 - Upstream: https://github.com/Dav1dde/glad
-- Version: 2.0.4 (2348b07c1ab4504d60398713781d8a57880234fa, 2023)
+- Version: 2.0.4 (2348b07c1ab4504d60398713781d8a57880234fa)
 - License: CC0 1.0 and Apache 2.0
 - Required: Yes
 

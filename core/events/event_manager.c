@@ -9,7 +9,7 @@ struct EventManager {
 	void **user_data;
 };
 
-EventManager *ls_create_event_manager() {
+EventManager *event_manager_create() {
 	EventManager *event_manager = ls_malloc(sizeof(EventManager));
 	event_manager->handler_count = 0;
 	event_manager->handlers = NULL;
@@ -18,7 +18,7 @@ EventManager *ls_create_event_manager() {
 	return event_manager;
 }
 
-void ls_destroy_event_manager(EventManager *event_manager) {
+void event_manager_destroy(EventManager *event_manager) {
 	LS_ASSERT(event_manager);
 
 	ls_free(event_manager->handlers);
@@ -26,7 +26,7 @@ void ls_destroy_event_manager(EventManager *event_manager) {
 	ls_free(event_manager);
 }
 
-void events_emit(const EventManager *event_manager, Event *event) {
+void event_manager_emit(const EventManager *event_manager, Event *event) {
 	for (size_t i = event_manager->handler_count; i > 0; i--) {
 		event_manager->handlers[i - 1](event, event_manager->user_data[i - 1]);
 		if (event->handled) {
@@ -35,7 +35,7 @@ void events_emit(const EventManager *event_manager, Event *event) {
 	}
 }
 
-void events_add_handler(EventManager *event_manager, EventHandler handler, void *user_data) {
+void event_manager_add_handler(EventManager *event_manager, EventHandler handler, void *user_data) {
 	LS_ASSERT(event_manager);
 	LS_ASSERT(handler);
 

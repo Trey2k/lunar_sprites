@@ -277,7 +277,7 @@ def detect_modules(search_path, recursive=False):
 def is_module(path):
     if not os.path.isdir(path):
         return False
-    must_exist = ["register_types.h", "SCsub", "config.py"]
+    must_exist = ["module_initialize.h", "SCsub", "config.py"]
     for f in must_exist:
         if not os.path.exists(os.path.join(path, f)):
             return False
@@ -290,10 +290,10 @@ def write_modules(modules):
 
     for name, path in modules.items():
         try:
-            with open(os.path.join(path, "register_types.h")):
-                includes_c += '#include "' + path + '/register_types.h"\n'
+            with open(os.path.join(path, "module_initialize.h")):
+                includes_c += '#include "' + path + '/module_initialize.h"\n'
                 initialize_c += "#ifdef MODULE_" + name.upper() + "_ENABLED\n"
-                initialize_c += "\tinitialize_" + name + "_module(p_level);\n"
+                initialize_c += "\tinitialize_" + name + "_module(p_level, p_arg);\n"
                 initialize_c += "#endif\n"
                 uninitialize_c += "#ifdef MODULE_" + name.upper() + "_ENABLED\n"
                 uninitialize_c += "\tuninitialize_" + name + "_module(p_level);\n"
@@ -303,13 +303,13 @@ def write_modules(modules):
 
     modules_c = """
 /* THIS FILE IS GENERATED DO NOT EDIT */
-#include "register_module_types.h"
+#include "initialize_modules.h"
 
 #include "modules/modules_enabled.gen.h"
 
 %s
 
-void initialize_modules(ModuleInitializationLevel p_level) {
+void initialize_modules(ModuleInitializationLevel p_level, void *p_arg) {
 %s
 }
 
@@ -322,7 +322,7 @@ void uninitialize_modules(ModuleInitializationLevel p_level) {
         uninitialize_c,
     )
 
-    with open("modules/register_module_types.gen.c", "w") as f:
+    with open("modules/initialize_modules.gen.c", "w") as f:
         f.write(modules_c)
 
 

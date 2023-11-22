@@ -14,6 +14,8 @@ struct PlatformWindow {
 
 	bool fullscreen;
 	bool hidden;
+
+	InputManager *input_manager;
 };
 
 #endif // WINDOWS_WINDOW_H

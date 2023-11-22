@@ -50,8 +50,7 @@ typedef struct {
 
 } WebWindowEvent;
 
-PlatformWindow *
-platform_create_window(const PlatformOS *os, WindowConfig config) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 
 	window->title = config.title;
@@ -62,6 +61,7 @@ platform_create_window(const PlatformOS *os, WindowConfig config) {
 	window->hidden = false;
 	window->fullscreen = false;
 	window->os = os;
+	window->renderer = renderer;
 
 	window->events = slice_create(16, true);
 
@@ -79,7 +79,7 @@ platform_create_window(const PlatformOS *os, WindowConfig config) {
 		window->canvas_id = ls_str_format("#window_%d", sub_window_count++);
 	}
 
-	RendererBackend renderer_backend = renderer_get_backend();
+	RendererBackend renderer_backend = renderer_get_backend(renderer);
 	switch (renderer_backend) {
 		case RENDERER_BACKEND_NONE:
 			break;
@@ -111,7 +111,7 @@ platform_create_window(const PlatformOS *os, WindowConfig config) {
 }
 
 void platform_destroy_window(PlatformWindow *window) {
-	RendererBackend renderer_backend = renderer_get_backend();
+	RendererBackend renderer_backend = renderer_get_backend(window->renderer);
 	switch (renderer_backend) {
 		case RENDERER_BACKEND_NONE:
 			break;
@@ -141,31 +141,31 @@ void platform_window_poll(PlatformWindow *window) {
 
 		switch (event->type) {
 			case WEBW_EVENT_KEYDOWN: {
-				core_handle_press(event->keycode);
+				input_handle_press(window->input_manager, event->keycode);
 			} break;
 
 			case WEBW_EVENT_KEYUP: {
-				core_handle_release(event->keycode);
+				input_handle_release(window->input_manager, event->keycode);
 			} break;
 
 			case WEBW_EVENT_MOUSEDOWN: {
-				core_handle_mouse_press(event->mbutton, event->position);
+				input_handle_mouse_press(window->input_manager, event->mbutton, event->position);
 			} break;
 
 			case WEBW_EVENT_MOUSEUP: {
-				core_handle_mouse_release(event->mbutton, event->position);
+				input_handle_mouse_release(window->input_manager, event->mbutton, event->position);
 			} break;
 
 			case WEBW_EVENT_MOUSEMOVE: {
-				core_handle_mouse_move(event->position);
+				input_handle_mouse_move(window->input_manager, event->position);
 			} break;
 
 			case WEBW_EVENT_MOUSEENTER: {
-				core_handle_mouse_enter(event->position);
+				input_handle_mouse_enter(window->input_manager, event->position);
 			} break;
 
 			case WEBW_EVENT_MOUSELEAVE: {
-				core_handle_mouse_leave(event->position);
+				input_handle_mouse_leave(window->input_manager, event->position);
 			} break;
 
 			default:

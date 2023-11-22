@@ -54,9 +54,7 @@ def configure(env: "Environment"):
         )
         sys.exit(255)
 
-    ## Build type
-
-    if env.dev_build:
+    if env["debug_symbols"]:
         env.Append(LINKFLAGS=["-rdynamic"])
 
     host_is_64_bit = sys.maxsize > 2**32
