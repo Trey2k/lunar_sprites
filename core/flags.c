@@ -28,7 +28,7 @@ struct FlagManager {
 static void parse_flag_value(struct Flag *flag, String flag_name, String raw_value);
 
 FlagManager *flag_manager_create() {
-	FlagManager *manager = ls_malloc(sizeof(FlagManager));
+	FlagManager *manager = ls_calloc(1, sizeof(FlagManager));
 	manager->help = flag_manager_register(manager, "help", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Prints this help message.");
 	return manager;
 }

@@ -54,8 +54,8 @@ def configure(env: "Environment"):
         )
         sys.exit(255)
 
-    # Export symbols
-    env.Append(LINKFLAGS=["-fvisibility=hidden", "-rdynamic"])
+    if env["debug_symbols"]:
+        env.Append(LINKFLAGS=["-rdynamic"])
 
     host_is_64_bit = sys.maxsize > 2**32
     if host_is_64_bit and env["arch"] == "x86_32":

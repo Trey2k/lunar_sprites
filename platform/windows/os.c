@@ -46,9 +46,16 @@ LSNativeDisplayType platform_get_native_display(const PlatformOS *os) {
 
 static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param, int64 l_param) {
 	PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
-	LS_ASSERT(window);
 
 	switch (message) {
+		case WM_CREATE: {
+			CREATESTRUCT *pCreate = (CREATESTRUCT *)l_param;
+			PlatformWindow *window = (PlatformWindow *)pCreate->lpCreateParams;
+
+			// Set the GWLP_USERDATA value
+			SetWindowLongPtr(native_window, GWLP_USERDATA, (LONG_PTR)window);
+		};
+
 		case WM_DESTROY: {
 			PostQuitMessage(0);
 			return 0;
@@ -150,16 +157,16 @@ static char *windows_path_add(String path1, String path2) {
 	size_t path1_length = ls_str_length(path1);
 	size_t path2_length = ls_str_length(path2);
 
-	if (ls_str_ends_with(path1, "/")) {
+	if (ls_str_ends_with(path1, "/") || ls_str_ends_with(path1, "\\")) {
 		path1_length--;
 	}
 
-	if (ls_str_starts_with(path2, "/")) {
+	if (ls_str_starts_with(path2, "/") || ls_str_starts_with(path2, "\\")) {
 		path2++;
 		path2_length--;
 	}
 
-	if (ls_str_ends_with(path2, "/")) {
+	if (ls_str_ends_with(path2, "/") || ls_str_ends_with(path2, "\\")) {
 		path2_length--;
 	}
 
@@ -170,13 +177,19 @@ static char *windows_path_add(String path1, String path2) {
 	ls_str_copy_to(path + path1_length + 1, path2, path2_length + 1);
 	path[path_size - 1] = '\0';
 
+	for (size_t i = 0; i < path_size; i++) {
+		if (path[i] == '/') {
+			path[i] = '\\';
+		}
+	}
+
 	return path;
 }
 
 static char *windows_path_get_directory(String path) {
 	size_t length = ls_str_length(path);
 	size_t i = length - 1;
-	while (i > 0 && path[i] != '/') {
+	while (i > 0 && path[i] != '/' && path[i] != '\\') {
 		i--;
 	}
 
@@ -194,7 +207,7 @@ static char *windows_path_get_directory(String path) {
 static char *windows_path_get_filename(String path) {
 	size_t length = ls_str_length(path);
 	size_t i = length - 1;
-	while (i > 0 && path[i] != '/') {
+	while (i > 0 && path[i] != '/' && path[i] != '\\') {
 		i--;
 	}
 
@@ -239,9 +252,10 @@ static char *windows_path_to_absolute(String path) {
 
 static Slice *windows_list_directory(String path) {
 	Slice *files = slice_create(16, true);
-
+	char *search_path = windows_path_add(path, "*");
 	WIN32_FIND_DATA find_data;
-	HANDLE find_handle = FindFirstFile(path, &find_data);
+	HANDLE find_handle = FindFirstFile(search_path, &find_data);
+	ls_free(search_path);
 	if (find_handle == INVALID_HANDLE_VALUE) {
 		return files;
 	}

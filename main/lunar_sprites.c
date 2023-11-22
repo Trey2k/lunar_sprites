@@ -56,12 +56,12 @@ void ls_main_init(int32 argc, char *argv[]) {
 
 	main.input_manager = core_get_input_manager(main.core);
 
-	core_start(main.core);
-
 	// Parse all flags.
 	flag_manager_parse(main.flag_manager, argc, argv, false);
 
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_FLAGS, NULL);
+
+	core_start(main.core);
 
 	if (!main.application_interface.init) {
 		ls_log_fatal("No application interface set.\n");

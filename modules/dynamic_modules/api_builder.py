@@ -8,7 +8,6 @@ state = Enum('State', ['Normal', 'Comment', 'MultiComment', 'Macro', 'Typedef', 
 # List of headers to include in the API header
 # The order of the headers is important
 source_headers = [
-    'core/api.h',
     'core/version_info.gen.h',
     'core/version.h',
     'core/types/typedefs.h',
@@ -234,7 +233,7 @@ def get_header_content(header):
 def make_exports(exports, make_dynamic_module_gen = False):
     exports = exports.replace('LS_EXPORT ', '')
     exports_header_txt = exports
-    export_source_txt = "/* THIS FILE IS GENERATED DO NOT EDIT */\n#include \"@API_HEADER@\"\n\n\n"
+    export_source_txt = "/* THIS FILE IS GENERATED DO NOT EDIT */\n#include \"@API_HEADER@\"\n\n"
 
     method_typedefs = ""
     api_interface_typedef = "struct LSAPIInterface {\n"
@@ -281,7 +280,7 @@ def make_exports(exports, make_dynamic_module_gen = False):
 
             api_interface_typedef += "\t%s_impl_%s;\n" % (var_type, var_name)
             api_interface_impl += "extern %s_impl_%s;\n" % (var_type, var_name)
-            export_source_txt += "%s _impl_%s = NULL;\n" % (var_type, var_name)
+            export_source_txt += "%s_impl_%s = NULL;\n" % (var_type, var_name)
             api_impl_methods.append(var_name)
             exports_header_txt = exports_header_txt.replace(line, "#define %s_impl_%s" % (var_name, var_name))
         else:
@@ -391,6 +390,14 @@ def make_api_header(make_dynamic_module_gen = False):
 #else
 #define LS_IMPORT
 #endif // defined(_MSC_VER)
+
+#if defined(_MSC_VER)
+#define LS_EXPORT __declspec(dllexport)
+#elif defined(__GNUC__)
+#define LS_EXPORT __attribute__((visibility("default")))
+#else // _MSC_VER
+#define LS_EXPORT
+#endif // _MSC_VER
  
 """
  

@@ -18,6 +18,7 @@
 *.exe
 *.out
 *.app
+*.exp
 
 # Temporary files
 *~
