@@ -43,7 +43,7 @@ OpenGLContext *opengl_context_create(const OpenGLRenderer *renderer, const LSWin
 
 #if defined(WGL_ENABLED)
 	if (opengl_wgl_enabled(renderer)) {
-		context->wgl = wgl_context_create(window);
+		context->wgl = wgl_context_create(renderer, window);
 		if (context->wgl) {
 			context->type = WGL_CONTEXT;
 			return context;

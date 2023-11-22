@@ -19,10 +19,10 @@ struct LSCore {
 
 static void core_check_flags(const LSCore *core);
 
-LSCore *core_create() {
+LSCore *core_create(FlagManager *flag_manager) {
 	LSCore *core = ls_malloc(sizeof(LSCore));
 
-	core->flag_manager = flag_manager_create();
+	core->flag_manager = flag_manager;
 
 	core->log_level = flag_manager_register(core->flag_manager, "log-level", FLAG_TYPE_STRING, (FlagValue){ .str = "INFO" },
 			"The log level to use. Valid values are `INFO`, `DEBUG`, `WARNING` and `ERROR`");
@@ -39,8 +39,7 @@ LSCore *core_create() {
 	return core;
 }
 
-void core_start(const LSCore *core, int32 argc, char *argv[]) {
-	flag_manager_parse(core->flag_manager, argc, argv);
+void core_start(const LSCore *core) {
 	core_check_flags(core);
 }
 
@@ -70,7 +69,7 @@ InputManager *core_get_input_manager(const LSCore *core) {
 	return core->input_manager;
 }
 
-const EventManager *ls_get_event_manager(const LSCore *core) {
+const EventManager *core_get_event_manager(const LSCore *core) {
 	return core->event_manager;
 }
 

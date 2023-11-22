@@ -13,10 +13,14 @@ LS_EXPORT size_t ls_str_hash_djb2(String string);
 LS_EXPORT bool ls_str_is_empty(String string);
 LS_EXPORT bool ls_str_contains(String string, String substring);
 LS_EXPORT bool ls_str_equals(String a, String b);
+LS_EXPORT bool ls_str_ends_with(String string, String substring);
+LS_EXPORT bool ls_str_starts_with(String string, String substring);
 
 LS_EXPORT char *ls_str_copy(String string);
+LS_EXPORT void ls_str_copy_to(char *buffer, String string, size_t buffer_size);
 LS_EXPORT char *ls_str_concat(String a, ...);
 LS_EXPORT char *ls_str_format(String format, ...);
+LS_EXPORT char *ls_str_replace(String string, String old, String new);
 
 LS_EXPORT String ls_str_char(String str, int32 c);
 LS_EXPORT String ls_str_find(String str, String substr);

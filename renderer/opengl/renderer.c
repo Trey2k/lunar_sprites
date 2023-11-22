@@ -34,7 +34,7 @@ OpenGLRenderer *opengl_renderer_create(const LSCore *core) {
 #endif // EGL_ENABLED
 
 #if defined(WGL_ENABLED)
-	opengl.wgl_enabled = wgl_init(core_get_os(core));
+	renderer->wgl_enabled = wgl_init(core_get_os(core));
 #endif // WGL_ENABLED
 
 	return renderer;
@@ -59,6 +59,10 @@ void opengl_renderer_destroy(OpenGLRenderer *renderer) {
 void opengl_register_methods(RendererInterface *renderer_interface) {
 	renderer_interface->set_clear_color = opengl_set_clear_color;
 	renderer_interface->clear = opengl_clear;
+}
+
+const LSCore *opengl_renderer_get_core(const OpenGLRenderer *renderer) {
+	return renderer->core;
 }
 
 #if defined(EGL_ENABLED)

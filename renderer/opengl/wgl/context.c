@@ -16,11 +16,10 @@
 #include <wingdi.h>
 
 static bool choose_pixel_format(LSNativeWindow native_window, HDC device_context, PIXELFORMATDESCRIPTOR *pfd);
-static uint32 load_wgl(PIXELFORMATDESCRIPTOR *pfd);
+static uint32 load_wgl(const OpenGLRenderer *renderer, PIXELFORMATDESCRIPTOR *pfd);
 
-LSWGLContext *wgl_context_create(const LSWindow *window) {
+LSWGLContext *wgl_context_create(const OpenGLRenderer *renderer, const LSWindow *window) {
 	LS_ASSERT(window);
-
 	LSNativeWindow native_window = window_get_native_window(window);
 	HDC device_context = GetDC(native_window);
 	if (!device_context) {
@@ -35,7 +34,7 @@ LSWGLContext *wgl_context_create(const LSWindow *window) {
 	pfd.cColorBits = 32;
 	pfd.cDepthBits = 32;
 
-	int32 err = load_wgl(&pfd);
+	int32 err = load_wgl(renderer, &pfd);
 	if (err != 0) {
 		ReleaseDC(native_window, device_context);
 		ls_log(LOG_LEVEL_WARNING, "Failed to load . %lu\n", GetLastError());
@@ -150,15 +149,15 @@ static const WindowConfig TEMP_WINDOW_CONFIG = {
 	.fullscreen = false,
 };
 
-static uint32
-load_wgl(PIXELFORMATDESCRIPTOR *pfd) {
-	const PlatformOS *os = os_get_platform_os(ls_get_os());
+static uint32 load_wgl(const OpenGLRenderer *renderer, PIXELFORMATDESCRIPTOR *pfd) {
+	const OS *base_os = core_get_os(opengl_renderer_get_core(renderer));
+	const PlatformOS *os = os_get_platform_os(base_os);
 
 	// WGL requires us to create another window for the temporary context.
 	// We use PlatformWindow and not LSWindow as LSWindow will trigger context creation recureivly.
 
-	// TODO: Make this window invisible
-	PlatformWindow *window = platform_create_window(os, TEMP_WINDOW_CONFIG);
+	// Windows platform does not need the renderer reference.
+	PlatformWindow *window = platform_create_window(os, TEMP_WINDOW_CONFIG, NULL);
 	LSNativeWindow native_window = platform_window_get_native_window(window);
 	HDC device_context = GetDC(native_window);
 

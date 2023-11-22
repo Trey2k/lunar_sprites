@@ -26,7 +26,10 @@ typedef struct FlagManager FlagManager;
 
 FlagManager *flag_manager_create();
 void flag_manager_destroy(FlagManager *manager);
-void flag_manager_parse(FlagManager *manager, int argc, char *argv[]);
+
+// If lazy_parse is true, the flag manager will not error if an unknown flag is passed.
+// This is useful for early flag registration.
+void flag_manager_parse(FlagManager *manager, int argc, char *argv[], bool lazy_parse);
 
 LS_EXPORT FlagValue *flag_manager_register(FlagManager *manager, String flag_name, FlagType type, FlagValue default_value, String description);
 LS_EXPORT void flag_manager_print_help(const FlagManager *manager);

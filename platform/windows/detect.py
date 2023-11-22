@@ -337,6 +337,7 @@ def configure_msvc(env, vcvars_msvc_config):
         CPPDEFINES=[
             "MSVC_ENABLED",
             "WINDOWS_ENABLED",
+            "WIN32_LEAN_AND_MEAN",
             "WIN32",
             "WINVER=%s" % env["target_win_version"],
             "_WIN32_WINNT=%s" % env["target_win_version"],

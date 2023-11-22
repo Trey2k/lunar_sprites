@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 def can_build(env, platform):
-    # TODO: Add support for other platforms.
-    return env["platform"] == "linuxbsd"
+    return True
 
 
 def configure(env):
@@ -12,7 +11,7 @@ def configure(env):
 
     env_vars.AddVariables(
         BoolVariable(
-            "api_test_client",
+            "dynamic_module_test",
             "Build the API Test Client.",
             True,
         ),

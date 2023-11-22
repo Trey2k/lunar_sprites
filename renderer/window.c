@@ -75,6 +75,12 @@ void window_set_title(LSWindow *window, String title) {
 	platform_window_set_title(window->platform_window, title);
 }
 
+void window_set_fullscreen(LSWindow *window, bool fullscreen) {
+	LS_ASSERT(window);
+
+	platform_window_set_fullscreen(window->platform_window, fullscreen);
+}
+
 void window_set_size(LSWindow *window, int32 width, int32 height) {
 	LS_ASSERT(window);
 
@@ -109,4 +115,10 @@ bool window_is_visible(const LSWindow *window) {
 	LS_ASSERT(window);
 
 	return platform_window_is_visible(window->platform_window);
+}
+
+bool window_is_fullscreen(const LSWindow *window) {
+	LS_ASSERT(window);
+
+	return platform_window_is_fullscreen(window->platform_window);
 }

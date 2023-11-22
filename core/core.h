@@ -21,17 +21,15 @@
 #include "core/log.h"
 #include "core/memory.h"
 #include "core/os/os.h"
-#include "core/path.h"
-#include "core/time.h"
 #include "core/version.h"
 /* -------------------------------------- */
 
 typedef struct LSCore LSCore;
 
-LSCore *core_create();
+LSCore *core_create(FlagManager *flag_manager);
 void core_destroy(LSCore *core);
 
-void core_start(const LSCore *core, int32 argc, char *argv[]);
+void core_start(const LSCore *core);
 void core_poll(const LSCore *core);
 
 LS_EXPORT FlagManager *core_get_flag_manager(const LSCore *core);

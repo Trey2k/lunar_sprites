@@ -1,0 +1,29 @@
+
+#/usr/bin/env python
+
+from api_builder import make_api_header
+Import("env_dynamic_modules")
+
+header, source = make_api_header()
+source = source.replace("@API_HEADER@", "ls_api.gen.h")
+with open("ls_api.gen.h", "w") as f:
+    f.write(header)
+
+with open("ls_api.gen.c", "w") as f:
+    f.write(source)
+
+env = env_dynamic_modules.Clone()
+
+env["CPPDEFINES"] = ""
+env["LIBS"] = []
+
+if env.debug_features:
+    env.Append(CPPDEFINES = ["DEBUG_ENABLED"])
+
+sources = [
+    "module_initialize.c",
+    "test_app.c",
+    "ls_api.gen.c",
+]
+
+env.add_shared_library("project/test_app", sources)

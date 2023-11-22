@@ -13,6 +13,8 @@ void opengl_renderer_destroy(OpenGLRenderer *renderer);
 
 void opengl_register_methods(RendererInterface *renderer_interface);
 
+const LSCore *opengl_renderer_get_core(const OpenGLRenderer *renderer);
+
 #if defined(WGL_ENABLED)
 bool opengl_wgl_enabled(const OpenGLRenderer *renderer);
 #endif // WGL_ENABLED

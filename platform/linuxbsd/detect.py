@@ -54,10 +54,8 @@ def configure(env: "Environment"):
         )
         sys.exit(255)
 
-    ## Build type
-
-    if env.dev_build:
-        env.Append(LINKFLAGS=["-rdynamic"])
+    # Export symbols
+    env.Append(LINKFLAGS=["-fvisibility=hidden", "-rdynamic"])
 
     host_is_64_bit = sys.maxsize > 2**32
     if host_is_64_bit and env["arch"] == "x86_32":

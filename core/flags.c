@@ -75,7 +75,7 @@ FlagValue *flag_manager_register(FlagManager *manager, String flag_name, FlagTyp
 	return flag->value;
 }
 
-void flag_manager_parse(FlagManager *manager, int argc, char *argv[]) {
+void flag_manager_parse(FlagManager *manager, int argc, char *argv[], bool lazy_parse) {
 	manager->program_name = ls_str_copy(argv[0]);
 	for (int i = 1; i < argc; i++) {
 		if (ls_str_length(argv[i]) <= 2 || argv[i][0] != '-' || argv[i][1] != '-') {
@@ -102,6 +102,10 @@ void flag_manager_parse(FlagManager *manager, int argc, char *argv[]) {
 		}
 
 		if (!found) {
+			if (lazy_parse) {
+				continue;
+			}
+
 			ls_log_fatal("Unknown command line option: %s\n", flag_name);
 		}
 

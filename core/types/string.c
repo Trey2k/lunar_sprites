@@ -43,6 +43,34 @@ bool ls_str_equals(String string1, String string2) {
 	return strcmp(string1, string2) == 0;
 }
 
+bool ls_str_ends_with(String string, String substring) {
+	LS_ASSERT(string);
+	LS_ASSERT(substring);
+
+	size_t string_length = ls_str_length(string);
+	size_t substring_length = ls_str_length(substring);
+
+	if (substring_length > string_length) {
+		return false;
+	}
+
+	return strcmp(string + string_length - substring_length, substring) == 0;
+}
+
+bool ls_str_starts_with(String string, String substring) {
+	LS_ASSERT(string);
+	LS_ASSERT(substring);
+
+	size_t string_length = ls_str_length(string);
+	size_t substring_length = ls_str_length(substring);
+
+	if (substring_length > string_length) {
+		return false;
+	}
+
+	return strncmp(string, substring, substring_length) == 0;
+}
+
 char *ls_str_copy(String string) {
 	LS_ASSERT(string);
 
@@ -52,6 +80,15 @@ char *ls_str_copy(String string) {
 	copy[length] = '\0';
 
 	return copy;
+}
+
+void ls_str_copy_to(char *buffer, String string, size_t buffer_size) {
+	LS_ASSERT(string);
+	LS_ASSERT(buffer);
+
+	size_t length = ls_str_length(string);
+	strncpy(buffer, string, buffer_size);
+	buffer[length] = '\0';
 }
 
 char *ls_str_concat(String a, ...) {
@@ -92,6 +129,43 @@ char *ls_str_format(String format, ...) {
 	va_end(args);
 
 	return string;
+}
+
+char *ls_str_replace(String string, String old, String new) {
+	LS_ASSERT(string);
+	LS_ASSERT(old);
+	LS_ASSERT(new);
+
+	size_t string_length = ls_str_length(string);
+	size_t old_length = ls_str_length(old);
+	size_t new_length = ls_str_length(new);
+
+	size_t count = 0;
+	for (size_t i = 0; i < string_length; i++) {
+		if (strncmp(string + i, old, old_length) == 0) {
+			count++;
+			i += old_length - 1;
+		}
+	}
+
+	size_t new_string_length = string_length + count * (new_length - old_length);
+	char *new_string = ls_malloc(new_string_length + 1);
+
+	size_t j = 0;
+	for (size_t i = 0; i < string_length; i++) {
+		if (strncmp(string + i, old, old_length) == 0) {
+			strncpy(new_string + j, new, new_length);
+			j += new_length;
+			i += old_length - 1;
+		} else {
+			new_string[j] = string[i];
+			j++;
+		}
+	}
+
+	new_string[new_string_length] = '\0';
+
+	return new_string;
 }
 
 String ls_str_char(String str, int32 c) {

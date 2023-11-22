@@ -4,7 +4,7 @@
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
 
-/* Keycodes are from glfw */
+/* Keycodes are from glfw */ 
 typedef enum {
 	LS_KEY_UNKNOWN = -1,
 	LS_KEY_NONE = 0,

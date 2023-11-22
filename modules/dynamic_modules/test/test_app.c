@@ -25,15 +25,15 @@ static const WindowConfig ROOT_WINDOW_CONFIG = {
 	.root_window = true,
 };
 
-ApplicationInterface *register_application() {
-	ApplicationInterface *application_interface = ls_malloc(sizeof(ApplicationInterface));
-	application_interface->init = test_app_init;
-	application_interface->start = test_app_start;
-	application_interface->deinit = test_app_deinit;
-	application_interface->update = test_app_update;
-	application_interface->should_stop = test_app_should_stop;
+ApplicationInterface register_application() {
+	ApplicationInterface application_interface;
+	application_interface.init = test_app_init;
+	application_interface.start = test_app_start;
+	application_interface.deinit = test_app_deinit;
+	application_interface.update = test_app_update;
+	application_interface.should_stop = test_app_should_stop;
 
-	application_interface->user_data = ls_calloc(1, sizeof(TestApplication));
+	application_interface.user_data = ls_calloc(1, sizeof(TestApplication));
 
 	return application_interface;
 }

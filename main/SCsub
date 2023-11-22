@@ -6,9 +6,6 @@ env.main_sources = []
 
 env_main = env.Clone()
 
-env_main.Append(CPPPATH=["#thirdparty/nanojsonc"])
-env_main.add_source_files(env.main_sources, ["#thirdparty/nanojsonc/object.c", "#thirdparty/nanojsonc/array.c"])
-
 env_main.add_source_files(env.main_sources, "*.c")
 
 if env["tests"]:

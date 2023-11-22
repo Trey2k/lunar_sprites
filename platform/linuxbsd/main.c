@@ -7,6 +7,5 @@ int32 main(int32 argc, char *argv[]) {
 		ls_main_loop();
 	}
 
-	ls_main_deinit();
-	return 0;
+	return ls_main_deinit();
 }

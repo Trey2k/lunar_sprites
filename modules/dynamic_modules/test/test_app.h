@@ -2,7 +2,7 @@
 #define TEST_APP_H
 #include "ls_api.gen.h"
 
-LS_EXPORT ApplicationInterface *register_application();
+ApplicationInterface register_application();
 
 const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data);
 void test_app_start(void *user_data);

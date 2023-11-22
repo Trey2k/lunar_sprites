@@ -472,6 +472,7 @@ if selected_platform in platform_list:
 
     # Configure compiler warnings
     if env.msvc:  # MSVC
+        # Export symbols
         if env["warnings"] == "none":
             env.Append(CCFLAGS=["/w"])
         else:

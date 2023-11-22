@@ -25,18 +25,3 @@ Files generated from [upstream web instance](https://gen.glad.sh/):
 Perma links:
 - [GL/GLES](https://gen.glad.sh/#generator=c&api=gl%3D3.3%2Cgles2%3D3.0&profile=gl%3Dcore%2Cgles1%3Dcommon&extensions=GL_ARB_debug_output%2CGL_ARB_ES3_compatibility&options=LOADER%2CMERGE%2CMERGE)
 - [EGL/WGL](https://gen.glad.sh/#generator=c&api=egl%3D1.5%2Cwgl%3D1.0&profile=gl%3Dcore%2Cgles1%3Dcommon&extensions=EGL_KHR_create_context%2CEGL_KHR_platform_android%2CEGL_KHR_platform_wayland%2CEGL_KHR_platform_x11%2CWGL_ARB_create_context%2CWGL_ARB_create_context_profile%2CWGL_ARB_extensions_string%2CWGL_ARB_pixel_format%2CWGL_EXT_create_context_es2_profile&options=LOADER%2CMERGE)
-
-
-## nanoJSONc
-Used to parse JSON data for project settins.
-
-- Upstream: https://github.com/saadshams/nanojsonc
-- Vecrsion: 1.0.0 (97f95abf9ca6d0c07c384e79f2fc884425172849)
-- License: BSD 3-Clause
-- Required: Yes
-
-Files extracted from upstream source:
-- `LICENSE`
-- `include/parser.h`
-- `src/array.c`
-- `src/object.c`
