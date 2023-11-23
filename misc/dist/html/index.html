@@ -46,8 +46,10 @@ canvas {
 const engine = new Engine("@LUNAR_BASE_PATH@");
 
 (async function () {
-	await engine.init();
-	engine.start(["--log-level", "info"]);
+	await engine.init({
+		dynamic_modules: [@LUNAR_DYNAMIC_MODULES@],
+	});
+	engine.start();
 }());
 		</script>
 	</body>

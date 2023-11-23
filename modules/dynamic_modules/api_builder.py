@@ -385,6 +385,8 @@ def make_api_header(make_dynamic_module_gen = False):
  
 #if defined(_MSC_VER)
 #define LS_IMPORT __declspec(dllimport)
+#elif defined(__EMSCRIPTEN__)
+#define LS_IMPORT
 #elif defined(__GNUC__)
 #define LS_IMPORT __attribute__((visibility("default")))
 #else
@@ -393,6 +395,8 @@ def make_api_header(make_dynamic_module_gen = False):
 
 #if defined(_MSC_VER)
 #define LS_EXPORT __declspec(dllexport)
+#elif defined(__EMSCRIPTEN__)
+#define LS_EXPORT __attribute__((used))
 #elif defined(__GNUC__)
 #define LS_EXPORT __attribute__((visibility("default")))
 #else // _MSC_VER

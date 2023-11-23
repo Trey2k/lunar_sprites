@@ -15,6 +15,7 @@ env_dynamic_modules.add_source_files(env.modules_sources, "*.c")
 env_dynamic_modules.add_source_files(env.modules_sources, "dynamic_modules.gen.c")
 
 Export("env_dynamic_modules")
+Export("env")
 
 if env["dynamic_module_test"]:
     SConscript("test/SCsub")

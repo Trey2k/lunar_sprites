@@ -1,7 +1,7 @@
 #include "platform/web/window.h"
-#include "platform/os.h"
 #include "platform/web/js_methods.h"
 #include "platform/web/keymap.h"
+#include "platform/web/os.h"
 #include "platform/window.h"
 
 #include "renderer/renderer.h"
@@ -62,6 +62,7 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 	window->fullscreen = false;
 	window->os = os;
 	window->renderer = renderer;
+	window->input_manager = os->input_manager;
 
 	window->events = slice_create(16, true);
 

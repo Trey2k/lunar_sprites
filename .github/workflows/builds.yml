@@ -21,7 +21,7 @@ jobs:
             artifact-name: linuxbsd-amd64-debug
 
           - name: LinuxBSD x86_64
-            args: platform=linuxbsd target=release arch=x86_64
+            args: platform=linuxbsd target=release arch=x86_64 production=yes
             cache-name: linuxbsd-amd64-release
             artifact-path: bin
             artifact-name: linuxbsd-amd64-release
@@ -33,19 +33,19 @@ jobs:
             artifact-name: linuxbsd-amd64-debug-mingw
           
           - name: LinuxBSD x86_64
-            args: platform=linuxbsd target=release arch=x86_64 use_mingw=yes
+            args: platform=linuxbsd target=release arch=x86_64 use_mingw=yes production=yes
             cache-name: linuxbsd-amd64-release-mingw
             artifact-path: bin
             artifact-name: linuxbsd-amd64-release-mingw
           
           - name: Windows x86_65 (Cross-compile)
-            args: platform=windows target=release arch=x86_64
+            args: platform=windows target=release arch=x86_64 production=yes
             cache-name: windows-amd64-release-cross
             artifact-path: bin
             artifact-name: windows-amd64-release-cross
           
           - name: Web wasm32
-            args: platform=web target=release arch=wasm32 optimize=size
+            args: platform=web target=release arch=wasm32 optimize=size production=yes
             cache-name: web-wasm32-release
             artifact-path: bin/.web_zip
             artifact-name: web-wasm32-release
@@ -141,7 +141,7 @@ jobs:
             artifact-name: windows-amd64-debug
 
           - name: Windows x86_64 (MSVC)
-            args: platform=windows target=release arch=x86_64 dev_build=yes
+            args: platform=windows target=release arch=x86_64 production=yes
             cache-name: windows-amd64-release
             artifact-name: windows-amd64-release
           
@@ -151,7 +151,7 @@ jobs:
             artifact-name: windows-amd64-debug-mingw
           
           - name: Windows x86_64 (MinGW)
-            args: platform=windows target=release arch=x86_64 dev_build=yes use_mingw=yes
+            args: platform=windows target=release arch=x86_64 production=yes use_mingw=yes
             cache-name: windows-amd64-release-mingw
             artifact-name: windows-amd64-release-mingw
 
@@ -193,6 +193,7 @@ jobs:
           cp README.md out/
           cp LICENSE.md out/
           cp bin/*.exe out/
+          cp bin/*.dll out/
 
       - uses: actions/upload-artifact@v3
         with:

@@ -37,7 +37,7 @@ def create_engine_file(env, target, source, externs):
     return env.Textfile(target, [env.File(s) for s in source])
 
 
-def create_template_zip(env, js, wasm, worker):
+def create_template_zip(env, js, wasm, worker, side):
     binary_name = "lunar_sprites.release" if env["target"] == "release" else "lunar_sprites.debug"
     zip_dir = env.Dir("#bin/.web_zip")
     in_files = [
@@ -45,17 +45,34 @@ def create_template_zip(env, js, wasm, worker):
         wasm,
         worker,
     ]
+
     out_files = [
         zip_dir.File(binary_name + ".js"),
         zip_dir.File(binary_name + ".wasm"),
         zip_dir.File(binary_name + ".worker.js"),
     ]
 
+    dynamic_modules = ""
+
+    # Dynamic linking
+    if env["dlink_enabled"]:
+        in_files.append(side) # Side wasm contains the lunar_sprites runtime
+        out_files.append(zip_dir.File(binary_name + ".side.wasm"))
+
+        for module in env.dynamic_modules:
+            in_files.append("#/bin/%s" % module)
+            out_files.append(zip_dir.File(module))
+            dynamic_modules += '"%s", ' % module
+        
+        if len(env.dynamic_modules) > 0:
+            dynamic_modules = dynamic_modules[:-2]
+
     subst_dict = {
         "@LUNAR_VERSION@": get_build_version(),
         "@LUNAR_NAME@": "Lunar Sprites",
         "@LUNAR_URL@": "%s.js" % binary_name,
         "@LUNAR_BASE_PATH@": binary_name,
+        "@LUNAR_DYNAMIC_MODULES@": dynamic_modules,
     }
 
     index = "#misc/dist/html/index.html"

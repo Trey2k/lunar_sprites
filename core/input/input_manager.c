@@ -203,6 +203,8 @@ void input_handle_mouse_move(InputManager *input_manager, Vector2i position) {
 }
 
 void input_handle_mouse_enter(InputManager *input_manager, Vector2i position) {
+	LS_ASSERT(input_manager->active_window);
+
 	input_manager->mouse_position = position;
 
 	Event e;

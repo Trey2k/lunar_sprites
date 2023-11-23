@@ -21,6 +21,7 @@ web_files = [
     "window.c",
     "os.c",
     "js_methods.c",
+    'main.c',
 ]
 
 if env["use_opengl"]:
@@ -45,15 +46,36 @@ for ext in sys_env["JS_EXTERNS"]:
 build = []
 build_targets = ["#bin/lunar_sprites${PROGSUFFIX}.js", "#bin/lunar_sprites${PROGSUFFIX}.wasm", "#bin/lunar_sprites${PROGSUFFIX}.worker.js"]
 
-# We use IDBFS. Since Emscripten 1.39.1 it needs to be linked explicitly.
-sys_env.Append(LIBS=["idbfs.js"])
-build = sys_env.Program(build_targets, web_files + ["main.c"])
+if env["dlink_enabled"]:
+    # Reset libraries, The main runtime will only link emscripten libraries.
+    sys_env["LIBS"] = []
+    sys_env.Append(LIBS=["idbfs.js"])
+    sys_env["CCFLAGS"].remove("SIDE_MODULE=2")
+    sys_env["LINKFLAGS"].remove("SIDE_MODULE=2")
+    sys_env.Append(CCFLAGS=["-s", "MAIN_MODULE=1"])
+    sys_env.Append(LINKFLAGS=["-s", "MAIN_MODULE=1"])
+    sys_env.Append(LINKFLAGS=["-s", "EXPORT_ALL=1"])
+    sys_env.Append(LINKFLAGS=["-s", "WARN_ON_UNDEFINED_SYMBOLS=0"])
+
+    sys_env["ENV"]["EMCC_FORCE_STDLIBS"] = "libc"
+    sys_env["CCFLAGS"].remove("-fvisibility=hidden")
+    sys_env["LINKFLAGS"].remove("-fvisibility=hidden")
+
+    sys = sys_env.Program(build_targets, ["web_runtime.c"])
+
+    # The side module containing the runtime.
+    wasm = env.add_program("#bin/lunar_sprites.side${PROGSUFFIX}.wasm", web_files)
+    build = sys + [wasm[0]]
+else:
+    sys_env.Append(LIBS=["idbfs.js"])
+    build = sys_env.Program(build_targets, web_files + ["web_runtime.c"])
 
 sys_env.Depends(build[0], sys_env["JS_LIBS"])
 sys_env.Depends(build[0], sys_env["JS_PRE"])
 sys_env.Depends(build[0], sys_env["JS_EXTERNS"])
 
 engine = [
+    "js/engine/fs.js",
     "js/engine/engine.js",
 ]
 externs = []
@@ -68,4 +90,6 @@ js_wrapped = env.Textfile("#bin/lunar_sprites", [env.File(f) for f in wrap_list]
 
 # 0 - unwrapped js file (use wrapped one instead)
 # 1 - wasm file
-env.CreateTemplateZip(js_wrapped, build[1], build[2])
+# 2 - worker js file
+# 3 - wasm side (when dlink_enabled is true)
+env.CreateTemplateZip(js_wrapped, build[1], build[2], build[3] if len(build) > 3 else None)

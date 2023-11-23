@@ -16,7 +16,7 @@ static void main_loop() {
 	}
 }
 
-int32 main(int argc, char *argv[]) {
+extern EMSCRIPTEN_KEEPALIVE int32 web_main(int argc, char *argv[]) {
 	ls_main_init(argc, argv);
 
 	emscripten_set_main_loop(main_loop, 0, true);

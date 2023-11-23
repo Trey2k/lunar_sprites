@@ -1,10 +1,42 @@
 const Engine = class {
 	constructor(base_path) {
-		this.base_path = base_path;
-		this.bin_path = base_path + '.wasm';
+		this.options = {
+			args : [ "--log-level", "info", "--path", "/user_fs" ],
+			base_path : base_path,
+			bin_path : base_path + '.wasm',
+			side_modules : [ base_path + '.side.wasm' ],
+
+			persistent_paths : [ '/user_fs' ],
+			dynamic_modules : [],
+		};
+
+		this.FS = null;
 	}
 
-	async init() {
+	async init(options) {
+		if (options) {
+			if (options.args) {
+				this.options.args.push.apply(this.options.args, options.args);
+			}
+			if (options.base_path) {
+				this.options.base_path = options.base_path;
+				this.options.bin_path = options.base_path + '.wasm';
+				this.options.side_modules = [ options.base_path + '.side.wasm' ];
+			}
+			if (options.bin_path) {
+				this.options.bin_path = options.bin_path;
+			}
+			if (options.side_modules) {
+				this.options.side_modules = options.side_modules;
+			}
+			if (options.persistent_paths) {
+				this.options.persistent_paths.push.apply(this.options.persistent_paths, options.persistent_paths);
+			}
+			if (options.dynamic_modules) {
+				this.options.dynamic_modules.push.apply(this.options.dynamic_modules, options.dynamic_modules);
+			}
+		}
+
 		const nodes = document.getElementsByTagName('canvas');
 		if (nodes.length && nodes[0] instanceof HTMLCanvasElement) {
 			const first = nodes[0];
@@ -17,7 +49,8 @@ const Engine = class {
 		this.module = await LunarSprites({
 			'print' : this.print,
 			'printErr' : this.printErr,
-			'thisProgram' : './' + this.bin_path,
+			'thisProgram' : './' + this.options.bin_path,
+			'dynamicLibraries' : [ this.options.base_path + '.side.wasm' ],
 			'noExitRuntime' : false,
 			'instantiateWasm' : this.instantiateWasm.bind(this),
 			'locateFile' : this.locateFile.bind(this),
@@ -31,10 +64,20 @@ const Engine = class {
 		this.module.set_canvas_position = this.set_canvas_position;
 		this.module.set_canvas_visibility = this.set_canvas_visibility;
 		this.module.set_canvas_fullscreen = this.set_canvas_fullscreen;
+
+		this.FS = new LSFS(this.module);
+
+		await this.FS.init(this.options.persistent_paths);
+
+		await Promise.all(this.options.dynamic_modules.map(async (module) => {
+			let response = await fetch(module);
+			let buffer = await response.arrayBuffer();
+			this.FS.copy_to_fs("/user_fs/" + module, buffer);
+		}));
 	}
 
-	async start(args) {
-		this.module['callMain'](args);
+	async start() {
+		this.module['callMain'](this.options.args);
 	}
 
 	print(text) {
@@ -120,7 +163,7 @@ const Engine = class {
 	}
 
 	instantiateWasm(imports, onSuccess) {
-		let r = fetch(this.bin_path);
+		let r = fetch(this.options.bin_path);
 		function done(result) {
 			onSuccess(result['instance'], result['module']);
 		}
@@ -139,11 +182,13 @@ const Engine = class {
 		if (!path.startsWith('lunar_sprites.')) {
 			return path;
 		} else if (path.endsWith('.worker.js')) {
-			return this.base_path + '.worker.js';
+			return this.options.base_path + '.worker.js';
 		} else if (path.endsWith('.js')) {
-			return this.base_path + '.js';
+			return this.options.base_path + '.js';
+		} else if (path.endsWith('.side.wasm')) {
+			return this.options.base_path + '.side.wasm';
 		} else if (path.endsWith('.wasm')) {
-			return this.base_path + '.wasm';
+			return this.options.base_path + '.wasm';
 		}
 	}
 }

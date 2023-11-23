@@ -37,6 +37,9 @@ def get_opts():
         BoolVariable("use_safe_heap", "Use Emscripten SAFE_HEAP sanitizer", False),
         # eval() can be a security concern, so it can be disabled.
         BoolVariable("javascript_eval", "Enable JavaScript eval interface", True),
+         BoolVariable(
+            "dlink_enabled", "Enable WebAssembly dynamic linking (Dynamic Module support). Produces bigger binaries", True
+        ),
         BoolVariable("use_closure_compiler", "Use closure compiler to minimize JavaScript code", False),
         BoolVariable(
             "proxy_to_pthread",
@@ -192,6 +195,23 @@ def configure(env: "Environment"):
         # Workaround https://github.com/emscripten-core/emscripten/issues/19781.
         if cc_semver >= (3, 1, 42) and cc_semver < (3, 1, 46):
             env.Append(LINKFLAGS=["-Wl,-u,scalbnf"])
+    
+    # Dynamic linking
+    if env["dlink_enabled"]:
+        env.dynamic_modules = []
+        if env["proxy_to_pthread"]:
+            print("Dynamic linking is not supported with proxy_to_pthread=yes, disabling")
+            env["dlink_enabled"] = False
+
+        if cc_semver < (3, 1, 14):
+            print("Dynamic linking requires emscripten >= 3.1.14, detected: %s.%s.%s" % cc_semver)
+            sys.exit(255)
+        
+        env.Append(CCFLAGS=["-s", "SIDE_MODULE=2"])
+        env.Append(LINKFLAGS=["-s", "SIDE_MODULE=2"])
+        env.Append(CCFLAGS=["-fvisibility=hidden"])
+        env.Append(LINKFLAGS=["-fvisibility=hidden"])
+        env.extra_suffix = ".dlink" + env.extra_suffix
 
     # Run the main application in a web worker
     if env["proxy_to_pthread"]:

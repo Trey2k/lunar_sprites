@@ -1,8 +1,6 @@
 #include "platform/linuxbsd/os.h"
 
-#include "core/debug.h"
-#include "core/log.h"
-#include "core/memory.h"
+#include "core/core.h"
 
 #include <dirent.h>
 #include <dlfcn.h>
