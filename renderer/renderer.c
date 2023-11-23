@@ -67,14 +67,6 @@ void renderer_destroy(Renderer *renderer) {
 	}
 }
 
-void renderer_set_clear_color(const Renderer *renderer, float32 r, float32 g, float32 b, float32 a) {
-	renderer->interface.set_clear_color(r, g, b, a);
-}
-
-void renderer_clear(const Renderer *renderer) {
-	renderer->interface.clear();
-}
-
 RendererBackend renderer_get_backend(const Renderer *renderer) {
 	return renderer->backend;
 }
@@ -88,6 +80,86 @@ OpenGLRenderer *renderer_get_opengl(const Renderer *renderer) {
 	return renderer->opengl;
 }
 #endif
+
+void renderer_set_clear_color(const Renderer *renderer, float32 r, float32 g, float32 b, float32 a) {
+	renderer->interface.set_clear_color(r, g, b, a);
+}
+
+void renderer_clear(const Renderer *renderer) {
+	renderer->interface.clear();
+}
+
+uint32 renderer_create_shader(const Renderer *renderer, String vertex_source, String fragment_source) {
+	return renderer->interface.create_shader(vertex_source, fragment_source);
+}
+
+void renderer_destroy_shader(const Renderer *renderer, uint32 shader) {
+	renderer->interface.destroy_shader(shader);
+}
+
+void renderer_bind_shader(const Renderer *renderer, uint32 shader) {
+	renderer->interface.bind_shader(shader);
+}
+
+void renderer_set_uniform_int(const Renderer *renderer, uint32 shader, String name, int32 value) {
+	renderer->interface.set_uniform_int(shader, name, value);
+}
+
+void renderer_set_uniform_float(const Renderer *renderer, uint32 shader, String name, float32 value) {
+	renderer->interface.set_uniform_float(shader, name, value);
+}
+
+void renderer_set_uniform_vec2(const Renderer *renderer, uint32 shader, String name, Vector2 value) {
+	renderer->interface.set_uniform_vec2(shader, name, value);
+}
+
+void renderer_set_uniform_vec3(const Renderer *renderer, uint32 shader, String name, Vector3 value) {
+	renderer->interface.set_uniform_vec3(shader, name, value);
+}
+
+int32 renderer_get_uniform_location(const Renderer *renderer, uint32 shader, String name) {
+	return renderer->interface.get_uniform_location(shader, name);
+}
+
+uint32 renderer_get_attrib_location(const Renderer *renderer, uint32 shader, String name) {
+	return renderer->interface.get_attrib_location(shader, name);
+}
+
+uint32 renderer_create_vertex_buffer(const Renderer *renderer, size_t size, void *data, UsageHint usage_hint) {
+	return renderer->interface.create_vertex_buffer(size, data, usage_hint);
+}
+
+void renderer_bind_vertex_buffer(const Renderer *renderer, TargetHint target, uint32 vertex_buffer) {
+	renderer->interface.bind_vertex_buffer(target, vertex_buffer);
+}
+
+void renderer_destroy_vertex_buffer(const Renderer *renderer, uint32 vertex_buffer) {
+	renderer->interface.destroy_vertex_buffer(vertex_buffer);
+}
+
+uint32 renderer_create_vertex_array(const Renderer *renderer) {
+	return renderer->interface.create_vertex_array();
+}
+
+void renderer_destroy_vertex_array(const Renderer *renderer, uint32 vertex_array) {
+	renderer->interface.destroy_vertex_array(vertex_array);
+}
+
+void renderer_bind_vertex_array(const Renderer *renderer, uint32 vertex_array) {
+	renderer->interface.bind_vertex_array(vertex_array);
+}
+
+void renderer_set_vertex_array_uniform(const Renderer *renderer, uint32 vertex_array, int32 uniform_position, uint32 size, DataType data_type, bool normalized, size_t stride, size_t offset) {
+	renderer->interface.set_vertex_array_uniform(vertex_array, uniform_position, size, data_type, normalized, stride, offset);
+}
+
+void renderer_enable_vertex_attrib_array(const Renderer *renderer, uint32 index) {
+	renderer->interface.enable_vertex_attrib_array(index);
+}
+
+void renderer_draw_arrays(const Renderer *renderer, DrawMode draw_mode, size_t first, size_t count) {
+	renderer->interface.draw_arrays(draw_mode, first, count);
+}
 
 static void check_flags(Renderer *renderer) {
 	ls_str_to_upper(renderer->backend_flag->str);

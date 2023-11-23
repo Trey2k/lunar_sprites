@@ -1,4 +1,5 @@
 #include "renderer/opengl/context.h"
+
 #include "core/core.h"
 
 #if defined(EGL_ENABLED)

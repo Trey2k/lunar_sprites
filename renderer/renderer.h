@@ -3,11 +3,11 @@
 
 #include "core/core.h"
 
+#include "renderer/typedefs.h"
+
 #if defined(OPENGL_ENABLED)
 #include "renderer/opengl/renderer.h"
 #endif
-
-#define RENDERER_BACKEND_COUNT 2
 
 typedef enum {
 	RENDERER_BACKEND_NONE,
@@ -20,16 +20,59 @@ Renderer *renderer_create(LSCore *core);
 void renderer_start(Renderer *renderer);
 void renderer_destroy(Renderer *renderer);
 
-LS_EXPORT void renderer_set_clear_color(const Renderer *renderer, float32 r, float32 g, float32 b, float32 a);
-LS_EXPORT void renderer_clear(const Renderer *renderer);
-
-LS_EXPORT RendererBackend renderer_get_backend(const Renderer *renderer);
-
 LSCore *renderer_get_core(const Renderer *renderer);
 
 #if defined(OPENGL_ENABLED)
 OpenGLRenderer *renderer_get_opengl(const Renderer *renderer);
 #endif
+
+// Sets the clear color for the renderer. There must be a valid rendering context.
+LS_EXPORT void renderer_set_clear_color(const Renderer *renderer, float32 r, float32 g, float32 b, float32 a);
+// Clears the screen with the clear color.
+LS_EXPORT void renderer_clear(const Renderer *renderer);
+// Returns the backend used by the renderer.
+LS_EXPORT RendererBackend renderer_get_backend(const Renderer *renderer);
+
+// Creates a shader from a vertex and fragment source. Returns 0 if the shader failed to compile.
+// The shader source is expected to be compatible with the backend.
+LS_EXPORT uint32 renderer_create_shader(const Renderer *renderer, String vertex_source, String fragment_source);
+// Destroys a shader.
+LS_EXPORT void renderer_destroy_shader(const Renderer *renderer, uint32 shader);
+// Binds the shader for use in the current rendering context.
+LS_EXPORT void renderer_bind_shader(const Renderer *renderer, uint32 shader);
+// Sets a uniform in the shader. The shader must be bound before calling this function.
+LS_EXPORT void renderer_set_uniform_int(const Renderer *renderer, uint32 shader, String name, int32 value);
+// Sets a uniform in the shader. The shader must be bound before calling this function.
+LS_EXPORT void renderer_set_uniform_float(const Renderer *renderer, uint32 shader, String name, float32 value);
+// Sets a uniform in the shader. The shader must be bound before calling this function.
+LS_EXPORT void renderer_set_uniform_vec2(const Renderer *renderer, uint32 shader, String name, Vector2 value);
+// Sets a uniform in the shader. The shader must be bound before calling this function.
+LS_EXPORT void renderer_set_uniform_vec3(const Renderer *renderer, uint32 shader, String name, Vector3 value);
+// Returns the location of a uniform in the shader. The shader must be bound before calling this function.
+LS_EXPORT int32 renderer_get_uniform_location(const Renderer *renderer, uint32 shader, String name);
+// Returns the location of an attribute in the shader. The shader must be bound before calling this function.
+LS_EXPORT uint32 renderer_get_attrib_location(const Renderer *renderer, uint32 shader, String name);
+
+// Creates a vertex buffer. The data is expected to be compatible with the backend.
+LS_EXPORT uint32 renderer_create_vertex_buffer(const Renderer *renderer, size_t size, void *data, UsageHint usage_hint);
+// Destroys a vertex buffer.
+LS_EXPORT void renderer_destroy_vertex_buffer(const Renderer *renderer, uint32 vertex_buffer);
+// Binds the vertex buffer for use in the current rendering context.
+LS_EXPORT void renderer_bind_vertex_buffer(const Renderer *renderer, TargetHint target, uint32 vertex_buffer);
+
+// Creates a vertex array. The data is expected to be compatible with the backend.
+LS_EXPORT uint32 renderer_create_vertex_array(const Renderer *renderer);
+// Destroys a vertex array.
+LS_EXPORT void renderer_destroy_vertex_array(const Renderer *renderer, uint32 vertex_array);
+// Binds the vertex array for use in the current rendering context.
+LS_EXPORT void renderer_bind_vertex_array(const Renderer *renderer, uint32 vertex_array);
+// Sets a uniform in the vertex array. The vertex array must be bound before calling this function.
+LS_EXPORT void renderer_set_vertex_array_uniform(const Renderer *renderer, uint32 vertex_array, int32 uniform_position, uint32 size, DataType data_type, bool normalized, size_t stride, size_t offset);
+
+// Enables a vertex attribute. The vertex array must be bound before calling this function.
+LS_EXPORT void renderer_enable_vertex_attrib_array(const Renderer *renderer, uint32 index);
+// Draws the vertex array. The vertex array must be bound before calling this function.
+LS_EXPORT void renderer_draw_arrays(const Renderer *renderer, DrawMode draw_mode, size_t first, size_t count);
 
 _FORCE_INLINE_ String renderer_backend_to_string(RendererBackend backend) {
 	switch (backend) {

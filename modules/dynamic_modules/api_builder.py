@@ -16,6 +16,7 @@ source_headers = [
     'core/memory.h',
     'core/debug.h',
     'core/types/vector/vector2.h',
+    'core/types/vector/vector3.h',
     'core/types/slice.h',
     'core/types/hashtable.h',
     'core/flags.h',
@@ -26,7 +27,8 @@ source_headers = [
     'core/events/event_manager.h',
     'core/os/os.h',
     'core/core.h',
- 
+    
+    'renderer/typedefs.h',
     'renderer/window.h',
     'renderer/renderer.h',
  
