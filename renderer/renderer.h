@@ -33,26 +33,6 @@ LS_EXPORT void renderer_clear(const Renderer *renderer);
 // Returns the backend used by the renderer.
 LS_EXPORT RendererBackend renderer_get_backend(const Renderer *renderer);
 
-// Creates a shader from a vertex and fragment source. Returns 0 if the shader failed to compile.
-// The shader source is expected to be compatible with the backend.
-LS_EXPORT uint32 renderer_create_shader(const Renderer *renderer, String vertex_source, String fragment_source);
-// Destroys a shader.
-LS_EXPORT void renderer_destroy_shader(const Renderer *renderer, uint32 shader);
-// Binds the shader for use in the current rendering context.
-LS_EXPORT void renderer_bind_shader(const Renderer *renderer, uint32 shader);
-// Sets a uniform in the shader. The shader must be bound before calling this function.
-LS_EXPORT void renderer_set_uniform_int(const Renderer *renderer, uint32 shader, String name, int32 value);
-// Sets a uniform in the shader. The shader must be bound before calling this function.
-LS_EXPORT void renderer_set_uniform_float(const Renderer *renderer, uint32 shader, String name, float32 value);
-// Sets a uniform in the shader. The shader must be bound before calling this function.
-LS_EXPORT void renderer_set_uniform_vec2(const Renderer *renderer, uint32 shader, String name, Vector2 value);
-// Sets a uniform in the shader. The shader must be bound before calling this function.
-LS_EXPORT void renderer_set_uniform_vec3(const Renderer *renderer, uint32 shader, String name, Vector3 value);
-// Returns the location of a uniform in the shader. The shader must be bound before calling this function.
-LS_EXPORT int32 renderer_get_uniform_location(const Renderer *renderer, uint32 shader, String name);
-// Returns the location of an attribute in the shader. The shader must be bound before calling this function.
-LS_EXPORT uint32 renderer_get_attrib_location(const Renderer *renderer, uint32 shader, String name);
-
 // Creates a vertex buffer. The data is expected to be compatible with the backend.
 LS_EXPORT uint32 renderer_create_vertex_buffer(const Renderer *renderer, size_t size, void *data, UsageHint usage_hint);
 // Destroys a vertex buffer.

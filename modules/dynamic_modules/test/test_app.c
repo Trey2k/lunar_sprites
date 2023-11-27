@@ -1,4 +1,5 @@
 #include "test_app.h"
+#include "modules/dynamic_modules/test/ls_api.gen.h"
 
 static const char TRI_VERT[] = "#version 300 es\n"
 							   "in vec3 pos;\n"
@@ -23,7 +24,7 @@ typedef struct {
 
 	bool should_stop;
 
-	uint32 tri_shader;
+	Shader *tri_shader;
 	uint32 tri_vao;
 	uint32 tri_vbo;
 
@@ -84,7 +85,7 @@ void test_app_start(void *user_data) {
 
 	LS_ASSERT(test_application->tri_shader);
 
-	int32 pos_attrib = renderer_get_attrib_location(test_application->renderer, test_application->tri_shader, "pos");
+	int32 pos_attrib = shader_get_attrib_location(test_application->tri_shader, "pos");
 
 	test_application->tri_vao = renderer_create_vertex_array(test_application->renderer);
 	renderer_bind_vertex_array(test_application->renderer, test_application->tri_vao);
@@ -93,13 +94,14 @@ void test_app_start(void *user_data) {
 	renderer_set_vertex_array_uniform(test_application->renderer, test_application->tri_vao, pos_attrib, 3, DATA_TYPE_FLOAT, false, 0, 0);
 	renderer_enable_vertex_attrib_array(test_application->renderer, pos_attrib);
 
-	renderer_bind_shader(test_application->renderer, test_application->tri_shader);
+	shader_bind(test_application->tri_shader);
 }
 
 void test_app_deinit(void *user_data) {
 	TestApplication *test_application = user_data;
 
-	renderer_destroy_shader(test_application->renderer, test_application->tri_shader);
+	shader_destroy(test_application->tri_shader);
+
 	renderer_destroy_vertex_buffer(test_application->renderer, test_application->tri_vbo);
 	renderer_destroy_vertex_array(test_application->renderer, test_application->tri_vao);
 

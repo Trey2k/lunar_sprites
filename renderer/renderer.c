@@ -89,42 +89,6 @@ void renderer_clear(const Renderer *renderer) {
 	renderer->interface.clear();
 }
 
-uint32 renderer_create_shader(const Renderer *renderer, String vertex_source, String fragment_source) {
-	return renderer->interface.create_shader(vertex_source, fragment_source);
-}
-
-void renderer_destroy_shader(const Renderer *renderer, uint32 shader) {
-	renderer->interface.destroy_shader(shader);
-}
-
-void renderer_bind_shader(const Renderer *renderer, uint32 shader) {
-	renderer->interface.bind_shader(shader);
-}
-
-void renderer_set_uniform_int(const Renderer *renderer, uint32 shader, String name, int32 value) {
-	renderer->interface.set_uniform_int(shader, name, value);
-}
-
-void renderer_set_uniform_float(const Renderer *renderer, uint32 shader, String name, float32 value) {
-	renderer->interface.set_uniform_float(shader, name, value);
-}
-
-void renderer_set_uniform_vec2(const Renderer *renderer, uint32 shader, String name, Vector2 value) {
-	renderer->interface.set_uniform_vec2(shader, name, value);
-}
-
-void renderer_set_uniform_vec3(const Renderer *renderer, uint32 shader, String name, Vector3 value) {
-	renderer->interface.set_uniform_vec3(shader, name, value);
-}
-
-int32 renderer_get_uniform_location(const Renderer *renderer, uint32 shader, String name) {
-	return renderer->interface.get_uniform_location(shader, name);
-}
-
-uint32 renderer_get_attrib_location(const Renderer *renderer, uint32 shader, String name) {
-	return renderer->interface.get_attrib_location(shader, name);
-}
-
 uint32 renderer_create_vertex_buffer(const Renderer *renderer, size_t size, void *data, UsageHint usage_hint) {
 	return renderer->interface.create_vertex_buffer(size, data, usage_hint);
 }

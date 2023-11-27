@@ -31,6 +31,7 @@ source_headers = [
     'renderer/typedefs.h',
     'renderer/window.h',
     'renderer/renderer.h',
+    'renderer/shader.h',
  
     'main/application.h',
     'main/lunar_sprites.h',
@@ -274,7 +275,7 @@ def make_exports(exports, make_dynamic_module_gen = False):
             
             word_count = len(var.split(' '))
             var_name = var.split(' ')[word_count - 1].replace(';', '')
-            var_type = var.replace(var.split(' ')[word_count - 1], ' ').replace(';', '')
+            var_type = var.replace(var.split(' ')[word_count - 1], '').replace(';', '')
 
             if '*' in var_name:
                 var_name = var_name.replace('*', '')
@@ -284,7 +285,7 @@ def make_exports(exports, make_dynamic_module_gen = False):
             api_interface_impl += "extern %s_impl_%s;\n" % (var_type, var_name)
             export_source_txt += "%s_impl_%s = NULL;\n" % (var_type, var_name)
             api_impl_methods.append(var_name)
-            exports_header_txt = exports_header_txt.replace(line, "#define %s_impl_%s" % (var_name, var_name))
+            exports_header_txt = exports_header_txt.replace(line, "#define %s _impl_%s" % (var_name, var_name))
         else:
             if len(line.split(' ')) < 2:
                 continue

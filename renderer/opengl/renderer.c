@@ -60,16 +60,6 @@ void opengl_register_methods(RendererInterface *renderer_interface) {
 	renderer_interface->set_clear_color = opengl_set_clear_color;
 	renderer_interface->clear = opengl_clear;
 
-	renderer_interface->create_shader = opengl_create_shader;
-	renderer_interface->destroy_shader = opengl_destroy_shader;
-	renderer_interface->bind_shader = opengl_bind_shader;
-	renderer_interface->set_uniform_int = opengl_set_uniform_int;
-	renderer_interface->set_uniform_float = opengl_set_uniform_float;
-	renderer_interface->set_uniform_vec2 = opengl_set_uniform_vec2;
-	renderer_interface->set_uniform_vec3 = opengl_set_uniform_vec3;
-	renderer_interface->get_uniform_location = opengl_get_uniform_location;
-	renderer_interface->get_attrib_location = opengl_get_attrib_location;
-
 	renderer_interface->create_vertex_buffer = opengl_create_vertex_buffer;
 	renderer_interface->destroy_vertex_buffer = opengl_destroy_vertex_buffer;
 	renderer_interface->bind_vertex_buffer = opengl_bind_vertex_buffer;

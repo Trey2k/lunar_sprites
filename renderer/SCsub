@@ -5,7 +5,8 @@ Import("env")
 env.renderer_sources = [
     "renderer.c",
     "context.c",
-    'window.c',
+    "window.c",
+    "shader.c",
 ]
 
 if env["use_opengl"]:
