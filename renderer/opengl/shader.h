@@ -5,7 +5,7 @@
 
 typedef struct OpenGLShader OpenGLShader;
 
-OpenGLShader *opengl_shader_create(String vertex_source, String fragment_source);
+OpenGLShader *opengl_create_shader(String vertex_source, String fragment_source);
 void opengl_shader_destroy(OpenGLShader *shader);
 
 void opengl_shader_bind(const OpenGLShader *shader);

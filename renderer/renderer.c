@@ -89,42 +89,6 @@ void renderer_clear(const Renderer *renderer) {
 	renderer->interface.clear();
 }
 
-uint32 renderer_create_vertex_buffer(const Renderer *renderer, size_t size, void *data, UsageHint usage_hint) {
-	return renderer->interface.create_vertex_buffer(size, data, usage_hint);
-}
-
-void renderer_bind_vertex_buffer(const Renderer *renderer, TargetHint target, uint32 vertex_buffer) {
-	renderer->interface.bind_vertex_buffer(target, vertex_buffer);
-}
-
-void renderer_destroy_vertex_buffer(const Renderer *renderer, uint32 vertex_buffer) {
-	renderer->interface.destroy_vertex_buffer(vertex_buffer);
-}
-
-uint32 renderer_create_vertex_array(const Renderer *renderer) {
-	return renderer->interface.create_vertex_array();
-}
-
-void renderer_destroy_vertex_array(const Renderer *renderer, uint32 vertex_array) {
-	renderer->interface.destroy_vertex_array(vertex_array);
-}
-
-void renderer_bind_vertex_array(const Renderer *renderer, uint32 vertex_array) {
-	renderer->interface.bind_vertex_array(vertex_array);
-}
-
-void renderer_set_vertex_array_uniform(const Renderer *renderer, uint32 vertex_array, int32 uniform_position, uint32 size, DataType data_type, bool normalized, size_t stride, size_t offset) {
-	renderer->interface.set_vertex_array_uniform(vertex_array, uniform_position, size, data_type, normalized, stride, offset);
-}
-
-void renderer_enable_vertex_attrib_array(const Renderer *renderer, uint32 index) {
-	renderer->interface.enable_vertex_attrib_array(index);
-}
-
-void renderer_draw_arrays(const Renderer *renderer, DrawMode draw_mode, size_t first, size_t count) {
-	renderer->interface.draw_arrays(draw_mode, first, count);
-}
-
 static void check_flags(Renderer *renderer) {
 	ls_str_to_upper(renderer->backend_flag->str);
 

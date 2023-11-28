@@ -59,18 +59,6 @@ void opengl_renderer_destroy(OpenGLRenderer *renderer) {
 void opengl_register_methods(RendererInterface *renderer_interface) {
 	renderer_interface->set_clear_color = opengl_set_clear_color;
 	renderer_interface->clear = opengl_clear;
-
-	renderer_interface->create_vertex_buffer = opengl_create_vertex_buffer;
-	renderer_interface->destroy_vertex_buffer = opengl_destroy_vertex_buffer;
-	renderer_interface->bind_vertex_buffer = opengl_bind_vertex_buffer;
-
-	renderer_interface->create_vertex_array = opengl_create_vertex_array;
-	renderer_interface->destroy_vertex_array = opengl_destroy_vertex_array;
-	renderer_interface->bind_vertex_array = opengl_bind_vertex_array;
-	renderer_interface->set_vertex_array_uniform = opengl_set_vertex_array_uniform;
-
-	renderer_interface->enable_vertex_attrib_array = opengl_enable_vertex_attrib_array;
-	renderer_interface->draw_arrays = opengl_draw_arrays;
 }
 
 const LSCore *opengl_renderer_get_core(const OpenGLRenderer *renderer) {

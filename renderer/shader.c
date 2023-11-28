@@ -1,17 +1,27 @@
 #include "renderer/shader.h"
-
-#include "renderer/opengl/shader.h"
 #include "renderer/renderer.h"
 
 #if defined(OPENGL_ENABLED)
+#include "renderer/opengl/shader.h"
+#endif
 
+// We cannot use if with the preprocessor, so we use this macro instead
+#if defined(OPENGL_ENABLED)
+#define GL_SHADER_CALL(shader, method, ...) \
+	opengl_shader_##method(shader->opengl, ##__VA_ARGS__);
+#else
+#define GL_SHADER_CALL(shader, method, ...) \
+	ls_log_fatal("OpenGL is not enabled\n");
+#endif // OPENGL_ENABLED
+
+// SHADER_CALL is for functions that do not return a value
 #define SHADER_CALL(shader, method, ...)                                     \
 	switch (shader->backend) {                                               \
 		case RENDERER_BACKEND_NONE: {                                        \
 		} break;                                                             \
                                                                              \
 		case RENDERER_BACKEND_OPENGL: {                                      \
-			opengl_shader_##method(shader->opengl, ##__VA_ARGS__);           \
+			GL_SHADER_CALL(shader, method, ##__VA_ARGS__);                   \
 		} break;                                                             \
                                                                              \
 		default:                                                             \
@@ -26,27 +36,12 @@
 		} break;                                                             \
                                                                              \
 		case RENDERER_BACKEND_OPENGL: {                                      \
-			return opengl_shader_##method(shader->opengl, ##__VA_ARGS__);    \
+			return GL_SHADER_CALL(shader, method, ##__VA_ARGS__);            \
 		} break;                                                             \
                                                                              \
 		default:                                                             \
 			ls_log_fatal("Unknown renderer backend: %d\n", shader->backend); \
 	};
-
-#else
-
-#define SHADER_CALL(shader, method, ...)                                     \
-	switch (shader->backend) {                                               \
-		case RENDERER_BACKEND_NONE: {                                        \
-		} break;                                                             \
-                                                                             \
-		default:                                                             \
-			ls_log_fatal("Unknown renderer backend: %d\n", shader->backend); \
-	};
-
-#define SHADER_CALL_R(shader, method, ...) SHADER_CALL(shader, method, ##__VA_ARGS__)
-
-#endif
 
 struct Shader {
 	RendererBackend backend;
@@ -68,7 +63,7 @@ Shader *renderer_create_shader(const Renderer *renderer, String vertex_source, S
 
 		case RENDERER_BACKEND_OPENGL: {
 #if defined(OPENGL_ENABLED)
-			shader->opengl = opengl_shader_create(vertex_source, fragment_source);
+			shader->opengl = opengl_create_shader(vertex_source, fragment_source);
 			if (!shader->opengl) {
 				ls_free(shader);
 				return NULL;

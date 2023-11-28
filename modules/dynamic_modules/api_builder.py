@@ -28,10 +28,11 @@ source_headers = [
     'core/os/os.h',
     'core/core.h',
     
-    'renderer/typedefs.h',
     'renderer/window.h',
     'renderer/renderer.h',
     'renderer/shader.h',
+    'renderer/buffers.h',
+    'renderer/vertex_array.h',
  
     'main/application.h',
     'main/lunar_sprites.h',
@@ -293,23 +294,37 @@ def make_exports(exports, make_dynamic_module_gen = False):
 
             after_type = 1
             if 'static' in ret_type:
-                ret_type += ' ' + line.split(' ')[1]
+                ret_type += ' ' + line.split(' ')[after_type]
                 after_type += 1
             
             if 'const' in ret_type:
-                ret_type += ' ' + line.split(' ')[1]
+                ret_type += ' ' + line.split(' ')[after_type]
                 after_type += 1
             
             if 'struct' in ret_type:
-                ret_type += ' ' + line.split(' ')[1]
+                ret_type += ' ' + line.split(' ')[after_type]
                 after_type += 1
             
             if 'enum' in ret_type:
-                ret_type += ' ' + line.split(' ')[1]
+                ret_type += ' ' + line.split(' ')[after_type]
+                after_type += 1
+            
+            if 'union' in ret_type:
+                ret_type += ' ' + line.split(' ')[after_type]
+                after_type += 1
+            
+            if '*const ' in line:
+                ret_type += ' ' + line.split(' ')[after_type]
                 after_type += 1
                 
             ret_type += ' '
             method_name = line.split(' ')[after_type].split('(')[0]
+
+
+            
+            if '*const' in method_name:
+                method_name = method_name.replace('*const ', '')
+                ret_type = ret_type + ' *const '
             
             if method_name.startswith('*'):
                 method_name = method_name[1:]

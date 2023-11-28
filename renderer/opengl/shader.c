@@ -8,7 +8,7 @@ struct OpenGLShader {
 	GLuint program;
 };
 
-OpenGLShader *opengl_shader_create(const char *vertex_source, const char *fragment_source) {
+OpenGLShader *opengl_create_shader(const char *vertex_source, const char *fragment_source) {
 	GL_CALL(GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER));
 	GL_CALL(glShaderSource(vertex_shader, 1, &vertex_source, NULL));
 	GL_CALL(glCompileShader(vertex_shader));

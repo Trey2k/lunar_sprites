@@ -25,8 +25,7 @@ typedef struct {
 	bool should_stop;
 
 	Shader *tri_shader;
-	uint32 tri_vao;
-	uint32 tri_vbo;
+	VertexArray *tri_vao;
 
 	float64 timer;
 } TestApplication;
@@ -73,26 +72,38 @@ void test_app_start(void *user_data) {
 
 	renderer_set_clear_color(test_application->renderer, 0.0, 1.0, 0.0, 1.0);
 
-	float32 tri_vertices[] = {
-		-1.0, -1.0, 0.0,
-		1.0, -1.0, 0.0,
-		0.0, 1.0, 0.0
+	float32 rect_verticies[] = {
+		-0.5, -0.5, 0.0,
+		0.5, -0.5, 0.0,
+		0.5, 0.5, 0.0,
+		-0.5, 0.5, 0.0
 	};
 
-	test_application->tri_vbo = renderer_create_vertex_buffer(test_application->renderer, sizeof(tri_vertices), tri_vertices, USAGE_HINT_STATIC_DRAW);
+	uint32 rect_indecies[] = {
+		0, 1, 2,
+		2, 3, 0
+	};
+
+	VertexBuffer *tri_vbo = renderer_create_vertex_buffer(test_application->renderer, rect_verticies, sizeof(rect_verticies));
+	BufferElement BufferLayoutElms[] = {
+		{ SHADER_DATA_TYPE_FLOAT3, "pos", false },
+	};
+
+	BufferLayout *tri_layout = buffer_layout_create(BufferLayoutElms, 1);
+	vertex_buffer_set_layout(tri_vbo, tri_layout);
+
+	IndexBuffer *tri_ibo = renderer_create_index_buffer(test_application->renderer, rect_indecies, sizeof(rect_indecies));
 
 	test_application->tri_shader = renderer_create_shader(test_application->renderer, TRI_VERT, TRI_FRAG);
 
 	LS_ASSERT(test_application->tri_shader);
 
-	int32 pos_attrib = shader_get_attrib_location(test_application->tri_shader, "pos");
-
 	test_application->tri_vao = renderer_create_vertex_array(test_application->renderer);
-	renderer_bind_vertex_array(test_application->renderer, test_application->tri_vao);
-	renderer_bind_vertex_buffer(test_application->renderer, TARGET_HINT_ARRAY_BUFFER, test_application->tri_vbo);
 
-	renderer_set_vertex_array_uniform(test_application->renderer, test_application->tri_vao, pos_attrib, 3, DATA_TYPE_FLOAT, false, 0, 0);
-	renderer_enable_vertex_attrib_array(test_application->renderer, pos_attrib);
+	vertex_arrray_add_vertex_buffer(test_application->tri_vao, tri_vbo);
+	vertex_array_set_index_buffer(test_application->tri_vao, tri_ibo);
+
+	vertex_array_bind(test_application->tri_vao);
 
 	shader_bind(test_application->tri_shader);
 }
@@ -102,8 +113,7 @@ void test_app_deinit(void *user_data) {
 
 	shader_destroy(test_application->tri_shader);
 
-	renderer_destroy_vertex_buffer(test_application->renderer, test_application->tri_vbo);
-	renderer_destroy_vertex_array(test_application->renderer, test_application->tri_vao);
+	vertex_array_destroy(test_application->tri_vao);
 
 	ls_free(test_application);
 }
@@ -113,7 +123,7 @@ void test_app_update(float64 delta_time, void *user_data) {
 	test_application->timer += delta_time;
 	check_input(test_application);
 
-	renderer_draw_arrays(test_application->renderer, DRAW_MODE_TRIANGLES, 0, 3);
+	vertex_array_draw(test_application->tri_vao);
 
 	if (test_application->timer > 1.0) {
 		ls_printf("FPS: %f\n", 1.0 / delta_time);
