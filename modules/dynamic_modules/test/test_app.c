@@ -34,8 +34,8 @@ static void check_input(TestApplication *test_application);
 static void input_handler(Event *event, void *user_data);
 
 static const WindowConfig ROOT_WINDOW_CONFIG = {
-	.position = { 0, 0 },
-	.size = { 1280, 720 },
+	.position = vec2i(0, 0),
+	.size = vec2i(800, 600),
 	.title = "Lunar Sprites Test Application",
 	.fullscreen = false,
 	.hidden = false,

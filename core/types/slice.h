@@ -2,9 +2,9 @@
 #define SLICE_H
 
 #include "core/api.h"
+#include "core/math/vector.h"
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
-#include "core/types/vector/vector2.h"
 
 #define SLICE_VAL(type, val) ((SliceValue){ .type = val })
 #define SLICE_VAL32(type, val) ((SliceValue32){ .type = val })

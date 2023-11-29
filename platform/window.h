@@ -2,10 +2,10 @@
 #define PLATFORM_WINDOW_H
 
 #include "core/input/keycodes.h"
+#include "core/math/vector.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
-#include "core/types/vector/vector2.h"
 
 #include "platform/os.h"
 

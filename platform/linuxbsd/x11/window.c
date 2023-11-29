@@ -97,25 +97,25 @@ static void handle_event(const X11Window *window, XEvent *event) {
 
 		case ButtonPress: {
 			input_handle_mouse_press(window->input_manager, x11_map_mbutton(event->xbutton.button),
-					(Vector2i){ event->xbutton.x, event->xbutton.y });
+					vec2i(event->xbutton.x, event->xbutton.y));
 
 		} break;
 
 		case ButtonRelease: {
 			input_handle_mouse_release(window->input_manager, x11_map_mbutton(event->xbutton.button),
-					(Vector2i){ event->xbutton.x, event->xbutton.y });
+					vec2i(event->xbutton.x, event->xbutton.y));
 		} break;
 
 		case MotionNotify: {
-			input_handle_mouse_move(window->input_manager, (Vector2i){ event->xmotion.x, event->xmotion.y });
+			input_handle_mouse_move(window->input_manager, vec2i(event->xmotion.x, event->xmotion.y));
 		} break;
 
 		case EnterNotify: {
-			input_handle_mouse_enter(window->input_manager, (Vector2i){ event->xcrossing.x, event->xcrossing.y });
+			input_handle_mouse_enter(window->input_manager, vec2i(event->xcrossing.x, event->xcrossing.y));
 		} break;
 
 		case LeaveNotify: {
-			input_handle_mouse_leave(window->input_manager, (Vector2i){ event->xcrossing.x, event->xcrossing.y });
+			input_handle_mouse_leave(window->input_manager, vec2i(event->xcrossing.x, event->xcrossing.y));
 		} break;
 	}
 }

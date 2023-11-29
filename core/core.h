@@ -4,11 +4,10 @@
 #include "core/api.h"
 
 /* --------------TYPES-------------- */
+#include "core/math/vector.h"
 #include "core/types/hashtable.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"
-#include "core/types/vector/vector2.h"
-#include "core/types/vector/vector3.h"
 /* --------------------------------- */
 
 /* --------------MANAGERS-------------- */

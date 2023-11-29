@@ -4,8 +4,8 @@
 #include "core/api.h"
 #include "core/events/event_manager.h"
 #include "core/input/keycodes.h"
+#include "core/math/vector.h"
 #include "core/types/typedefs.h"
-#include "core/types/vector/vector2.h"
 #include "core/window.h"
 
 typedef struct InputManager InputManager;
