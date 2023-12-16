@@ -25,7 +25,7 @@ source_headers = [
     'core/input/input_manager.h',
     'core/events/events.h',
     'core/events/event_manager.h',
-    'core/os/os.h',
+    'core/os.h',
     'core/core.h',
     
     'renderer/window.h',

@@ -92,18 +92,18 @@ X11Server *os_linuxbsd_get_x11_server(const PlatformOS *os) {
 }
 #endif
 
-static uint64 linuxbsd_get_time() {
+uint64 platform_get_time() {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return (uint64)tv.tv_sec * 1000000 + (uint64)tv.tv_usec;
 }
 
-static bool linuxbsd_path_exists(String path) {
+bool platform_path_exists(String path) {
 	struct stat st;
 	return stat(path, &st) == 0;
 }
 
-static bool linuxbsd_path_is_directory(String path) {
+bool platform_path_is_directory(String path) {
 	struct stat st;
 	if (stat(path, &st) != 0) {
 		return false;
@@ -112,7 +112,7 @@ static bool linuxbsd_path_is_directory(String path) {
 	return S_ISDIR(st.st_mode);
 }
 
-static bool linuxbsd_path_is_file(String path) {
+bool platform_path_is_file(String path) {
 	struct stat st;
 	if (stat(path, &st) != 0) {
 		return false;
@@ -121,7 +121,7 @@ static bool linuxbsd_path_is_file(String path) {
 	return S_ISREG(st.st_mode);
 }
 
-static char *linuxbsd_path_add(String path1, String path2) {
+char *platform_path_add(String path1, String path2) {
 	size_t path1_length = ls_str_length(path1);
 	size_t path2_length = ls_str_length(path2);
 
@@ -147,7 +147,7 @@ static char *linuxbsd_path_add(String path1, String path2) {
 	return path;
 }
 
-static char *linuxbsd_path_get_directory(String path) {
+char *platform_path_get_directory(String path) {
 	size_t length = ls_str_length(path);
 	size_t i = length - 1;
 	while (i > 0 && path[i] != '/') {
@@ -165,7 +165,7 @@ static char *linuxbsd_path_get_directory(String path) {
 	return directory;
 }
 
-static char *linuxbsd_path_get_filename(String path) {
+char *platform_path_get_filename(String path) {
 	size_t length = ls_str_length(path);
 	size_t i = length - 1;
 	while (i > 0 && path[i] != '/') {
@@ -183,7 +183,7 @@ static char *linuxbsd_path_get_filename(String path) {
 	return filename;
 }
 
-static char *linuxbsd_path_get_extension(String path) {
+char *platform_path_get_extension(String path) {
 	size_t length = ls_str_length(path);
 	size_t i = length - 1;
 	while (i > 0 && path[i] != '.') {
@@ -201,7 +201,7 @@ static char *linuxbsd_path_get_extension(String path) {
 	return extension;
 }
 
-static char *linuxbsd_path_to_absolute(String path) {
+char *platform_path_to_absolute(String path) {
 	char *absolute_path = realpath(path, NULL);
 	if (!absolute_path) {
 		return NULL;
@@ -210,7 +210,7 @@ static char *linuxbsd_path_to_absolute(String path) {
 	return absolute_path;
 }
 
-static Slice *linuxbsd_list_directory(String path) {
+Slice *platform_list_directory(String path) {
 	DIR *dir = opendir(path);
 	if (!dir) {
 		return NULL;
@@ -232,7 +232,7 @@ static Slice *linuxbsd_list_directory(String path) {
 	return files;
 }
 
-static char *linuxbsd_read_file(String path, size_t *size) {
+char *platform_read_file(String path, size_t *size) {
 	FILE *file = fopen(path, "rb");
 	if (!file) {
 		return NULL;
@@ -255,7 +255,7 @@ static char *linuxbsd_read_file(String path, size_t *size) {
 	return data;
 }
 
-static bool linuxbsd_write_file(String path, const void *data, size_t size) {
+bool platform_write_file(String path, const void *data, size_t size) {
 	FILE *file = fopen(path, "wb");
 	if (!file) {
 		return false;
@@ -267,41 +267,57 @@ static bool linuxbsd_write_file(String path, const void *data, size_t size) {
 	return true;
 }
 
-static void linuxbsd_set_working_directory(String path) {
+LSFile platform_open_file(String path, String mode) {
+	return fopen(path, mode);
+}
+
+void platform_close_file(LSFile file) {
+	fclose(file);
+}
+
+size_t platform_read_file_data(LSFile file, void *data, size_t size) {
+	return fread(data, 1, size, file);
+}
+
+size_t platform_write_file_data(LSFile file, const void *data, size_t size) {
+	return fwrite(data, 1, size, file);
+}
+
+size_t platform_get_file_size(LSFile file) {
+	size_t current_position = ftell(file);
+	fseek(file, 0, SEEK_END);
+	size_t size = ftell(file);
+	fseek(file, current_position, SEEK_SET);
+
+	return size;
+}
+
+size_t platform_get_file_position(LSFile file) {
+	return ftell(file);
+}
+
+void platform_set_file_position(LSFile file, size_t position) {
+	fseek(file, position, SEEK_SET);
+}
+
+bool platform_is_end_of_file(LSFile file) {
+	return feof(file);
+}
+
+void platform_set_working_directory(String path) {
 	if (chdir(path) != 0) {
 		ls_log(LOG_LEVEL_INFO, "Failed to set working directory to %s\n", path);
 	}
 }
 
-static char *linuxbsd_get_working_directory() {
+char *platform_get_working_directory() {
 	return getcwd(NULL, 0);
 }
 
-static void *linuxbsd_open_library(String path) {
+void *platform_open_library(String path) {
 	return dlopen(path, RTLD_LAZY);
 }
 
-static void *linuxbsd_get_library_symbol(void *library, String symbol) {
+void *platform_get_library_symbol(void *library, String symbol) {
 	return dlsym(library, symbol);
-}
-
-PlatformOSInterface platform_get_os_interface(const PlatformOS *os) {
-	PlatformOSInterface interface;
-	interface.get_time = linuxbsd_get_time;
-	interface.path_exists = linuxbsd_path_exists;
-	interface.path_is_directory = linuxbsd_path_is_directory;
-	interface.path_is_file = linuxbsd_path_is_file;
-	interface.path_add = linuxbsd_path_add;
-	interface.path_get_directory = linuxbsd_path_get_directory;
-	interface.path_get_filename = linuxbsd_path_get_filename;
-	interface.path_get_extension = linuxbsd_path_get_extension;
-	interface.list_directory = linuxbsd_list_directory;
-	interface.read_file = linuxbsd_read_file;
-	interface.write_file = linuxbsd_write_file;
-	interface.set_working_directory = linuxbsd_set_working_directory;
-	interface.path_to_absolute = linuxbsd_path_to_absolute;
-	interface.get_working_directory = linuxbsd_get_working_directory;
-	interface.open_library = linuxbsd_open_library;
-	interface.get_library_symbol = linuxbsd_get_library_symbol;
-	return interface;
 }

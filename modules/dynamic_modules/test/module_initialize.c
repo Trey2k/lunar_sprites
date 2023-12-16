@@ -17,8 +17,6 @@ void deinitialize_test_app_module(ModuleInitializationLevel p_level) {
 }
 
 LS_EXPORT DynamicModuleInterface register_test_app_module() {
-	LS_ASSERT(_impl_ls_calloc);
-
 	DynamicModuleInterface module_interface = {
 		.init = initailize_test_app_module,
 		.deinit = deinitialize_test_app_module

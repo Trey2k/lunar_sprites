@@ -18,8 +18,6 @@ typedef struct {
 	FlagValue *dump_api;
 	FlagValue *dump_api_file;
 	Slice *interfaces;
-
-	const OS *os;
 } DynamicModules;
 
 static DynamicModules dynamic_modules;
@@ -30,7 +28,6 @@ static char *get_module_name(String file_path);
 void dynamic_modules_init(LSCore *core) {
 	api_interface_init();
 
-	dynamic_modules.os = core_get_os(core);
 	FlagManager *flag_manager = core_get_flag_manager(core);
 
 	dynamic_modules.dump_api = flag_manager_register(flag_manager, "dump-api", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Extract the native API header file.");
@@ -59,13 +56,13 @@ void dynamic_modules_start() {
 
 		char *api_source = ls_str_replace((String)LS_API_SOURCE, "@API_HEADER@", header_file);
 
-		if (!os_write_file(dynamic_modules.os, source_file, api_source, ls_str_length(api_source))) {
+		if (!os_write_file(source_file, api_source, ls_str_length(api_source))) {
 			ls_log_fatal("Failed to write file %s\n", source_file);
 		}
 
 		ls_free(api_source);
 
-		if (!os_write_file(dynamic_modules.os, header_file, (String)LS_API_HEADER, ls_str_length((String)LS_API_HEADER))) {
+		if (!os_write_file(header_file, (String)LS_API_HEADER, ls_str_length((String)LS_API_HEADER))) {
 			ls_log_fatal("Failed to write file %s\n", header_file);
 		}
 
@@ -85,15 +82,15 @@ void dynamic_modules_deinit() {
 static Slice *load_native_modules() {
 	Slice *interfaces = slice_create(16, true);
 
-	Slice *files = os_list_directory(dynamic_modules.os, "./");
+	Slice *files = os_list_directory("./");
 
 	for (size_t i = 0; i < slice_get_size(files); i++) {
 		String file = slice_get(files, i).str;
-		char *file_abs = os_path_to_absolute(dynamic_modules.os, file);
+		char *file_abs = os_path_to_absolute(file);
 
-		char *ext = os_path_get_extension(dynamic_modules.os, file_abs);
+		char *ext = os_path_get_extension(file_abs);
 		if (ext && ls_str_equals(ext, DYNAMIC_EXTENSION)) {
-			void *handle = os_open_library(dynamic_modules.os, file_abs);
+			void *handle = os_open_library(file_abs);
 			if (!handle) {
 				ls_log(LOG_LEVEL_INFO, "Failed to load module %s\n", file_abs);
 				continue;
@@ -103,7 +100,7 @@ static Slice *load_native_modules() {
 			char *register_method = ls_str_format("register_%s_module", module_name);
 			ls_free(module_name);
 
-			LSApiInitFun init_function = os_get_library_symbol(dynamic_modules.os, handle, "ls_api_init");
+			LSApiInitFun init_function = os_get_library_symbol(handle, "ls_api_init");
 			if (!init_function) {
 				ls_log(LOG_LEVEL_INFO, "Failed to load module %s\n", file_abs);
 				continue;
@@ -111,7 +108,7 @@ static Slice *load_native_modules() {
 
 			init_function(ls_api_interface);
 
-			DynamicModuleRegisterFunc register_function = os_get_library_symbol(dynamic_modules.os, handle, register_method);
+			DynamicModuleRegisterFunc register_function = os_get_library_symbol(handle, register_method);
 			ls_free(register_method);
 
 			if (!register_function) {
@@ -154,7 +151,7 @@ void uninitialize_dynamic_modules(ModuleInitializationLevel p_level) {
 }
 
 static char *get_module_name(String file_path) {
-	char *file_name = os_path_get_filename(dynamic_modules.os, file_path);
+	char *file_name = os_path_get_filename(file_path);
 	// Find the first . in the file name and replace it with a null terminator.
 	String lib_name = ls_str_find(file_name, ".");
 	if (lib_name) {

@@ -129,7 +129,7 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 	};
 }
 
-static uint64 windows_get_time() {
+uint64 platform_get_time() {
 	FILETIME file_time;
 	GetSystemTimeAsFileTime(&file_time);
 	ULARGE_INTEGER large_integer;
@@ -138,22 +138,22 @@ static uint64 windows_get_time() {
 	return large_integer.QuadPart / 10;
 }
 
-static bool windows_path_exists(String path) {
+bool platform_path_exists(String path) {
 	DWORD attributes = GetFileAttributes(path);
 	return attributes != INVALID_FILE_ATTRIBUTES;
 }
 
-static bool windows_path_is_directory(String path) {
+bool platform_path_is_directory(String path) {
 	DWORD attributes = GetFileAttributes(path);
 	return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-static bool windows_path_is_file(String path) {
+bool platform_path_is_file(String path) {
 	DWORD attributes = GetFileAttributes(path);
 	return attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-static char *windows_path_add(String path1, String path2) {
+char *platform_path_add(String path1, String path2) {
 	size_t path1_length = ls_str_length(path1);
 	size_t path2_length = ls_str_length(path2);
 
@@ -186,7 +186,7 @@ static char *windows_path_add(String path1, String path2) {
 	return path;
 }
 
-static char *windows_path_get_directory(String path) {
+char *platform_path_get_directory(String path) {
 	size_t length = ls_str_length(path);
 	size_t i = length - 1;
 	while (i > 0 && path[i] != '/' && path[i] != '\\') {
@@ -204,7 +204,7 @@ static char *windows_path_get_directory(String path) {
 	return directory;
 }
 
-static char *windows_path_get_filename(String path) {
+char *platform_path_get_filename(String path) {
 	size_t length = ls_str_length(path);
 	size_t i = length - 1;
 	while (i > 0 && path[i] != '/' && path[i] != '\\') {
@@ -222,7 +222,7 @@ static char *windows_path_get_filename(String path) {
 	return filename;
 }
 
-static char *windows_path_get_extension(String path) {
+char *platform_path_get_extension(String path) {
 	size_t length = ls_str_length(path);
 	size_t i = length - 1;
 	while (i > 0 && path[i] != '.') {
@@ -240,7 +240,7 @@ static char *windows_path_get_extension(String path) {
 	return extension;
 }
 
-static char *windows_path_to_absolute(String path) {
+char *platform_path_to_absolute(String path) {
 	char *absolute_path = ls_malloc(MAX_PATH);
 	if (!GetFullPathName(path, MAX_PATH, absolute_path, NULL)) {
 		ls_free(absolute_path);
@@ -250,9 +250,9 @@ static char *windows_path_to_absolute(String path) {
 	return absolute_path;
 }
 
-static Slice *windows_list_directory(String path) {
+Slice *platform_list_directory(String path) {
 	Slice *files = slice_create(16, true);
-	char *search_path = windows_path_add(path, "*");
+	char *search_path = platform_path_add(path, "*");
 	WIN32_FIND_DATA find_data;
 	HANDLE find_handle = FindFirstFile(search_path, &find_data);
 	ls_free(search_path);
@@ -273,7 +273,7 @@ static Slice *windows_list_directory(String path) {
 	return files;
 }
 
-static char *windows_read_file(String path, size_t *size) {
+char *platform_read_file(String path, size_t *size) {
 	HANDLE file_handle = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file_handle == INVALID_HANDLE_VALUE) {
 		return NULL;
@@ -299,7 +299,7 @@ static char *windows_read_file(String path, size_t *size) {
 	return data;
 }
 
-static bool windows_write_file(String path, const void *data, size_t size) {
+bool platform_write_file(String path, const void *data, size_t size) {
 	HANDLE file_handle = CreateFile(path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (file_handle == INVALID_HANDLE_VALUE) {
 		return false;
@@ -316,37 +316,53 @@ static bool windows_write_file(String path, const void *data, size_t size) {
 	return true;
 }
 
-static void windows_set_working_directory(String path) {
+LSFile platform_open_file(String path, String mode) {
+	return fopen(path, mode);
+}
+
+void platform_close_file(LSFile file) {
+	fclose(file);
+}
+
+size_t platform_read_file_data(LSFile file, void *data, size_t size) {
+	return fread(data, 1, size, file);
+}
+
+size_t platform_write_file_data(LSFile file, const void *data, size_t size) {
+	return fwrite(data, 1, size, file);
+}
+
+size_t platform_get_file_size(LSFile file) {
+	size_t current_position = ftell(file);
+	fseek(file, 0, SEEK_END);
+	size_t size = ftell(file);
+	fseek(file, current_position, SEEK_SET);
+
+	return size;
+}
+
+size_t platform_get_file_position(LSFile file) {
+	return ftell(file);
+}
+
+void platform_set_file_position(LSFile file, size_t position) {
+	fseek(file, position, SEEK_SET);
+}
+
+bool platform_is_end_of_file(LSFile file) {
+	return feof(file);
+}
+
+void platform_set_working_directory(String path) {
 	if (!SetCurrentDirectory(path)) {
 		ls_log(LOG_LEVEL_WARNING, "Failed to set working directory to %s\n", path);
 	}
 }
 
-static void *windows_open_library(String path) {
+void *platform_open_library(String path) {
 	return LoadLibrary(path);
 }
 
-static void *windows_get_library_symbol(void *library, String symbol) {
+void *platform_get_library_symbol(void *library, String symbol) {
 	return GetProcAddress(library, symbol);
-}
-
-PlatformOSInterface platform_get_os_interface(const PlatformOS *os) {
-	PlatformOSInterface ps_interface;
-	ps_interface.get_time = windows_get_time;
-	ps_interface.path_exists = windows_path_exists;
-	ps_interface.path_is_directory = windows_path_is_directory;
-	ps_interface.path_is_file = windows_path_is_file;
-	ps_interface.path_add = windows_path_add;
-	ps_interface.path_get_directory = windows_path_get_directory;
-	ps_interface.path_get_filename = windows_path_get_filename;
-	ps_interface.path_get_extension = windows_path_get_extension;
-	ps_interface.list_directory = windows_list_directory;
-	ps_interface.read_file = windows_read_file;
-	ps_interface.write_file = windows_write_file;
-	ps_interface.set_working_directory = windows_set_working_directory;
-	ps_interface.path_to_absolute = windows_path_to_absolute;
-	ps_interface.get_working_directory = windows_path_to_absolute;
-	ps_interface.open_library = windows_open_library;
-	ps_interface.get_library_symbol = windows_get_library_symbol;
-	return ps_interface;
 }

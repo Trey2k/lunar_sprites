@@ -1,7 +1,7 @@
 #ifndef EGL_DISPLAY_H
 #define EGL_DISPLAY_H
 
-#include "core/os/os.h"
+#include "core/os.h"
 
 // We don't use glad for EGL on web, because it's not needed.
 #if !defined(WEB_ENABLED)

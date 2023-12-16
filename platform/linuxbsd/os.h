@@ -1,7 +1,7 @@
 #ifndef LINUXBSD_OS_H
 #define LINUXBSD_OS_H
 
-#include "core/os/os.h"
+#include "core/os.h"
 #include "platform/os.h"
 
 #if defined(WAYLAND_ENABLED)

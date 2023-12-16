@@ -20,7 +20,7 @@
 #include "core/flags.h"
 #include "core/log.h"
 #include "core/memory.h"
-#include "core/os/os.h"
+#include "core/os.h"
 #include "core/version.h"
 /* -------------------------------------- */
 

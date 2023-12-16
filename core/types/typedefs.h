@@ -13,6 +13,8 @@ typedef unsigned long long uint64;
 typedef float float32;
 typedef double float64;
 
+typedef void *LSFile;
+
 #if defined(__SIZE_TYPE__)
 typedef __SIZE_TYPE__ size_t;
 #else // __SIZE_TYPE__
