@@ -33,15 +33,6 @@ typedef struct {
 static void check_input(TestApplication *test_application);
 static void input_handler(Event *event, void *user_data);
 
-static const WindowConfig ROOT_WINDOW_CONFIG = {
-	.position = vec2i(0, 0),
-	.size = vec2i(800, 600),
-	.title = "Lunar Sprites Test Application",
-	.fullscreen = false,
-	.hidden = false,
-	.root_window = true,
-};
-
 ApplicationInterface register_application() {
 	ApplicationInterface application_interface;
 	application_interface.init = test_app_init;
@@ -60,6 +51,16 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 	test_application->core = core;
 	test_application->renderer = renderer;
 	test_application->should_stop = false;
+
+	const WindowConfig ROOT_WINDOW_CONFIG = {
+		.position = vec2i(0, 0),
+		.size = vec2i(800, 600),
+		.title = "Lunar Sprites Test Application",
+		.fullscreen = false,
+		.hidden = false,
+		.root_window = true,
+	};
+
 	test_application->root_window = renderer_create_window(renderer, ROOT_WINDOW_CONFIG);
 	test_application->input_manager = core_get_input_manager(core);
 

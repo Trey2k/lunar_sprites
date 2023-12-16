@@ -22,9 +22,6 @@ LS_EXPORT char *ls_str_concat(String a, ...);
 LS_EXPORT char *ls_str_format(String format, ...);
 LS_EXPORT char *ls_str_replace(String string, String old, String new);
 
-LS_EXPORT char *ls_str_token(String string, String delimiters, String *context);
-LS_EXPORT char *ls_str_token_r(String string, String delimiters, char **context);
-
 LS_EXPORT String ls_str_char(String str, int32 c);
 LS_EXPORT String ls_str_find(String str, String substr);
 
