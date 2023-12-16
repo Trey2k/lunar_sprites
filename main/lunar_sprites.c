@@ -12,7 +12,6 @@
 struct Main {
 	FlagManager *flag_manager;
 	LSCore *core;
-	const OS *os;
 	Renderer *renderer;
 	const LSWindow *root_window;
 
@@ -46,7 +45,6 @@ void ls_main_init(int32 argc, char *argv[]) {
 	flag_manager_parse(main.flag_manager, argc, argv, true);
 
 	main.core = core_create(main.flag_manager);
-	main.os = core_get_os(main.core);
 	check_path();
 
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE, main.core);
@@ -75,7 +73,7 @@ void ls_main_init(int32 argc, char *argv[]) {
 }
 
 void ls_main_loop() {
-	uint64 current_time = os_get_time(main.os);
+	uint64 current_time = os_get_time();
 	main.delta_time = (current_time - main.last_frame_time) / 1000000.0;
 	main.last_frame_time = current_time;
 
@@ -135,16 +133,16 @@ static void check_path() {
 		ls_log_fatal("No path specified.\n");
 	}
 
-	if (!os_path_exists(main.os, main.path->str)) {
+	if (!os_path_exists(main.path->str)) {
 		ls_log_fatal("Path %s does not exist.\n", main.path->str);
 	}
 
-	if (!os_path_is_directory(main.os, main.path->str)) {
+	if (!os_path_is_directory(main.path->str)) {
 		ls_log_fatal("Path %s is not a directory.\n", main.path->str);
 	}
 
 	if (!ls_str_equals(main.path->str, "./")) {
 		ls_log(LOG_LEVEL_INFO, "Setting working directory to %s.\n", main.path->str);
-		os_set_working_directory(main.os, main.path->str);
+		os_set_working_directory(main.path->str);
 	}
 }

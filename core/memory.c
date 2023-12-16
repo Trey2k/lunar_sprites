@@ -1,5 +1,6 @@
 #include "core/memory.h"
 
+#include <malloc.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +15,10 @@ void *ls_realloc(void *ptr, size_t size) {
 
 void *ls_calloc(size_t count, size_t size) {
 	return calloc(count, size);
+}
+
+void *ls_alloca(size_t size) {
+	return alloca(size);
 }
 
 void ls_memset(void *dest, int32 value, size_t size) {
