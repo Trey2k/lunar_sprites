@@ -16,6 +16,7 @@
 /* ------------------------------------ */
 
 /* --------------COMPONENTS-------------- */
+#include "core/config.h"
 #include "core/debug.h"
 #include "core/flags.h"
 #include "core/log.h"

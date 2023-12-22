@@ -13,6 +13,7 @@ struct Main {
 	FlagManager *flag_manager;
 	LSCore *core;
 	Renderer *renderer;
+
 	const LSWindow *root_window;
 
 	ApplicationInterface application_interface;
@@ -35,7 +36,6 @@ static void check_path();
 void ls_main_init(int32 argc, char *argv[]) {
 	main.should_stop = false;
 	main.exit_code = 0;
-
 	main.delta_time = 0.0;
 
 	main.flag_manager = flag_manager_create();

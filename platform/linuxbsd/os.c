@@ -276,6 +276,7 @@ void platform_close_file(LSFile file) {
 }
 
 size_t platform_read_file_data(LSFile file, void *data, size_t size) {
+	LS_ASSERT(size <= platform_get_file_size(file));
 	return fread(data, 1, size, file);
 }
 

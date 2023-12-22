@@ -3,6 +3,7 @@
 #include "core/log.h"
 #include "core/os.h"
 #include "core/types/hashtable.h"
+#include "core/types/slice.h"
 #include "core/types/string.h"
 
 enum ConfigParserState {
@@ -10,8 +11,6 @@ enum ConfigParserState {
 	CONFIG_STATE_KEY,
 	CONFIG_STATE_VALUE,
 };
-
-static void parse_config(Hashtable *config, char current_char, enum ConfigParserState *state);
 
 void write_config(String path, Hashtable *config) {
 	LS_ASSERT(path);
@@ -41,7 +40,7 @@ void write_config(String path, Hashtable *config) {
 Hashtable *read_config(String path) {
 	LS_ASSERT(path);
 
-	Hashtable *config = hashtable_create(HASHTABLE_KEY_STRING, 16, false);
+	Hashtable *config = hashtable_create(HASHTABLE_KEY_STRING, 16, true);
 
 	LSFile file = os_open_file(path, "r");
 	if (!file) {
@@ -50,18 +49,68 @@ Hashtable *read_config(String path) {
 	}
 
 	size_t file_size = os_get_file_size(file);
-	char *file_data = ls_alloca(file_size + 1);
+	char *file_data = ls_malloc(file_size + 1);
 	os_read_file_data(file, file_data, file_size);
 	file_data[file_size] = '\0';
+	os_close_file(file);
+
 	enum ConfigParserState state = CONFIG_STATE_NONE;
 
-	while (*file_data) {
-		parse_config(config, *file_data, &state);
-		file_data++;
+	Slice8 *current_key = slice8_create(32);
+	Slice8 *current_value = slice8_create(32);
+	char *cur_char = file_data;
+	while (*cur_char) {
+		switch (state) {
+			case CONFIG_STATE_NONE: {
+				if (*cur_char >= 'A' && *cur_char <= 'z') {
+					state = CONFIG_STATE_KEY;
+					cur_char--;
+				} else if (*cur_char == '\n') {
+					state = CONFIG_STATE_NONE;
+				} else {
+					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);
+					return config;
+				}
+			} break;
+			case CONFIG_STATE_KEY: {
+				if (*cur_char == ':') {
+					cur_char++;
+					if (*cur_char != ' ') {
+						cur_char--;
+					}
+
+					state = CONFIG_STATE_VALUE;
+				} else if ((*cur_char >= 'A' && *cur_char <= 'z') ||
+						(*cur_char >= '0' && *cur_char <= '9') ||
+						*cur_char == '.') {
+					slice8_append(current_key, SLICE_VAL8(chr, *cur_char));
+				} else {
+					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);
+					return config;
+				}
+			} break;
+			case CONFIG_STATE_VALUE: {
+				if (*cur_char == '\n') {
+					state = CONFIG_STATE_NONE;
+					slice8_append(current_key, SLICE_VAL8(chr, '\0'));
+					slice8_append(current_value, SLICE_VAL8(chr, '\0'));
+
+					char *key = ls_str_copy(slice8_get_data(current_key));
+					char *value = ls_str_copy(slice8_get_data(current_value));
+
+					hashtable_set(config, HASH_KEY(str, key), HASH_VAL(str, value));
+					slice8_clear(current_key);
+					slice8_clear(current_value);
+				} else if ((*cur_char >= ' ' && *cur_char <= '~')) {
+					slice8_append(current_value, SLICE_VAL8(chr, *cur_char));
+				} else {
+					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);
+					return config;
+				}
+			} break;
+		};
+		cur_char++;
 	}
 
 	return config;
-}
-
-static void parse_config(Hashtable *config, char current_char, enum ConfigParserState *state) {
 }

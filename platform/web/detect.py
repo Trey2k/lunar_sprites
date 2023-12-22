@@ -196,6 +196,8 @@ def configure(env: "Environment"):
         if cc_semver >= (3, 1, 42) and cc_semver < (3, 1, 46):
             env.Append(LINKFLAGS=["-Wl,-u,scalbnf"])
     
+    env.static_files = []
+
     # Dynamic linking
     if env["dlink_enabled"]:
         env.dynamic_modules = []

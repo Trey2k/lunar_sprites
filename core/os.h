@@ -65,7 +65,7 @@ LS_EXPORT bool os_is_end_of_file(LSFile file);
 
 // Sets the working directory.
 LS_EXPORT void os_set_working_directory(String path);
-LS_EXPORT char *os_get_working_directory(const OS *os);
+LS_EXPORT char *os_get_working_directory();
 
 // Opens a library. Returns a handle to the library.
 LS_EXPORT void *os_open_library(String path);

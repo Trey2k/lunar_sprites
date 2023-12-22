@@ -143,8 +143,8 @@ static bool choose_pixel_format(LSNativeWindow native_window, HDC device_context
 
 static const WindowConfig TEMP_WINDOW_CONFIG = {
 	.title = "Temp",
-	.size = { 1, 1 },
-	.position = { 0, 0 },
+	.size = { { 1, 1 } },
+	.position = { { 0, 0 } },
 	.hidden = true,
 	.fullscreen = false,
 };

@@ -26,6 +26,7 @@ source_headers = [
     'core/events/events.h',
     'core/events/event_manager.h',
     'core/os.h',
+    'core/config.h',
     'core/core.h',
     
     'renderer/window.h',

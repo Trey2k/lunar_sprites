@@ -113,7 +113,7 @@ void os_set_working_directory(String path) {
 	platform_set_working_directory(path);
 }
 
-char *os_get_working_directory(const OS *os) {
+char *os_get_working_directory() {
 	return platform_path_to_absolute(".");
 }
 

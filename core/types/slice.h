@@ -9,15 +9,14 @@
 #define SLICE_VAL(type, val) ((SliceValue){ .type = val })
 #define SLICE_VAL32(type, val) ((SliceValue32){ .type = val })
 #define SLICE_VAL128(type, val) ((SliceValue128){ .type.x = val.x, .type.y = val.y })
+#define SLICE_VAL8(type, val) ((SliceValue8){ .type = val })
 
 typedef union {
-	union {
-		void *ptr;
-		int64 i64;
-		uint64 u64;
-		float64 f64;
-		String str;
-	};
+	void *ptr;
+	int64 i64;
+	uint64 u64;
+	float64 f64;
+	String str;
 } SliceValue;
 
 typedef bool (*SliceCompareFunc)(const SliceValue a, const SliceValue b);
@@ -54,12 +53,10 @@ _FORCE_INLINE_ bool slice_string_compare(const SliceValue a, const SliceValue b)
 }
 
 typedef union {
-	union {
-		bool b;
-		int32 i32;
-		uint32 u32;
-		float32 f32;
-	};
+	bool b;
+	int32 i32;
+	uint32 u32;
+	float32 f32;
 } SliceValue32;
 
 typedef bool (*SliceCompareFunc32)(const SliceValue32 a, const SliceValue32 b);
@@ -90,10 +87,8 @@ LS_EXPORT size_t slice32_get_size(const Slice32 *slice);
 LS_EXPORT size_t slice32_get_capacity(const Slice32 *slice);
 
 typedef union {
-	union {
-		Vector2 v2;
-		Vector2i v2i;
-	};
+	Vector2 v2;
+	Vector2i v2i;
 } SliceValue128;
 
 typedef bool (*SliceCompareFunc128)(const SliceValue128 a, const SliceValue128 b);
@@ -121,5 +116,35 @@ LS_EXPORT bool slice128_contains(const Slice128 *slice, SliceValue128 data, Slic
 
 LS_EXPORT size_t slice128_get_size(const Slice128 *slice);
 LS_EXPORT size_t slice128_get_capacity(const Slice128 *slice);
+
+typedef union {
+	char chr;
+} SliceValue8;
+
+typedef bool (*SliceCompareFunc8)(const SliceValue8 a, const SliceValue8 b);
+typedef struct Slice8 Slice8;
+
+LS_EXPORT Slice8 *slice8_create(size_t inital_size);
+LS_EXPORT void slice8_destroy(Slice8 *slice);
+
+LS_EXPORT void slice8_append(Slice8 *slice, SliceValue8 data);
+LS_EXPORT void slice8_append_slice(Slice8 *slice, const Slice8 *other);
+LS_EXPORT void slice8_insert(Slice8 *slice, size_t index, SliceValue8 data);
+LS_EXPORT void slice8_remove(Slice8 *slice, size_t index);
+LS_EXPORT void slice8_remove_range(Slice8 *slice, size_t index, size_t count);
+LS_EXPORT void slice8_clear(Slice8 *slice);
+LS_EXPORT void slice8_sort(Slice8 *slice, SliceCompareFunc8 compare_func);
+
+LS_EXPORT const void *slice8_get_data(const Slice8 *slice);
+
+LS_EXPORT SliceValue8 slice8_get(const Slice8 *slice, size_t index);
+LS_EXPORT SliceValue8 slice8_get_last(const Slice8 *slice);
+LS_EXPORT SliceValue8 slice8_get_first(const Slice8 *slice);
+
+LS_EXPORT bool slice8_is_empty(const Slice8 *slice);
+LS_EXPORT bool slice8_contains(const Slice8 *slice, SliceValue8 data, SliceCompareFunc8 compare_func);
+
+LS_EXPORT size_t slice8_get_size(const Slice8 *slice);
+LS_EXPORT size_t slice8_get_capacity(const Slice8 *slice);
 
 #endif // SLICE_H

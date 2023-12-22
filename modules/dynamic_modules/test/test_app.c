@@ -40,7 +40,6 @@ ApplicationInterface register_application() {
 	application_interface.deinit = test_app_deinit;
 	application_interface.update = test_app_update;
 	application_interface.should_stop = test_app_should_stop;
-
 	application_interface.user_data = ls_calloc(1, sizeof(TestApplication));
 
 	return application_interface;

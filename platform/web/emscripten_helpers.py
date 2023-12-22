@@ -53,6 +53,15 @@ def create_template_zip(env, js, wasm, worker, side):
     ]
 
     dynamic_modules = ""
+    static_files = ""
+
+    for file in env.static_files:
+        in_files.append("#/bin/%s" % file)
+        out_files.append(zip_dir.File(file))
+        static_files += '"%s", ' % file
+    
+    if len(env.static_files) > 0:
+        static_files = static_files[:-2]
 
     # Dynamic linking
     if env["dlink_enabled"]:
@@ -73,6 +82,7 @@ def create_template_zip(env, js, wasm, worker, side):
         "@LUNAR_URL@": "%s.js" % binary_name,
         "@LUNAR_BASE_PATH@": binary_name,
         "@LUNAR_DYNAMIC_MODULES@": dynamic_modules,
+        "@LUNAR_STATIC_FILES@": static_files,
     }
 
     index = "#misc/dist/html/index.html"

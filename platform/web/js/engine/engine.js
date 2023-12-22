@@ -5,6 +5,7 @@ const Engine = class {
 			base_path : base_path,
 			bin_path : base_path + '.wasm',
 			side_modules : [ base_path + '.side.wasm' ],
+			static_files : [],
 
 			persistent_paths : [ '/user_fs' ],
 			dynamic_modules : [],
@@ -28,6 +29,9 @@ const Engine = class {
 			}
 			if (options.side_modules) {
 				this.options.side_modules = options.side_modules;
+			}
+			if (options.static_files) {
+				this.options.static_files.push.apply(this.options.static_files, options.static_files);
 			}
 			if (options.persistent_paths) {
 				this.options.persistent_paths.push.apply(this.options.persistent_paths, options.persistent_paths);
@@ -68,11 +72,16 @@ const Engine = class {
 		this.FS = new LSFS(this.module);
 
 		await this.FS.init(this.options.persistent_paths);
-
 		await Promise.all(this.options.dynamic_modules.map(async (module) => {
 			let response = await fetch(module);
 			let buffer = await response.arrayBuffer();
 			this.FS.copy_to_fs("/user_fs/" + module, buffer);
+		}));
+
+		await Promise.all(this.options.static_files.map(async (file) => {
+			let response = await fetch(file);
+			let buffer = await response.arrayBuffer();
+			this.FS.copy_to_fs("/user_fs/" + file, buffer);
 		}));
 	}
 

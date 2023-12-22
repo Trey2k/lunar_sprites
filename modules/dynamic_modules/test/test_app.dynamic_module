@@ -1,0 +1,8 @@
+name: Test App
+entry_point: register_test_app_module
+linuxbsd.debug: libtest_app.linuxbsd.debug.x86_64.so
+linuxbsd.release: libtest_app.linuxbsd.release.x86_64.so
+windows.debug: libtest_app.windows.debug.x86_64.dll
+windows.release: libtest_app.windows.release.x86_64.dll
+web.debug: libtest_app.wasm
+web.release: libtest_app.wasm
