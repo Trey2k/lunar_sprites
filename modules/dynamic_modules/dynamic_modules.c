@@ -20,7 +20,7 @@
 
 #define DYNAMIC_MODULE_CONFIG_EXTENSION "dynamic_module"
 
-typedef void (*LSApiInitFun)(LSAPIInterface *p_interface);
+typedef void (*LSApiInitFunc)(LSAPIInterface *p_interface);
 
 typedef struct {
 	FlagValue *dump_api;
@@ -103,8 +103,6 @@ static DynamicModuleInterface *load_dynamic_module(String file_path) {
 	String entry_point = hashtable_get(config, HASH_KEY(str, "entry_point")).str;
 	String lib_path = hashtable_get(config, HASH_KEY(str, PLATFORM)).str;
 
-	hashtable_destroy(config);
-
 	ls_printf("Loading dynamic module %s\n", module_name);
 
 	char *lib_path_abs = os_path_to_absolute(lib_path);
@@ -115,7 +113,7 @@ static DynamicModuleInterface *load_dynamic_module(String file_path) {
 		return NULL;
 	}
 
-	LSApiInitFun init_function = os_get_library_symbol(handle, "ls_api_init");
+	LSApiInitFunc init_function = os_get_library_symbol(handle, "ls_api_init");
 	if (!init_function) {
 		ls_log(LOG_LEVEL_INFO, "Failed to load dynamic module %s\n", module_name);
 	}
@@ -136,6 +134,8 @@ static DynamicModuleInterface *load_dynamic_module(String file_path) {
 
 	DynamicModuleInterface *interface_ptr = ls_malloc(sizeof(DynamicModuleInterface));
 	*interface_ptr = interface;
+
+	hashtable_destroy(config);
 
 	return interface_ptr;
 }
