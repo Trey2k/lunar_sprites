@@ -194,6 +194,8 @@ jobs:
           cp LICENSE.md out/
           cp bin/*.exe out/
           cp bin/*.dll out/
+          cp bin/*.dynamic_module out/
+          cp bin/*.png out/
 
       - uses: actions/upload-artifact@v3
         with:
