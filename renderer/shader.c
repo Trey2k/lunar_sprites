@@ -53,7 +53,111 @@ struct Shader {
 	};
 };
 
-Shader *renderer_create_shader(const Renderer *renderer, String vertex_source, String fragment_source) {
+enum ShaderParserState {
+	STATE_NONE,
+	STATE_PREPROCESSOR,
+	STATE_OPNGL_VERTEX,
+	STATE_OPNGL_FRAGMENT,
+};
+
+static bool handle_preprocessor_command(String command, enum ShaderParserState *state) {
+	if (ls_str_equals(command, "opengl_vertex")) {
+		*state = STATE_OPNGL_VERTEX;
+	} else if (ls_str_equals(command, "opengl_fragment")) {
+		*state = STATE_OPNGL_FRAGMENT;
+	} else {
+		ls_log(LOG_LEVEL_ERROR, "Unknown preprocessor command: %s\n", command);
+		return false;
+	}
+
+	return true;
+}
+
+static bool is_preprocessor_command(String cur_char) {
+	return *cur_char == '#' && *(cur_char + 1) == 'L' && *(cur_char + 2) == 'S' && *(cur_char + 3) == ' ';
+}
+
+Shader *renderer_create_shader(const Renderer *renderer, String source, size_t source_size) {
+	Slice8 *opengl_vertex_source = slice8_create(source_size / 2);
+	Slice8 *opengl_fragment_source = slice8_create(source_size / 2);
+	Slice8 *preprocessor_command = slice8_create(32);
+	Shader *shader = NULL;
+
+	enum ShaderParserState state = STATE_NONE;
+
+	String cur_char = source;
+	while (*cur_char != '\0') {
+		switch (state) {
+			case STATE_NONE: {
+				if (is_preprocessor_command(cur_char)) {
+					cur_char += 3;
+					state = STATE_PREPROCESSOR;
+				}
+			} break;
+
+			case STATE_PREPROCESSOR: {
+				if (*cur_char != '\n') {
+					slice8_append(preprocessor_command, SLICE_VAL8(chr, *cur_char));
+				} else {
+					slice8_append(preprocessor_command, SLICE_VAL8(chr, '\0'));
+					if (!handle_preprocessor_command(slice8_get_data(preprocessor_command), &state)) {
+						goto error;
+					}
+					slice8_clear(preprocessor_command);
+				}
+			} break;
+
+			case STATE_OPNGL_VERTEX: {
+				if (is_preprocessor_command(cur_char)) {
+					cur_char += 3;
+					state = STATE_PREPROCESSOR;
+					break;
+				}
+
+				slice8_append(opengl_vertex_source, SLICE_VAL8(chr, *cur_char));
+			} break;
+
+			case STATE_OPNGL_FRAGMENT: {
+				if (is_preprocessor_command(cur_char)) {
+					cur_char += 3;
+					state = STATE_PREPROCESSOR;
+					break;
+				}
+
+				slice8_append(opengl_fragment_source, SLICE_VAL8(chr, *cur_char));
+			} break;
+		}
+		cur_char++;
+	}
+
+	RendererBackend backend = renderer_get_backend(renderer);
+
+	if (backend == RENDERER_BACKEND_OPENGL) {
+		slice8_append(opengl_vertex_source, SLICE_VAL8(chr, '\0'));
+		slice8_append(opengl_fragment_source, SLICE_VAL8(chr, '\0'));
+
+		shader = renderer_create_shader_raw(renderer, slice8_get_data(opengl_vertex_source), slice8_get_data(opengl_fragment_source));
+	}
+
+error:
+	slice8_destroy(opengl_vertex_source);
+	slice8_destroy(opengl_fragment_source);
+	slice8_destroy(preprocessor_command);
+
+	return shader;
+}
+
+Shader *renderer_create_shader_file(const Renderer *renderer, String path) {
+	size_t file_size = 0;
+	char *file_data = os_read_file(path, &file_size);
+
+	Shader *shader = renderer_create_shader(renderer, file_data, file_size);
+	ls_free(file_data);
+
+	return shader;
+}
+
+Shader *renderer_create_shader_raw(const Renderer *renderer, String vertex_source, String fragment_source) {
 	Shader *shader = ls_malloc(sizeof(Shader));
 	shader->backend = renderer_get_backend(renderer);
 
@@ -106,6 +210,10 @@ void shader_set_uniform_vec2(const Shader *shader, String name, Vector2 value) {
 
 void shader_set_uniform_vec3(const Shader *shader, String name, Vector3 value) {
 	SHADER_CALL(shader, set_uniform_vec3, name, value);
+}
+
+void shader_set_uniform_mat4(const Shader *shader, String name, Matrix4 value) {
+	SHADER_CALL(shader, set_uniform_mat4, name, value);
 }
 
 int32 shader_get_uniform_location(const Shader *shader, String name) {

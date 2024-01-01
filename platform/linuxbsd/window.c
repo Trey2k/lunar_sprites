@@ -144,6 +144,20 @@ void platform_window_set_size(PlatformWindow *window, int32 width, int32 height)
 	};
 }
 
+Vector2i platform_window_get_size(const PlatformWindow *window) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			return x11_window_get_size(window->x11_window);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+			return vec2i(0, 0);
+	};
+}
+
 void platform_window_set_fullscreen(PlatformWindow *window, bool fullscreen) {
 	switch (window->display_server) {
 #if defined(X11_ENABLED)

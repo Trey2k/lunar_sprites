@@ -1,6 +1,8 @@
 #include "renderer/renderer.h"
 
 #include "renderer/renderer_interface.h"
+#include "renderer/texture.h"
+#include "renderer/window.h"
 
 #include "core/core.h"
 
@@ -12,6 +14,8 @@ struct Renderer {
 	LSCore *core;
 
 	RendererInterface interface;
+
+	const LSWindow *active_window;
 
 	FlagValue *backend_flag;
 	RendererBackend backend;
@@ -31,6 +35,8 @@ Renderer *renderer_create(LSCore *core) {
 	renderer->backend_flag = flag_manager_register(core_get_flag_manager(core),
 			"renderer-backend", FLAG_TYPE_STRING, FLAG_VAL(str, "OPENGL"),
 			"The renderer backend to use. Valid values are NONE and OPENGL.");
+
+	texture_manager_init();
 
 	return renderer;
 }
@@ -54,6 +60,8 @@ void renderer_start(Renderer *renderer) {
 }
 
 void renderer_destroy(Renderer *renderer) {
+	texture_manager_deinit();
+
 	switch (renderer->backend) {
 		case RENDERER_BACKEND_NONE: {
 		} break;
@@ -87,6 +95,14 @@ void renderer_set_clear_color(const Renderer *renderer, float32 r, float32 g, fl
 
 void renderer_clear(const Renderer *renderer) {
 	renderer->interface.clear();
+}
+
+void renderer_set_active_window(Renderer *renderer, const LSWindow *window) {
+	renderer->active_window = window;
+}
+
+Vector2i renderer_get_viewport_size(const Renderer *renderer) {
+	return window_get_size(renderer->active_window);
 }
 
 static void check_flags(Renderer *renderer) {

@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import os
+
+Import("env")
+Import("env_modules")
+
+env_png = env_modules.Clone()
+
+thirdparty_obj = []
+
+thirdparty_dir = "#thirdparty/"
+thirdparty_sources = [
+    "libspng/spng.c",
+    "miniz/miniz.c",
+]
+thirdparty_sources = [thirdparty_dir + file for file in thirdparty_sources]
+
+env_png.Prepend(CPPPATH=[thirdparty_dir + "libspng"])
+env_png.Prepend(CPPDEFINES=["SPNG_STATIC"])
+
+env_thirdparty = env.Clone()
+env_thirdparty.disable_warnings()
+env_thirdparty.Prepend(CPPPATH=[thirdparty_dir + "miniz"])
+env_thirdparty.Prepend(CPPDEFINES=["SPNG_USE_MINIZ"])
+env_thirdparty.add_source_files(thirdparty_obj, thirdparty_sources)
+env.modules_sources += thirdparty_obj
+
+module_obj = []
+
+env_png.add_source_files(module_obj, "*.c")
+env.modules_sources += module_obj
+
+env.Depends(module_obj, thirdparty_obj)

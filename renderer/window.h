@@ -25,7 +25,7 @@ typedef struct {
 	bool root_window;
 } WindowConfig;
 
-LS_EXPORT LSWindow *renderer_create_window(const Renderer *renderer, WindowConfig config);
+LS_EXPORT LSWindow *renderer_create_window(Renderer *renderer, WindowConfig config);
 LS_EXPORT void window_destroy(LSWindow *window);
 
 LS_EXPORT LSNativeWindow window_get_native_window(const LSWindow *window);
@@ -34,6 +34,7 @@ LS_EXPORT void window_poll(const LSWindow *window);
 
 LS_EXPORT void window_set_title(LSWindow *window, const char *title);
 LS_EXPORT void window_set_size(LSWindow *window, int32 width, int32 height);
+LS_EXPORT Vector2i window_get_size(const LSWindow *window);
 
 LS_EXPORT void window_make_current(const LSWindow *window);
 LS_EXPORT void window_swap_buffers(const LSWindow *window);

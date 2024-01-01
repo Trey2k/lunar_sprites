@@ -36,10 +36,29 @@ typedef struct {
 } EventMouse;
 
 typedef enum {
+	EVENT_WINDOW_CLOSE,
+	EVENT_WINDOW_RESIZE,
+	EVENT_WINDOW_MOVE,
+	EVENT_WINDOW_FOCUS,
+	EVENT_WINDOW_LOST_FOCUS,
+	EVENT_WINDOW_MINIMIZE,
+	EVENT_WINDOW_MAXIMIZE
+} EventWindowType;
+
+typedef struct {
+	EventWindowType type;
+	union {
+		Vector2i position;
+		Vector2i size;
+	};
+	const LSWindow *window;
+} EventWindow;
+
+typedef enum {
 	EVENT_NONE,
 	EVENT_KEY,
 	EVENT_MOUSE,
-	EVENT_WINDOW_CLOSE,
+	EVENT_WINDOW
 } EventType;
 
 typedef struct {
@@ -47,7 +66,7 @@ typedef struct {
 	union {
 		EventKey key;
 		EventMouse mouse;
-		const LSWindow *window;
+		EventWindow window;
 	};
 
 	bool handled;

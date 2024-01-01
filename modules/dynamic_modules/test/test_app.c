@@ -1,18 +1,8 @@
 #include "test_app.h"
 #include "modules/dynamic_modules/test/ls_api.gen.h"
 
-static const char TRI_VERT[] = "#version 300 es\n"
-							   "in vec3 pos;\n"
-							   "void main() {\n"
-							   "	gl_Position = vec4(pos, 1.0);\n"
-							   "}\n";
-
-static const char TRI_FRAG[] = "#version 300 es\n"
-							   "precision mediump float;\n"
-							   "out vec4 FragColor;\n"
-							   "void main() {\n"
-							   "	FragColor = vec4(1.0, 0, 0, 1);\n"
-							   "}\n";
+#define WIDTH 150
+#define HEIGHT 150
 
 typedef struct {
 	LSCore *core;
@@ -24,8 +14,8 @@ typedef struct {
 
 	bool should_stop;
 
-	Shader *tri_shader;
-	VertexArray *tri_vao;
+	Sprite *sprite;
+	Camera *camera;
 
 	float64 timer;
 } TestApplication;
@@ -70,60 +60,38 @@ void test_app_start(void *user_data) {
 	TestApplication *test_application = user_data;
 	core_add_event_handler(test_application->core, input_handler, test_application);
 
-	renderer_set_clear_color(test_application->renderer, 0.0, 1.0, 0.0, 1.0);
+	renderer_set_clear_color(test_application->renderer, 0.0, 0.0, 0.0, 1.0);
 
-	float32 rect_verticies[] = {
-		-0.5, -0.5, 0.0,
-		0.5, -0.5, 0.0,
-		0.5, 0.5, 0.0,
-		-0.5, 0.5, 0.0
-	};
-
-	uint32 rect_indecies[] = {
-		0, 1, 2,
-		2, 3, 0
-	};
-
-	VertexBuffer *tri_vbo = renderer_create_vertex_buffer(test_application->renderer, rect_verticies, sizeof(rect_verticies));
-	BufferElement BufferLayoutElms[] = {
-		{ SHADER_DATA_TYPE_FLOAT3, "pos", false },
-	};
-
-	BufferLayout *tri_layout = buffer_layout_create(BufferLayoutElms, 1);
-	vertex_buffer_set_layout(tri_vbo, tri_layout);
-
-	IndexBuffer *tri_ibo = renderer_create_index_buffer(test_application->renderer, rect_indecies, sizeof(rect_indecies));
-
-	test_application->tri_shader = renderer_create_shader(test_application->renderer, TRI_VERT, TRI_FRAG);
-
-	LS_ASSERT(test_application->tri_shader);
-
-	test_application->tri_vao = renderer_create_vertex_array(test_application->renderer);
-
-	vertex_arrray_add_vertex_buffer(test_application->tri_vao, tri_vbo);
-	vertex_array_set_index_buffer(test_application->tri_vao, tri_ibo);
-
-	vertex_array_bind(test_application->tri_vao);
-
-	shader_bind(test_application->tri_shader);
+	test_application->sprite = renderer_create_sprite(test_application->renderer, "moon.png", vec2(0, 0), vec2(0.25, 0.25), 0.0);
+	Vector2i viewport_size = window_get_size(test_application->root_window);
+	test_application->camera = camera_create(math_deg_to_rad(100), viewport_size.y / viewport_size.x, 0.1, 100.0);
+	camera_set_position(test_application->camera, vec3(0.0, 0.0, 0.0));
+	camera_set_rotation(test_application->camera, vec3(0.0, 0.0, 0.0));
+	camera_set_active(test_application->camera);
 }
 
 void test_app_deinit(void *user_data) {
 	TestApplication *test_application = user_data;
 
-	shader_destroy(test_application->tri_shader);
-
-	vertex_array_destroy(test_application->tri_vao);
+	sprite_destroy(test_application->sprite);
 
 	ls_free(test_application);
 }
 
 void test_app_update(float64 delta_time, void *user_data) {
 	TestApplication *test_application = user_data;
+
+	float32 rotation = sprite_get_rotation(test_application->sprite);
+	rotation += 0.1 * delta_time;
+	if (rotation >= PI * 2) {
+		rotation = 0.0;
+	}
+	sprite_set_rotation(test_application->sprite, rotation);
+
 	test_application->timer += delta_time;
 	check_input(test_application);
 
-	vertex_array_draw(test_application->tri_vao);
+	sprite_draw(test_application->sprite);
 
 	if (test_application->timer > 1.0) {
 		ls_printf("FPS: %f\n", 1.0 / delta_time);

@@ -56,13 +56,14 @@ void renderer_context_destroy(Context *context) {
 	ls_free(context);
 }
 
-void renderer_context_make_current(const Context *context) {
+void renderer_context_make_current(Renderer *renderer, const Context *context) {
 	LS_ASSERT(context);
 
 	switch (context->backend) {
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
 			opengl_context_make_current(context->opengl_context);
+			renderer_set_active_window(renderer, opengl_context_get_window(context->opengl_context));
 		} break;
 #endif
 

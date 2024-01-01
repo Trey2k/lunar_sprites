@@ -115,7 +115,7 @@ def configure(env: "Environment"):
         ]
     )
 
-    env.Append(LIBS=["pthread"])
+    env.Append(LIBS=["pthread", "m"])
 
     if platform.system() == "Linux":
         env.Append(LIBS=["dl"])

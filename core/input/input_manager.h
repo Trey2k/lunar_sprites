@@ -27,6 +27,7 @@ void input_handle_mouse_release(InputManager *input_manager, LSMouseButton butto
 void input_handle_mouse_move(InputManager *input_manager, Vector2i position);
 void input_handle_mouse_enter(InputManager *input_manager, Vector2i position);
 void input_handle_mouse_leave(InputManager *input_manager, Vector2i position);
+void input_handle_resize(InputManager *input_manager, Vector2i size);
 
 LS_EXPORT bool input_is_key_pressed(const InputManager *input_manager, LSKeycode keycode);
 LS_EXPORT bool input_is_key_just_pressed(const InputManager *input_manager, LSKeycode keycode);

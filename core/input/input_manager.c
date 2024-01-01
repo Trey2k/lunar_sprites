@@ -64,8 +64,9 @@ void input_handle_window_close(InputManager *input_manager) {
 	LS_ASSERT(input_manager->active_window);
 
 	Event e;
-	e.type = EVENT_WINDOW_CLOSE;
-	e.window = input_manager->active_window;
+	e.type = EVENT_WINDOW;
+	e.window.type = EVENT_WINDOW_CLOSE;
+	e.window.window = input_manager->active_window;
 	event_manager_emit(input_manager->event_manager, &e);
 }
 
@@ -108,6 +109,18 @@ void input_handle_release(InputManager *input_manager, LSKeycode keycode) {
 	e.key.type = EVENT_KEY_RELEASED;
 	e.key.keycode = keycode;
 	e.key.window = input_manager->active_window;
+	e.handled = false;
+	event_manager_emit(input_manager->event_manager, &e);
+}
+
+void input_handle_resize(InputManager *input_manager, Vector2i size) {
+	LS_ASSERT(input_manager->active_window);
+
+	Event e;
+	e.type = EVENT_WINDOW;
+	e.window.type = EVENT_WINDOW_RESIZE;
+	e.window.size = size;
+	e.window.window = input_manager->active_window;
 	e.handled = false;
 	event_manager_emit(input_manager->event_manager, &e);
 }

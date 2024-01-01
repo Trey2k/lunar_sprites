@@ -125,6 +125,11 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			input_handle_window_close(window->input_manager);
 			return 0;
 		} break;
+
+		case WM_SIZE: {
+			input_handle_resize(window->input_manager, vec2i(LOWORD(l_param), HIWORD(l_param)));
+			return 0;
+		} break;
 	};
 
 	return DefWindowProc(native_window, message, w_param, l_param);

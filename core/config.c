@@ -12,7 +12,7 @@ enum ConfigParserState {
 	CONFIG_STATE_VALUE,
 };
 
-void write_config(String path, Hashtable *config) {
+void write_config(String path, const Hashtable *config) {
 	LS_ASSERT(path);
 	LS_ASSERT(config);
 

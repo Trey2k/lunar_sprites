@@ -4,7 +4,6 @@
 #include "core/api.h"
 
 /* --------------TYPES-------------- */
-#include "core/math/vector.h"
 #include "core/types/hashtable.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"
@@ -20,6 +19,9 @@
 #include "core/debug.h"
 #include "core/flags.h"
 #include "core/log.h"
+#include "core/math/math.h"
+#include "core/math/matrix.h"
+#include "core/math/vector.h"
 #include "core/memory.h"
 #include "core/os.h"
 #include "core/version.h"

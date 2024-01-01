@@ -115,6 +115,12 @@ void platform_window_set_size(PlatformWindow *window, int32 width, int32 height)
 	window->height = height;
 }
 
+Vector2i platform_window_get_size(const PlatformWindow *window) {
+	RECT rect;
+	GetWindowRect(window->window, &rect);
+	return vec2i(rect.right - rect.left, rect.bottom - rect.top);
+}
+
 bool platform_window_is_visible(const PlatformWindow *window) {
 	return !window->hidden;
 }

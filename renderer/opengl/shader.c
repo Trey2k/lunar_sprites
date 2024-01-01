@@ -108,10 +108,14 @@ void opengl_shader_set_uniform_vec3(const OpenGLShader *shader, String name, Vec
 	GL_CALL(glUniform3f(glGetUniformLocation(shader->program, name), value.x, value.y, value.z));
 }
 
+void opengl_shader_set_uniform_mat4(const OpenGLShader *shader, String name, Matrix4 value) {
+	GL_CALL(glUniformMatrix4fv(glGetUniformLocation(shader->program, name), 1, GL_FALSE, &value.mat[0]));
+}
+
 int32 opengl_shader_get_uniform_location(const OpenGLShader *shader, String name) {
-	return glGetUniformLocation(shader->program, name);
+	return GL_CALL(glGetUniformLocation(shader->program, name));
 }
 
 uint32 opengl_shader_get_attrib_location(const OpenGLShader *shader, String name) {
-	return glGetAttribLocation(shader->program, name);
+	return GL_CALL(glGetAttribLocation(shader->program, name));
 }

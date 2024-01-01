@@ -103,7 +103,7 @@ static DynamicModuleInterface *load_dynamic_module(String file_path) {
 	String entry_point = hashtable_get(config, HASH_KEY(str, "entry_point")).str;
 	String lib_path = hashtable_get(config, HASH_KEY(str, PLATFORM)).str;
 
-	ls_printf("Loading dynamic module %s\n", module_name);
+	ls_log(LOG_LEVEL_INFO, "Loading dynamic module %s\n", module_name);
 
 	char *lib_path_abs = os_path_to_absolute(lib_path);
 	void *handle = os_open_library(lib_path_abs);

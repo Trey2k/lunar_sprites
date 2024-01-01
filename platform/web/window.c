@@ -232,6 +232,12 @@ void platform_window_set_size(PlatformWindow *window, int32 width, int32 height)
 	set_canvas_size(window->canvas_id, width, height);
 }
 
+Vector2i platform_window_get_size(const PlatformWindow *window) {
+	LS_ASSERT(window);
+
+	return vec2i(window->width, window->height);
+}
+
 bool platform_window_is_visible(const PlatformWindow *window) {
 	LS_ASSERT(window);
 

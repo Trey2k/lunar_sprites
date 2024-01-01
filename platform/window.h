@@ -22,6 +22,7 @@ void platform_window_poll(PlatformWindow *window);
 
 void platform_window_set_title(PlatformWindow *window, String title);
 void platform_window_set_size(PlatformWindow *window, int32 width, int32 height);
+Vector2i platform_window_get_size(const PlatformWindow *window);
 
 void platform_window_set_fullscreen(PlatformWindow *window, bool fullscreen);
 
