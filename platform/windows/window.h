@@ -16,6 +16,7 @@ struct PlatformWindow {
 	bool hidden;
 
 	InputManager *input_manager;
+	LSWindow *parent;
 };
 
 #endif // WINDOWS_WINDOW_H

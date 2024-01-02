@@ -96,9 +96,13 @@ Shader *renderer_create_shader(const Renderer *renderer, String source, size_t s
 			} break;
 
 			case STATE_PREPROCESSOR: {
-				if (*cur_char != '\n') {
+				if ((*cur_char != '\n') && (*cur_char != '\r' && *(cur_char + 1) != '\n')) {
 					slice8_append(preprocessor_command, SLICE_VAL8(chr, *cur_char));
 				} else {
+					if (*cur_char == '\r') {
+						cur_char++;
+					}
+
 					slice8_append(preprocessor_command, SLICE_VAL8(chr, '\0'));
 					if (!handle_preprocessor_command(slice8_get_data(preprocessor_command), &state)) {
 						goto error;

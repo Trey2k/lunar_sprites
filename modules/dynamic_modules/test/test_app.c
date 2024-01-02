@@ -64,9 +64,7 @@ void test_app_start(void *user_data) {
 
 	test_application->sprite = renderer_create_sprite(test_application->renderer, "moon.png", vec2(0, 0), vec2(0.25, 0.25), 0.0);
 	Vector2i viewport_size = window_get_size(test_application->root_window);
-	test_application->camera = camera_create(math_deg_to_rad(100), viewport_size.y / viewport_size.x, 0.1, 100.0);
-	camera_set_position(test_application->camera, vec3(0.0, 0.0, 0.0));
-	camera_set_rotation(test_application->camera, vec3(0.0, 0.0, 0.0));
+	test_application->camera = camera_create(math_deg_to_rad(100), (float32)viewport_size.y / (float32)viewport_size.x, 0.1, 100.0);
 	camera_set_active(test_application->camera);
 }
 
@@ -87,6 +85,22 @@ void test_app_update(float64 delta_time, void *user_data) {
 		rotation = 0.0;
 	}
 	sprite_set_rotation(test_application->sprite, rotation);
+
+	if (input_is_key_pressed(test_application->input_manager, LS_KEY_W)) {
+		camera_move(test_application->camera, vec3(0.0, 0.1, 0.0));
+	}
+
+	if (input_is_key_pressed(test_application->input_manager, LS_KEY_S)) {
+		camera_move(test_application->camera, vec3(0.0, -0.1, 0.0));
+	}
+
+	if (input_is_key_pressed(test_application->input_manager, LS_KEY_A)) {
+		camera_move(test_application->camera, vec3(-0.1, 0.0, 0.0));
+	}
+
+	if (input_is_key_pressed(test_application->input_manager, LS_KEY_D)) {
+		camera_move(test_application->camera, vec3(0.1, 0.0, 0.0));
+	}
 
 	test_application->timer += delta_time;
 	check_input(test_application);

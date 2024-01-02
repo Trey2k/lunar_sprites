@@ -157,7 +157,7 @@ static uint32 load_wgl(const OpenGLRenderer *renderer, PIXELFORMATDESCRIPTOR *pf
 	// We use PlatformWindow and not LSWindow as LSWindow will trigger context creation recureivly.
 
 	// Windows platform does not need the renderer reference.
-	PlatformWindow *window = platform_create_window(os, TEMP_WINDOW_CONFIG, NULL);
+	PlatformWindow *window = platform_create_window(os, TEMP_WINDOW_CONFIG, NULL, NULL);
 	LSNativeWindow native_window = platform_window_get_native_window(window);
 	HDC device_context = GetDC(native_window);
 

@@ -12,7 +12,7 @@
 #include "platform/linuxbsd/x11/window.h"
 #endif
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, const LSWindow *parent) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 	window->display_server = os->display_server;
 

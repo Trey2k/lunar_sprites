@@ -34,7 +34,7 @@ LSWindow *renderer_create_window(Renderer *renderer, WindowConfig config) {
 	LS_ASSERT(os);
 
 	LSWindow *window = ls_malloc(sizeof(LSWindow));
-	window->platform_window = platform_create_window(os_get_platform_os(os), config, renderer);
+	window->platform_window = platform_create_window(os_get_platform_os(os), config, renderer, window);
 	window->renderer = renderer;
 	window->input_manager = core_get_input_manager(core);
 

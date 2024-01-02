@@ -48,6 +48,10 @@ LSNativeDisplayType platform_get_native_display(const PlatformOS *os) {
 
 static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param, int64 l_param) {
 	PlatformWindow *window = (PlatformWindow *)GetWindowLongPtr(native_window, GWLP_USERDATA);
+	if (!window) {
+		ls_log(LOG_LEVEL_WARNING, "Window procedure called before window was created!\n");
+		return DefWindowProc(native_window, message, w_param, l_param);
+	}
 
 	switch (message) {
 		case WM_CREATE: {
@@ -127,7 +131,11 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 		} break;
 
 		case WM_SIZE: {
+			input_set_active_window(window->input_manager, window->parent);
+
 			input_handle_resize(window->input_manager, vec2i(LOWORD(l_param), HIWORD(l_param)));
+
+			input_set_active_window(window->input_manager, NULL);
 			return 0;
 		} break;
 	};

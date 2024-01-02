@@ -65,7 +65,10 @@ Hashtable *read_config(String path) {
 				if (*cur_char >= 'A' && *cur_char <= 'z') {
 					state = CONFIG_STATE_KEY;
 					cur_char--;
-				} else if (*cur_char == '\n') {
+				} else if ((*cur_char == '\n') || (*cur_char == '\r' && *(cur_char + 1) == '\n')) {
+					if (*cur_char == '\r') {
+						cur_char++;
+					}
 					state = CONFIG_STATE_NONE;
 				} else {
 					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);

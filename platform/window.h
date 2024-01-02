@@ -13,7 +13,7 @@
 
 typedef struct PlatformWindow PlatformWindow;
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer);
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, const LSWindow *parent);
 void platform_destroy_window(PlatformWindow *window);
 
 LSNativeWindow platform_window_get_native_window(const PlatformWindow *window);
