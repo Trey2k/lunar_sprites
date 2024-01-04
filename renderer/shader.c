@@ -96,9 +96,7 @@ Shader *renderer_create_shader(const Renderer *renderer, String source, size_t s
 			} break;
 
 			case STATE_PREPROCESSOR: {
-				if ((*cur_char != '\n') && (*cur_char != '\r' && *(cur_char + 1) != '\n')) {
-					slice8_append(preprocessor_command, SLICE_VAL8(chr, *cur_char));
-				} else {
+				if ((*cur_char == '\n') || (*cur_char == '\r' && *(cur_char + 1) == '\n')) {
 					if (*cur_char == '\r') {
 						cur_char++;
 					}
@@ -108,6 +106,8 @@ Shader *renderer_create_shader(const Renderer *renderer, String source, size_t s
 						goto error;
 					}
 					slice8_clear(preprocessor_command);
+				} else {
+					slice8_append(preprocessor_command, SLICE_VAL8(chr, *cur_char));
 				}
 			} break;
 
