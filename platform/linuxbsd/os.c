@@ -220,7 +220,9 @@ Slice *platform_list_directory(String path) {
 
 	struct dirent *entry;
 	while ((entry = readdir(dir)) != NULL) {
-		if (ls_str_equals(entry->d_name, ".") || ls_str_equals(entry->d_name, "..")) {
+		if (entry->d_type != DT_REG ||
+				ls_str_equals(entry->d_name, ".") ||
+				ls_str_equals(entry->d_name, "..")) {
 			continue;
 		}
 

@@ -28,7 +28,7 @@ Perma links:
 
 
 ## libspng
-Used to parse PNG texture data in the png_texture module.
+Used to parse PNG texture data in the png module.
 
 - Upstream: https://github.com/randy408/libspng
 - Version: 0.7.4 (fb768002d4288590083a476af628e51c3f1d47cd)
@@ -53,3 +53,16 @@ Files extracted from upstream source:
 - `LICENSE`
 - `miniz.c`
 - `miniz.h`
+
+## lua
+The Lua programming language.
+
+- Upstream: https://github.com/lua/lua
+- Version: 5.4.6 (6443185167c77adcc8552a3fee7edab7895db1a9)
+- License: MIT license
+- Required: No
+
+Files extracted from upstream source:
+- `LICENSE` license text copied from https://www.lua.org/license.html
+- `*.c`
+- `*.h`
