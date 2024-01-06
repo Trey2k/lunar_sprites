@@ -72,7 +72,7 @@ Hashtable *read_config(String path) {
 					state = CONFIG_STATE_NONE;
 				} else {
 					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);
-					return config;
+					goto error;
 				}
 			} break;
 			case CONFIG_STATE_KEY: {
@@ -89,7 +89,7 @@ Hashtable *read_config(String path) {
 					slice8_append(current_key, SLICE_VAL8(chr, *cur_char));
 				} else {
 					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);
-					return config;
+					goto error;
 				}
 			} break;
 			case CONFIG_STATE_VALUE: {
@@ -108,7 +108,7 @@ Hashtable *read_config(String path) {
 					slice8_append(current_value, SLICE_VAL8(chr, *cur_char));
 				} else {
 					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);
-					return config;
+					goto error;
 				}
 			} break;
 		};
@@ -126,6 +126,11 @@ Hashtable *read_config(String path) {
 		slice8_clear(current_key);
 		slice8_clear(current_value);
 	}
+
+error:
+	slice8_destroy(current_key);
+	slice8_destroy(current_value);
+	ls_free(file_data);
 
 	return config;
 }
