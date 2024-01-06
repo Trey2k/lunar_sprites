@@ -93,7 +93,7 @@ Hashtable *read_config(String path) {
 				}
 			} break;
 			case CONFIG_STATE_VALUE: {
-				if (*cur_char == '\n') {
+				if ((*cur_char == '\n') || (*cur_char == '\r' && *(cur_char + 1) == '\n')) {
 					state = CONFIG_STATE_NONE;
 					slice8_append(current_key, SLICE_VAL8(chr, '\0'));
 					slice8_append(current_value, SLICE_VAL8(chr, '\0'));
@@ -113,6 +113,18 @@ Hashtable *read_config(String path) {
 			} break;
 		};
 		cur_char++;
+	}
+
+	if (state == CONFIG_STATE_VALUE) {
+		slice8_append(current_key, SLICE_VAL8(chr, '\0'));
+		slice8_append(current_value, SLICE_VAL8(chr, '\0'));
+
+		char *key = ls_str_copy(slice8_get_data(current_key));
+		char *value = ls_str_copy(slice8_get_data(current_value));
+
+		hashtable_set(config, HASH_KEY(str, key), HASH_VAL(str, value));
+		slice8_clear(current_key);
+		slice8_clear(current_value);
 	}
 
 	return config;
