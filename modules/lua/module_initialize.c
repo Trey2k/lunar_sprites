@@ -6,7 +6,7 @@ void initialize_lua_module(ModuleInitializationLevel p_level, void *p_arg) {
 		return;
 	}
 
-	lua_app_init();
+	lua_project_init();
 }
 
 void uninitialize_lua_module(ModuleInitializationLevel p_level) {

@@ -6,6 +6,20 @@
 #include <stdio.h>
 #include <string.h>
 
+int ls_sprintf(char *buffer, size_t buffer_size, String format, ...) {
+	LS_ASSERT(buffer);
+	LS_ASSERT(format);
+
+	va_list args;
+	va_start(args, format);
+
+	int ret = vsnprintf(buffer, buffer_size, format, args);
+
+	va_end(args);
+
+	return ret;
+}
+
 size_t ls_str_length(String string) {
 	LS_ASSERT(string);
 

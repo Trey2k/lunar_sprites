@@ -87,6 +87,36 @@ Matrix4 mat4_multiply(const Matrix4 a, const Matrix4 b) {
 	return result;
 }
 
+Matrix4 mat4_divide(const Matrix4 matrix, float32 value) {
+	Matrix4 result = MAT4_IDENTITY;
+
+	for (int32 i = 0; i < 16; i++) {
+		result.mat[i] = matrix.mat[i] / value;
+	}
+
+	return result;
+}
+
+Matrix4 mat4_add(const Matrix4 a, const Matrix4 b) {
+	Matrix4 result = MAT4_IDENTITY;
+
+	for (int32 i = 0; i < 16; i++) {
+		result.mat[i] = a.mat[i] + b.mat[i];
+	}
+
+	return result;
+}
+
+Matrix4 mat4_subtract(const Matrix4 a, const Matrix4 b) {
+	Matrix4 result = MAT4_IDENTITY;
+
+	for (int32 i = 0; i < 16; i++) {
+		result.mat[i] = a.mat[i] - b.mat[i];
+	}
+
+	return result;
+}
+
 Matrix4 mat4_transpose(const Matrix4 matrix) {
 	Matrix4 result = MAT4_IDENTITY;
 
@@ -117,4 +147,14 @@ void mat4_print(const Matrix4 matrix) {
 	ls_printf("%f, %f, %f, %f\n", matrix.x1, matrix.y1, matrix.z1, matrix.w1);
 	ls_printf("%f, %f, %f, %f\n", matrix.x2, matrix.y2, matrix.z2, matrix.w2);
 	ls_printf("%f, %f, %f, %f\n", matrix.x3, matrix.y3, matrix.z3, matrix.w3);
+}
+
+bool mat4_equals(const Matrix4 a, const Matrix4 b) {
+	for (int32 i = 0; i < 16; i++) {
+		if (a.mat[i] != b.mat[i]) {
+			return false;
+		}
+	}
+
+	return true;
 }

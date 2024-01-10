@@ -25,6 +25,7 @@ env.modules_sources += thirdparty_obj
 module_obj = []
 
 env_lua.add_source_files(module_obj, "*.c")
+env_lua.add_source_files(module_obj, "types/*.c")
 env.modules_sources += module_obj
 
 env.Depends(module_obj, thirdparty_obj)

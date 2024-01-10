@@ -61,14 +61,16 @@ void ls_main_init(int32 argc, char *argv[]) {
 
 	core_start(main.core);
 
+	renderer_start(main.renderer);
+
+	initialize_modules(MODULE_INITIALIZATION_LEVEL_MAIN, NULL);
+
 	if (!main.application_interface.init) {
 		ls_log_fatal("No application interface set.\n");
 	}
 
-	renderer_start(main.renderer);
-
 	main.root_window = main.application_interface.init(main.core, main.renderer, main.application_interface.user_data);
-	initialize_modules(MODULE_INITIALIZATION_LEVEL_MAIN, NULL);
+
 	main.application_interface.start(main.application_interface.user_data);
 }
 

@@ -7,6 +7,8 @@
 
 typedef const char *String;
 
+LS_EXPORT int ls_sprintf(char *buffer, size_t buffer_size, String format, ...);
+
 LS_EXPORT size_t ls_str_length(String string);
 LS_EXPORT size_t ls_str_hash_djb2(String string);
 
