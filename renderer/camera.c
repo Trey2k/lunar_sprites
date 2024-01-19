@@ -31,8 +31,16 @@ void camera_set_position(Camera *camera, Vector3 position) {
 	camera->position = position;
 }
 
+Vector3 camera_get_position(const Camera *camera) {
+	return camera->position;
+}
+
 void camera_set_rotation(Camera *camera, Vector3 rotation) {
 	camera->rotation = rotation;
+}
+
+Vector3 camera_get_rotation(const Camera *camera) {
+	return camera->rotation;
 }
 
 void camera_set_projection(Camera *camera, float32 fov, float32 aspect, float32 near, float32 far) {

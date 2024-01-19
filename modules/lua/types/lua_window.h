@@ -10,7 +10,6 @@
 #include <lualib.h>
 
 void lua_register_window(lua_State *L);
-int lua_new_window(lua_State *L);
 
 LS_EXPORT void lua_push_window(lua_State *L, LSWindow *window);
 LS_EXPORT bool lua_is_window(lua_State *L, int index);

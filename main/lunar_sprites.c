@@ -38,6 +38,7 @@ void ls_main_init(int32 argc, char *argv[]) {
 	main.exit_code = 0;
 	main.delta_time = 0.0;
 
+	main.last_frame_time = os_get_time();
 	main.flag_manager = flag_manager_create();
 	main.path = flag_manager_register(main.flag_manager, "path", FLAG_TYPE_STRING, FLAG_VAL(str, "./"), "Path to the game directory.");
 

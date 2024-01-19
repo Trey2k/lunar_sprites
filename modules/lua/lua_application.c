@@ -2,9 +2,7 @@
 #include "lua_state.h"
 #include "types/lua_types.h"
 
-#include "core/core.h"
 #include "main/lunar_sprites.h"
-#include "renderer/renderer.h"
 
 #define PROJECT_FILE_NAME "project.lua"
 
@@ -14,10 +12,7 @@ static const LSWindow *lua_app_init(LSCore *core, Renderer *renderer, void *user
 	lua_pushcfunction(L, ls_lua_error_handler);
 	lua_getglobal(L, "init");
 	if (lua_isfunction(L, -1)) {
-		lua_push_core(L, core);
-		lua_push_renderer(L, renderer);
-
-		if (!ls_lua_call(L, 2, 1, -4)) {
+		if (!ls_lua_call(L, 0, 1, -2)) {
 			ls_log_fatal("Error calling init function\n");
 			return NULL;
 		}
@@ -101,7 +96,7 @@ static bool lua_app_should_stop(void *user_data) {
 	return false;
 }
 
-void lua_project_init() {
+void lua_project_init(LSCore *core, Renderer *renderer) {
 	if (!os_path_exists(PROJECT_FILE_NAME)) {
 		ls_log(LOG_LEVEL_DEBUG, "No lua project file found, skipping lua initialization\n");
 		return;
@@ -123,7 +118,7 @@ void lua_project_init() {
 		return;
 	}
 
-	lua_State *application_state = ls_lua_new_application_state();
+	lua_State *application_state = ls_lua_new_application_state(core, renderer);
 
 	int32 len = lua_rawlen(settings_state, -1);
 	for (int32 i = 1; i <= len; i++) {

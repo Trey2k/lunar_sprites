@@ -7,7 +7,8 @@ def make_shader_source(shader, shader_var_name, out_source_file):
     with open(shader, "rb") as f:
         shader_bytes = f.read()
 
-    out_source = "const char *const %s = (const char[%d]){\n\t" % (shader_var_name, len(shader_bytes) + 1)
+    out_source = "/* THIS FILE IS GENERATED DO NOT EDIT */\n"
+    out_source += "const char *const %s = (const char[%d]){\n\t" % (shader_var_name, len(shader_bytes) + 1)
 
     for i, b in enumerate(shader_bytes):
         out_source += str(b) + ', '

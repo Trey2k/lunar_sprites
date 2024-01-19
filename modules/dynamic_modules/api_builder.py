@@ -207,7 +207,7 @@ def get_header_content(header):
     info = {
         'depth': 0,
         'comment': "",
-        'macros': "",
+        'macros': "", 
         'typedefs': "",
         'exports': ""
     }

@@ -11,7 +11,10 @@ LS_EXPORT Camera *camera_create(float32 fov, float32 aspect, float32 near, float
 LS_EXPORT void camera_destroy(Camera *camera);
 
 LS_EXPORT void camera_set_position(Camera *camera, Vector3 position);
+LS_EXPORT Vector3 camera_get_position(const Camera *camera);
 LS_EXPORT void camera_set_rotation(Camera *camera, Vector3 rotation);
+LS_EXPORT Vector3 camera_get_rotation(const Camera *camera);
+
 LS_EXPORT void camera_set_projection(Camera *camera, float32 fov, float32 aspect, float32 near, float32 far);
 
 LS_EXPORT void camera_move(Camera *camera, Vector3 delta);

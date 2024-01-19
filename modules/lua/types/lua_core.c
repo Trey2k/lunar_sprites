@@ -1,17 +1,18 @@
 #include "lua_core.h"
 
-static Hashtable *methods = NULL;
-
 static const luaL_Reg core_meta_methods[] = {
 	{ NULL, NULL }
 };
 
+extern void lua_core_init_constants(lua_State *L, int32 table_index);
+
 void lua_register_core(lua_State *L) {
-	LS_ASSERT(methods == NULL);
-
-	methods = hashtable_create(HASHTABLE_KEY_STRING, 1, false);
-
 	luaL_newmetatable(L, "MT_CORE");
+
+	lua_newtable(L);
+	lua_core_init_constants(L, -2);
+	lua_setfield(L, -2, "__index");
+
 	luaL_setfuncs(L, core_meta_methods, 0);
 	lua_pop(L, 1);
 }

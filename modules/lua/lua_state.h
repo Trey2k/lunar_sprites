@@ -3,12 +3,14 @@
 
 #include "core/core.h"
 
+#include "renderer/renderer.h"
+
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
 
 lua_State *ls_lua_new_settings_state();
-lua_State *ls_lua_new_application_state();
+lua_State *ls_lua_new_application_state(LSCore *core, Renderer *renderer);
 
 bool ls_lua_dostring(lua_State *L, String string);
 bool ls_lua_dofile(lua_State *L, String filename);

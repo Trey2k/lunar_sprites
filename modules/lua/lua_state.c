@@ -15,11 +15,17 @@ lua_State *ls_lua_new_settings_state() {
 	return settings_state;
 }
 
-lua_State *ls_lua_new_application_state() {
+lua_State *ls_lua_new_application_state(LSCore *core, Renderer *renderer) {
 	lua_State *application_state = luaL_newstate();
 	luaL_openlibs(application_state);
 
 	lua_register_types(application_state);
+
+	lua_push_core(application_state, core);
+	lua_setglobal(application_state, "LS");
+
+	lua_push_renderer(application_state, renderer);
+	lua_setglobal(application_state, "RENDERER");
 
 	return application_state;
 }

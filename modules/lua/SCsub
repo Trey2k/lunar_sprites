@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from lua_builders import make_lua_constants_source
 
 Import("env")
 Import("env_modules")
@@ -24,8 +25,20 @@ env.modules_sources += thirdparty_obj
 
 module_obj = []
 
+make_lua_constants_source("LS_", [
+    "../../core/input/keycodes.h",
+    "../../core/math/math.h",
+    "../../core/log.h",
+], "lua_core_init_constants", "types/lua_core.gen.c")
+
+make_lua_constants_source("RENDERER_", [
+    "../../renderer/renderer.h",
+], "lua_renderer_init_constants", "types/lua_renderer.gen.c")
+
 env_lua.add_source_files(module_obj, "*.c")
 env_lua.add_source_files(module_obj, "types/*.c")
+env_lua.add_source_files(module_obj, "types/lua_core.gen.c")
+env_lua.add_source_files(module_obj, "types/lua_renderer.gen.c")
 env.modules_sources += module_obj
 
 env.Depends(module_obj, thirdparty_obj)
