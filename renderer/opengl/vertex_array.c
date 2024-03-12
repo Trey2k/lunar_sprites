@@ -24,7 +24,7 @@ static GLenum shader_data_type_to_opengl(ShaderDataType type) {
 			return GL_BOOL;
 
 		default:
-			LS_ASSERT_MSG(false, "Unkown shader data type: %d", type);
+			LS_ASSERT_MSG(false, "Unknown shader data type: %d", type);
 			return 0;
 	}
 };

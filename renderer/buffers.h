@@ -48,7 +48,7 @@ _FORCE_INLINE_ uint32 shader_data_type_size(ShaderDataType type) {
 			return 1;
 
 		default:
-			LS_ASSERT_MSG(false, "Unkown shader data type: %d", type);
+			LS_ASSERT_MSG(false, "Unknown shader data type: %d", type);
 			return 0;
 	}
 }
@@ -79,7 +79,7 @@ _FORCE_INLINE_ uint32 shader_data_type_get_component_count(ShaderDataType type) 
 			return 1;
 
 		default:
-			LS_ASSERT_MSG(false, "Unkown shader data type: %d", type);
+			LS_ASSERT_MSG(false, "Unknown shader data type: %d", type);
 			return 0;
 	}
 }

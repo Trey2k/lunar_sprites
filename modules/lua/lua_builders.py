@@ -12,7 +12,7 @@ def contstants_normal_state(remove_prefix, last_state, line, info):
 
 def constants_in_enum_state(remove_prefix, last_state, line, info):
     if "}" in line:
-        type_name = line.replace("}", "").replace(" ", "").replace(";", "").replace("\n", "")
+        type_name = line.replace("}", "").replace(" ", "").replace(";", "").replace("\n", "").replace("\r", "")
         info['type_name'] = type_name
         return STATE.NORMAL
 
@@ -27,7 +27,7 @@ def constants_in_enum_state(remove_prefix, last_state, line, info):
         info['values'].append({'value': value_name, 'name': name, 'type': 'integer'})
         return last_state
     else:
-        value_name = line.replace(" ", "").replace(",", "").replace("\n", "")
+        value_name = line.replace(" ", "").replace(",", "").replace("\n", "").replace("\r", "")
         name = value_name.removeprefix(remove_prefix)
         info['values'].append({'value': value_name, 'name': name, 'type': 'integer'})
 
@@ -42,7 +42,7 @@ def constants_in_define_state(remove_prefix, last_state, line, info):
     name = line.split(" ")[1]
     value_name = name.removeprefix(remove_prefix)
     info['type_name'] = name
-    value = line.split(" ")[2].replace("\n", "")
+    value = line.split(" ")[2].replace("\n", "").replace("\r", "")
 
     if value.startswith("\""):
         info['values'].append({'value': value_name, 'name': name, 'type': 'string'})
@@ -104,11 +104,12 @@ void %s(lua_State *L, int32 table_index) {
     for type_name, values in constants.items():
         out_source += "\t// %s\n" % type_name
         for value in values:
-            out_source +=  "\tlua_push%s(L, %s);\n\tlua_setfield(L, table_index, \"%s\");\n" % (value["type"], value['value'], value['name'])
+            if value['type'] == "" or value['name'] == "":
+                continue
+            out_source +=  "\tlua_push%s(L, %s);\n\tlua_setfield(L, table_index, \"%s\");\n" % (value['type'], value['value'], value['name'])
         out_source += "\n"
     
     out_source = out_source[:-1]
     out_source += "}\n"
-    
     with open(out_source_file, "w") as f:
         f.write(out_source)
