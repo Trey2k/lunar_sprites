@@ -69,16 +69,12 @@ InputManager *core_get_input_manager(const LSCore *core) {
 	return core->input_manager;
 }
 
-const EventManager *core_get_event_manager(const LSCore *core) {
+EventManager *core_get_event_manager(const LSCore *core) {
 	return core->event_manager;
 }
 
 const OS *core_get_os(const LSCore *core) {
 	return core->os;
-}
-
-void core_add_event_handler(const LSCore *core, EventHandler handler, void *user_data) {
-	event_manager_add_handler(core->event_manager, handler, user_data);
 }
 
 static void core_check_flags(const LSCore *core) {

@@ -7,7 +7,7 @@
 #include <lua.h>
 #include <lualib.h>
 
-void lua_register_core(lua_State *L);
+void lua_register_core(LSCore *core, lua_State *L);
 
 LS_EXPORT void lua_push_core(lua_State *L, LSCore *core);
 LS_EXPORT bool lua_is_core(lua_State *L, int index);

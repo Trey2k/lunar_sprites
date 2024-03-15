@@ -14,7 +14,7 @@ typedef enum {
 typedef struct {
 	EventKeyType type;
 	LSKeycode keycode;
-	bool repeat;
+	bool repeated;
 
 	const LSWindow *window;
 } EventKey;
@@ -47,10 +47,8 @@ typedef enum {
 
 typedef struct {
 	EventWindowType type;
-	union {
-		Vector2i position;
-		Vector2i size;
-	};
+	Vector2i position;
+	Vector2i size;
 	const LSWindow *window;
 } EventWindow;
 

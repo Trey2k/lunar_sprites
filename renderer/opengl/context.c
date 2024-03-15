@@ -63,8 +63,8 @@ static void opengl_init(OpenGLContext *context, const LSCore *core, const LSWind
 
 	Vector2i size = window_get_size(window);
 	GL_CALL(glViewport(0, 0, size.x, size.y));
-
-	core_add_event_handler(core, opengl_context_event_handler, context);
+	EventManager *event_manager = core_get_event_manager(core);
+	event_manager_add_handler(event_manager, opengl_context_event_handler, context);
 }
 
 OpenGLContext *opengl_context_create(const OpenGLRenderer *renderer, const LSWindow *window) {

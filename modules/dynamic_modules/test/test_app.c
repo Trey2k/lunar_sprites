@@ -1,9 +1,6 @@
 #include "test_app.h"
 #include "modules/dynamic_modules/test/ls_api.gen.h"
 
-#define WIDTH 150
-#define HEIGHT 150
-
 typedef struct {
 	LSCore *core;
 	Renderer *renderer;
@@ -58,7 +55,8 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 
 void test_app_start(void *user_data) {
 	TestApplication *test_application = user_data;
-	core_add_event_handler(test_application->core, input_handler, test_application);
+	EventManager *event_handler = core_get_event_manager(test_application->core);
+	event_manager_add_handler(event_handler, input_handler, test_application);
 
 	renderer_set_clear_color(test_application->renderer, 0.0, 0.0, 0.0, 1.0);
 
@@ -138,7 +136,7 @@ static void input_handler(Event *e, void *user_data) {
 		case EVENT_KEY: {
 			switch (e->key.type) {
 				case EVENT_KEY_PRESSED: {
-					if (!e->key.repeat) {
+					if (!e->key.repeated) {
 						ls_printf("Key pressed: %s\n", keycode_to_string(e->key.keycode));
 					} else {
 						ls_printf("Key repeated: %s\n", keycode_to_string(e->key.keycode));

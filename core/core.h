@@ -37,9 +37,7 @@ void core_poll(const LSCore *core);
 
 LS_EXPORT FlagManager *core_get_flag_manager(const LSCore *core);
 LS_EXPORT InputManager *core_get_input_manager(const LSCore *core);
-LS_EXPORT const EventManager *core_get_event_manager(const LSCore *core);
+LS_EXPORT EventManager *core_get_event_manager(const LSCore *core);
 LS_EXPORT const OS *core_get_os(const LSCore *core);
-
-LS_EXPORT void core_add_event_handler(const LSCore *core, EventHandler handler, void *user_data);
 
 #endif // CORE_H

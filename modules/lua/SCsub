@@ -27,6 +27,7 @@ module_obj = []
 
 make_lua_constants_source("LS_", [
     "../../core/input/keycodes.h",
+    "../../core/events/events.h",
     "../../core/math/math.h",
     "../../core/log.h",
 ], "lua_core_init_constants", "types/lua_core.gen.c")

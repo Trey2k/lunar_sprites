@@ -88,7 +88,7 @@ void input_handle_press(InputManager *input_manager, LSKeycode keycode) {
 	e.type = EVENT_KEY;
 	e.key.type = EVENT_KEY_PRESSED;
 	e.key.keycode = keycode;
-	e.key.repeat = input_manager->key_state[keycode].repeat_count > 0;
+	e.key.repeated = input_manager->key_state[keycode].repeat_count > 0;
 	e.key.window = input_manager->active_window;
 	e.handled = false;
 	event_manager_emit(input_manager->event_manager, &e);

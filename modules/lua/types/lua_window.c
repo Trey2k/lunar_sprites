@@ -124,6 +124,11 @@ static const luaL_Reg window_meta_methods[] = {
 	{ NULL, NULL }
 };
 
+static const luaL_Reg const_window_meta_methods[] = {
+	{ "__index", lua_window_index },
+	{ NULL, NULL }
+};
+
 void lua_register_window(lua_State *L) {
 	if (methods == NULL) {
 		methods = hashtable_create(HASHTABLE_KEY_STRING, 11, false);
@@ -144,6 +149,10 @@ void lua_register_window(lua_State *L) {
 	luaL_newmetatable(L, "MT_WINDOW");
 	luaL_setfuncs(L, window_meta_methods, 0);
 	lua_pop(L, 1);
+
+	luaL_newmetatable(L, "MT_CONST_WINDOW");
+	luaL_setfuncs(L, const_window_meta_methods, 0);
+	lua_pop(L, 1);
 }
 
 void lua_push_window(lua_State *L, LSWindow *window) {
@@ -154,27 +163,50 @@ void lua_push_window(lua_State *L, LSWindow *window) {
 	lua_setmetatable(L, -2);
 }
 
+void lua_push_const_window(lua_State *L, const LSWindow *window) {
+	const LSWindow **udata = (const LSWindow **)lua_newuserdata(L, sizeof(LSWindow *));
+	*udata = window;
+
+	luaL_getmetatable(L, "MT_CONST_WINDOW");
+	lua_setmetatable(L, -2);
+}
+
 bool lua_is_window(lua_State *L, int index) {
 	if (!lua_isuserdata(L, index)) {
-		return 0;
+		return false;
 	}
 
 	if (lua_getmetatable(L, index)) {
 		lua_getfield(L, LUA_REGISTRYINDEX, "MT_WINDOW");
 		if (lua_rawequal(L, -1, -2)) {
 			lua_pop(L, 2);
-			return 1;
+			return true;
+		}
+		lua_pop(L, 2);
+
+		lua_getfield(L, LUA_REGISTRYINDEX, "MT_CONST_WINDOW");
+		if (lua_rawequal(L, -1, -2)) {
+			lua_pop(L, 2);
+			return true;
 		}
 		lua_pop(L, 2);
 	}
 
-	return 0;
+	return false;
 }
 
 LSWindow *lua_check_window(lua_State *L, int index) {
 	return *(LSWindow **)luaL_checkudata(L, index, "MT_WINDOW");
 }
 
+const LSWindow *lua_check_const_window(lua_State *L, int index) {
+	return *(const LSWindow **)luaL_checkudata(L, index, "MT_CONST_WINDOW");
+}
+
 LSWindow *lua_to_window(lua_State *L, int index) {
 	return *(LSWindow **)lua_touserdata(L, index);
+}
+
+const LSWindow *lua_to_const_window(lua_State *L, int index) {
+	return *(const LSWindow **)lua_touserdata(L, index);
 }
