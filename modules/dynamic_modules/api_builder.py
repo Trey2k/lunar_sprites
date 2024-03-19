@@ -5,48 +5,6 @@ from enum import Enum
  
 state = Enum('State', ['Normal', 'Comment', 'MultiComment', 'Macro', 'Typedef', 'Export'])
  
-# List of headers to include in the API header
-# The order of the headers is important
-source_headers = [
-    'core/version_info.gen.h',
-    'core/version.h',
-    'core/types/typedefs.h',
-    'core/types/string.h',
-    'core/log.h',
-    'core/memory.h',
-    'core/debug.h',
-    'core/math/math.h',
-    'core/math/vector.h',
-    'core/math/matrix.h',
-    'core/types/slice.h',
-    'core/types/hashtable.h',
-    'core/flags.h',
-    'core/window.h',
-    'core/input/keycodes.h',
-    'core/input/input_manager.h',
-    'core/events/events.h',
-    'core/events/event_manager.h',
-    'core/os.h',
-    'core/config.h',
-    'core/core.h',
-    
-    'renderer/window.h',
-    'renderer/renderer.h',
-    'renderer/shader.h',
-    'renderer/buffers.h',
-    'renderer/vertex_array.h',
-    'renderer/texture.h',
-    'renderer/camera.h',
-    'renderer/sprite.h',
- 
-    'main/application.h',
-    'main/lunar_sprites.h',
-
-    'modules/initialize_modules.h',
- 
-    'modules/dynamic_modules/dynamic_modules.h',
-]
- 
 def is_line_macro_start(line):
     return ((line.startswith('#define') or
                 line.startswith('#if') or
@@ -393,7 +351,7 @@ void api_interface_init() {
     return exports_header_txt, export_source_txt
 
 
-def make_api_header(make_dynamic_module_gen = False):
+def make_api_header(env, make_dynamic_module_gen = False):
     api_header_txt = """/* THIS FILE IS GENERATED DO NOT EDIT */
 #ifndef LS_API_H
 #define LS_API_H
@@ -432,7 +390,7 @@ def make_api_header(make_dynamic_module_gen = False):
     all_typedefs = ""
     all_exports = ""
  
-    for header in source_headers:
+    for header in env.api_headers:
         header = os.path.join(os.path.dirname(__file__), '../..', header)
         if not os.path.exists(header):
             print('WARNING: Header {} does not exist'.format(header))
@@ -461,11 +419,11 @@ def make_api_header(make_dynamic_module_gen = False):
     return api_header_txt, api_source_text
  
 
-def make_dynamic_module_gen():
-    api_header_txt, api_source_txt, exports_interface = make_api_header(True)
+def make_dynamic_module_gen(env):
+    api_header_txt, api_source_txt, exports_interface = make_api_header(env, True)
 
     inlude_txt = ""
-    for header in source_headers:
+    for header in env.api_headers:
         inlude_txt += '#include "%s"\n' % header
 
     dynamic_modules_gen_c = """/* THIS FILE IS GENERATED DO NOT EDIT */
@@ -503,13 +461,3 @@ def make_dynamic_module_gen():
 
     with open('dynamic_modules.gen.c', 'w') as f:
         f.write(dynamic_modules_gen_c)
- 
-if __name__ == '__main__':
-    header, source = make_api_header()
-    source = source.replace('@API_HEADER@', 'ls_api.h')
-
-    with open(os.path.join(os.path.dirname(__file__), 'ls_api.h'), 'w') as f:
-        f.write(header)
-
-    with open(os.path.join(os.path.dirname(__file__), 'ls_api.c'), 'w') as f:
-        f.write(source)

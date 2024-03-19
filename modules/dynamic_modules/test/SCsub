@@ -6,7 +6,7 @@ Import("env_dynamic_modules")
 
 from api_builder import make_api_header
 
-header, source = make_api_header()
+header, source = make_api_header(env)
 source = source.replace("@API_HEADER@", "ls_api.gen.h")
 with open("ls_api.gen.h", "w") as f:
     f.write(header)
