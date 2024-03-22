@@ -18,6 +18,7 @@ def configure(env):
         "modules/lua/types/lua_core.h",
         "modules/lua/types/lua_event_manager.h",
         "modules/lua/types/lua_input_manager.h",
+        "modules/lua/types/lua_color.h",
         "modules/lua/types/lua_matrix.h",
         "modules/lua/types/lua_renderer.h",
         "modules/lua/types/lua_sprite.h",

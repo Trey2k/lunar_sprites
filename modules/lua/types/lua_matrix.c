@@ -41,6 +41,7 @@ static int lua_matrix4_tostring(lua_State *L) {
 			m.z0, m.z1, m.z2, m.z3, m.w0, m.w1, m.w2, m.w3);
 
 	lua_pushstring(L, str);
+	ls_free(str);
 	return 1;
 }
 

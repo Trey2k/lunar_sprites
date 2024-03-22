@@ -19,6 +19,7 @@ env.renderer_sources = [
 ]
 
 make_shader_source("shaders/sprite.shader", "SPRITE_SHADER_SOURCE", "sprite_shader.gen.c")
+make_shader_source("shaders/font.shader", "FONT_SHADER_SOURCE", "font_shader.gen.c")
 
 if env["use_opengl"]:
     SConscript("opengl/SCsub")

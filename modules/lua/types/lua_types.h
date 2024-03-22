@@ -2,6 +2,7 @@
 #define LUA_TYPES_H
 
 #include "lua_camera.h"
+#include "lua_color.h"
 #include "lua_core.h"
 #include "lua_event_manager.h"
 #include "lua_input_manager.h"

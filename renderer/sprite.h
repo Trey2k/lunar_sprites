@@ -1,7 +1,6 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "core/core.h"
 #include "renderer/renderer.h"
 
 typedef struct Sprite Sprite;

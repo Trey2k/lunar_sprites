@@ -4,6 +4,7 @@
 #include "core/api.h"
 
 /* --------------TYPES-------------- */
+#include "core/types/color.h"
 #include "core/types/hashtable.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"
