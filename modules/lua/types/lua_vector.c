@@ -1,5 +1,9 @@
 #include "lua_vector.h"
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 static int lua_vector2_eq(lua_State *L) {
 	Vector2 *v1 = luaL_checkudata(L, 1, "MT_VECTOR2");
 	Vector2 *v2 = luaL_checkudata(L, 2, "MT_VECTOR2");

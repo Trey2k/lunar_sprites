@@ -1,5 +1,6 @@
 #include "renderer/opengl//vertex_array.h"
 #include "core/debug.h"
+#include "core/types/typedefs.h"
 #include "renderer/buffers.h"
 #include "renderer/opengl/buffers.h"
 #include "renderer/opengl/debug.h"
@@ -34,8 +35,7 @@ struct OpenGLVertexArray {
 	const OpenGLRenderer *opengl;
 
 	uint32 vertex_buffer_count;
-	VertexBuffer **vertex_buffers;
-	IndexBuffer *index_buffer;
+	const IndexBuffer *index_buffer;
 };
 
 OpenGLVertexArray *opengl_vertex_array_create(const OpenGLRenderer *opengl) {
@@ -43,7 +43,6 @@ OpenGLVertexArray *opengl_vertex_array_create(const OpenGLRenderer *opengl) {
 	vertex_array->opengl = (OpenGLRenderer *)opengl;
 
 	vertex_array->vertex_buffer_count = 0;
-	vertex_array->vertex_buffers = NULL;
 	vertex_array->index_buffer = NULL;
 
 	GL_CALL(glGenVertexArrays(1, &vertex_array->id));
@@ -53,14 +52,6 @@ OpenGLVertexArray *opengl_vertex_array_create(const OpenGLRenderer *opengl) {
 }
 
 void opengl_vertex_array_destroy(OpenGLVertexArray *vertex_array) {
-	for (uint32 i = 0; i < vertex_array->vertex_buffer_count; i++) {
-		vertex_buffer_destroy(vertex_array->vertex_buffers[i]);
-	}
-
-	if (vertex_array->index_buffer) {
-		index_buffer_destroy(vertex_array->index_buffer);
-	}
-
 	GL_CALL(glDeleteVertexArrays(1, &vertex_array->id));
 	ls_free(vertex_array);
 }
@@ -73,34 +64,38 @@ void opengl_vertex_array_unbind(const OpenGLVertexArray *vertex_array) {
 	GL_CALL(glBindVertexArray(0));
 }
 
-void opengl_vertex_array_add_vertex_buffer(OpenGLVertexArray *vertex_array, VertexBuffer *vertex_buffer) {
-	const BufferLayout *buffer_layout = vertex_buffer_get_layout(vertex_buffer);
-	uint32 element_count = 0;
-	const BufferElement *elements = buffer_layout_get_elements(buffer_layout, &element_count);
-	LS_ASSERT(element_count > 0);
-
+void opengl_vertex_array_set_vertex_buffers(OpenGLVertexArray *vertex_array, const VertexBuffer **vertex_buffers, size_t count) {
+	vertex_array->vertex_buffer_count = 0;
 	opengl_vertex_array_bind(vertex_array);
-	vertex_buffer_bind(vertex_buffer);
+	for (uint32 i = 0; i < count; i++) {
+		const VertexBuffer *vertex_buffer = vertex_buffers[i];
+		LS_ASSERT(vertex_buffer);
 
-	uint32 index = 0;
-	for (uint32 i = 0; i < element_count; i++) {
-		const BufferElement *element = &elements[i];
-		GL_CALL(glEnableVertexAttribArray(index));
-		GL_CALL(
-				glVertexAttribPointer(index,
-						shader_data_type_get_component_count(element->type),
-						shader_data_type_to_opengl(element->type),
-						element->normalized ? GL_TRUE : GL_FALSE,
-						buffer_layout_get_stride(buffer_layout),
-						(const void *)(uintptr_t)element->offset));
-		index++;
+		const BufferLayout *buffer_layout = vertex_buffer_get_layout(vertex_buffer);
+		uint32 element_count = 0;
+		const BufferElement *elements = buffer_layout_get_elements(buffer_layout, &element_count);
+
+		vertex_array->vertex_buffer_count += vertex_buffer_get_count(vertex_buffer);
+		LS_ASSERT(element_count > 0);
+
+		uint32 index = 0;
+		for (uint32 j = 0; j < element_count; j++) {
+			const BufferElement *element = &elements[j];
+			GL_CALL(glEnableVertexAttribArray(index));
+			vertex_buffer_bind(vertex_buffer);
+			GL_CALL(
+					glVertexAttribPointer(index,
+							shader_data_type_get_component_count(element->type),
+							shader_data_type_to_opengl(element->type),
+							element->normalized ? GL_TRUE : GL_FALSE,
+							buffer_layout_get_stride(buffer_layout),
+							(const void *)(uintptr_t)element->offset));
+			index++;
+		}
 	}
-
-	vertex_array->vertex_buffers = ls_realloc(vertex_array->vertex_buffers, sizeof(OpenGLVertexBuffer *) * (vertex_array->vertex_buffer_count + 1));
-	vertex_array->vertex_buffers[vertex_array->vertex_buffer_count++] = vertex_buffer;
 }
 
-void opengl_vertex_array_set_index_buffer(OpenGLVertexArray *vertex_array, IndexBuffer *index_buffer) {
+void opengl_vertex_array_set_index_buffer(OpenGLVertexArray *vertex_array, const IndexBuffer *index_buffer) {
 	opengl_vertex_array_bind(vertex_array);
 	index_buffer_bind(index_buffer);
 
@@ -109,19 +104,13 @@ void opengl_vertex_array_set_index_buffer(OpenGLVertexArray *vertex_array, Index
 
 void opengl_vertex_array_draw(const OpenGLVertexArray *vertex_array) {
 	opengl_vertex_array_bind(vertex_array);
-
-	if (vertex_array->index_buffer) {
-		GL_CALL(glDrawElements(GL_TRIANGLES, index_buffer_get_count(vertex_array->index_buffer), GL_UNSIGNED_INT, NULL));
-	} else {
-		uint32 count = 0;
-		opengl_vertex_array_get_vertex_buffers(vertex_array, &count);
-		GL_CALL(glDrawArrays(GL_TRIANGLES, 0, count));
-	}
+	GL_CALL(glDrawArrays(GL_TRIANGLES, 0, vertex_array->vertex_buffer_count));
 }
 
-const VertexBuffer *const *opengl_vertex_array_get_vertex_buffers(const OpenGLVertexArray *vertex_array, uint32 *count) {
-	*count = vertex_array->vertex_buffer_count;
-	return (const VertexBuffer *const *)vertex_array->vertex_buffers;
+void opengl_vertex_array_draw_elements(const OpenGLVertexArray *vertex_array) {
+	opengl_vertex_array_bind(vertex_array);
+	LS_ASSERT_MSG(vertex_array->index_buffer, "%s", "No index buffer set for vertex array");
+	GL_CALL(glDrawElements(GL_TRIANGLES, index_buffer_get_count(vertex_array->index_buffer), GL_UNSIGNED_INT, NULL));
 }
 
 const IndexBuffer *opengl_vertex_array_get_index_buffer(const OpenGLVertexArray *vertex_array) {

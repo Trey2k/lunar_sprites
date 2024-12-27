@@ -1,4 +1,5 @@
 #include "renderer/buffers.h"
+#include "core/log.h"
 #include "renderer/renderer.h"
 
 #if defined(OPENGL_ENABLED)
@@ -130,7 +131,7 @@ struct VertexBuffer {
 	};
 };
 
-VertexBuffer *renderer_create_vertex_buffer(const Renderer *renderer, const float32 *data, uint32 size) {
+VertexBuffer *renderer_create_vertex_buffer_empty(const Renderer *renderer, BufferUsage usage) {
 	VertexBuffer *vertex_buffer = ls_malloc(sizeof(VertexBuffer));
 	vertex_buffer->backend = renderer_get_backend(renderer);
 
@@ -140,7 +141,31 @@ VertexBuffer *renderer_create_vertex_buffer(const Renderer *renderer, const floa
 
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
-			vertex_buffer->opengl = opengl_create_vertex_buffer(data, size);
+			vertex_buffer->opengl = opengl_create_vertex_buffer_empty(usage);
+			if (!vertex_buffer->opengl) {
+				ls_free(vertex_buffer);
+				return NULL;
+			}
+		} break;
+#endif
+		default:
+			ls_log_fatal("Unknown renderer backend: %d\n", vertex_buffer->backend);
+	};
+
+	return vertex_buffer;
+}
+
+VertexBuffer *renderer_create_vertex_buffer(const Renderer *renderer, const void *data, uint32 size, BufferUsage usage) {
+	VertexBuffer *vertex_buffer = ls_malloc(sizeof(VertexBuffer));
+	vertex_buffer->backend = renderer_get_backend(renderer);
+
+	switch (vertex_buffer->backend) {
+		case RENDERER_BACKEND_NONE: {
+		} break;
+
+#if defined(OPENGL_ENABLED)
+		case RENDERER_BACKEND_OPENGL: {
+			vertex_buffer->opengl = opengl_create_vertex_buffer(data, size, usage);
 			if (!vertex_buffer->opengl) {
 				ls_free(vertex_buffer);
 				return NULL;
@@ -168,6 +193,10 @@ void vertex_buffer_unbind(const VertexBuffer *vertex_buffer) {
 	VERTEX_BUFFER_CALL(vertex_buffer, unbind);
 }
 
+void vertex_buffer_set_data(VertexBuffer *vertex_buffer, const void *data, uint32 size) {
+	VERTEX_BUFFER_CALL(vertex_buffer, set_data, data, size);
+}
+
 void vertex_buffer_set_layout(VertexBuffer *vertex_buffer, const BufferLayout *buffer_layout) {
 	VERTEX_BUFFER_CALL(vertex_buffer, set_layout, buffer_layout);
 }
@@ -175,6 +204,11 @@ void vertex_buffer_set_layout(VertexBuffer *vertex_buffer, const BufferLayout *b
 const BufferLayout *vertex_buffer_get_layout(const VertexBuffer *vertex_buffer) {
 	VERTEX_BUFFER_CALL_R(vertex_buffer, get_layout);
 	return NULL;
+}
+
+uint32 vertex_buffer_get_count(const VertexBuffer *vertex_buffer) {
+	VERTEX_BUFFER_CALL_R(vertex_buffer, get_count);
+	return 0;
 }
 
 struct IndexBuffer {
@@ -187,7 +221,7 @@ struct IndexBuffer {
 	};
 };
 
-IndexBuffer *renderer_create_index_buffer(const Renderer *renderer, const uint32 *data, uint32 size) {
+IndexBuffer *renderer_create_index_buffer_empty(const Renderer *renderer, BufferUsage usage) {
 	IndexBuffer *index_buffer = ls_malloc(sizeof(IndexBuffer));
 	index_buffer->backend = renderer_get_backend(renderer);
 
@@ -197,7 +231,32 @@ IndexBuffer *renderer_create_index_buffer(const Renderer *renderer, const uint32
 
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
-			index_buffer->opengl = opengl_index_buffer_create(data, size);
+			index_buffer->opengl = opengl_index_buffer_create_empty(usage);
+			if (!index_buffer->opengl) {
+				ls_free(index_buffer);
+				return NULL;
+			}
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown renderer backend: %d\n", index_buffer->backend);
+	};
+
+	return index_buffer;
+}
+
+IndexBuffer *renderer_create_index_buffer(const Renderer *renderer, const void *data, uint32 size, BufferUsage usage) {
+	IndexBuffer *index_buffer = ls_malloc(sizeof(IndexBuffer));
+	index_buffer->backend = renderer_get_backend(renderer);
+
+	switch (index_buffer->backend) {
+		case RENDERER_BACKEND_NONE: {
+		} break;
+
+#if defined(OPENGL_ENABLED)
+		case RENDERER_BACKEND_OPENGL: {
+			index_buffer->opengl = opengl_index_buffer_create(data, size, usage);
 			if (!index_buffer->opengl) {
 				ls_free(index_buffer);
 				return NULL;
@@ -223,6 +282,10 @@ void index_buffer_bind(const IndexBuffer *index_buffer) {
 
 void index_buffer_unbind(const IndexBuffer *index_buffer) {
 	INDEX_BUFFER_CALL(index_buffer, unbind);
+}
+
+void index_buffer_set_data(const IndexBuffer *index_buffer, const void *data, uint32 size) {
+	INDEX_BUFFER_CALL(index_buffer, set_data, data, size);
 }
 
 uint32 index_buffer_get_count(const IndexBuffer *index_buffer) {

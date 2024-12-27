@@ -2,6 +2,7 @@
 
 #include "core/core.h"
 
+#include "core/debug.h"
 #include "renderer/context.h"
 
 #include "platform/window.h"
@@ -23,6 +24,8 @@ struct LSWindow {
 };
 
 LSWindow *renderer_create_window(Renderer *renderer, WindowConfig config) {
+	LS_ASSERT(renderer);
+
 	if (renderer_get_backend(renderer) == RENDERER_BACKEND_NONE) {
 		ls_log(LOG_LEVEL_WARNING, "Cannot create window with renderer backend NONE\n");
 		return NULL;
@@ -42,11 +45,15 @@ LSWindow *renderer_create_window(Renderer *renderer, WindowConfig config) {
 	window_make_current(window);
 	window_swap_buffers(window);
 
+	input_handle_window_open(window->input_manager, window);
+
 	return window;
 }
 
 void window_destroy(LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
+
 	if (window->context) {
 		renderer_context_destroy(window->context);
 	}
@@ -57,12 +64,14 @@ void window_destroy(LSWindow *window) {
 
 LSNativeWindow window_get_native_window(const LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	return platform_window_get_native_window(window->platform_window);
 }
 
 void window_poll(const LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	input_set_active_window(window->input_manager, window);
 	platform_window_poll(window->platform_window);
@@ -71,60 +80,70 @@ void window_poll(const LSWindow *window) {
 
 void window_set_title(LSWindow *window, String title) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	platform_window_set_title(window->platform_window, title);
 }
 
 void window_set_fullscreen(LSWindow *window, bool fullscreen) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	platform_window_set_fullscreen(window->platform_window, fullscreen);
 }
 
 void window_set_size(LSWindow *window, int32 width, int32 height) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	platform_window_set_size(window->platform_window, width, height);
 }
 
 Vector2i window_get_size(const LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	return platform_window_get_size(window->platform_window);
 }
 
 void window_make_current(const LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	renderer_context_make_current(window->renderer, window->context);
 }
 
 void window_swap_buffers(const LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	renderer_context_swap_buffers(window->context);
 }
 
 void window_show(LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	platform_window_show(window->platform_window);
 }
 
 void window_hide(LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	platform_window_hide(window->platform_window);
 }
 
 bool window_is_visible(const LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	return platform_window_is_visible(window->platform_window);
 }
 
 bool window_is_fullscreen(const LSWindow *window) {
 	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
 
 	return platform_window_is_fullscreen(window->platform_window);
 }

@@ -4,6 +4,10 @@
 
 #include "main/lunar_sprites.h"
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 #define PROJECT_FILE_NAME "project.lua"
 
 static const LSWindow *lua_app_init(LSCore *core, Renderer *renderer, void *user_data) {

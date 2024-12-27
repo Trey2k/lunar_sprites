@@ -6,6 +6,7 @@ void lua_register_types(LSCore *core, lua_State *L) {
 	lua_register_vector3(L);
 	lua_register_vector3i(L);
 	lua_register_matrix4(L);
+	lua_register_color(L);
 
 	lua_register_input_manager(L);
 	lua_register_event_manager(L);

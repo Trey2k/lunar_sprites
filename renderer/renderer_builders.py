@@ -1,6 +1,9 @@
+import os
 
+def make_shader_source(self, shader, shader_var_name, out_source_file):
+    # Make working dir project root
+    os.chdir(os.path.abspath(str(self.Dir('#'))))
 
-def make_shader_source(shader, shader_var_name, out_source_file):
     bytes_per_line = 16
     shader_bytes = None
 

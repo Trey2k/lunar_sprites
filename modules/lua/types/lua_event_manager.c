@@ -5,6 +5,10 @@
 
 #include "core/core.h"
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 typedef struct {
 	lua_State *L;
 	int32 function_ref;

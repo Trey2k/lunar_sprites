@@ -1,5 +1,9 @@
 #include "lua_input_manager.h"
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 static const luaL_Reg input_manager_meta_methods[] = {
 	{ NULL, NULL }
 };

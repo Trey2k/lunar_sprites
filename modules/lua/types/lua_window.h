@@ -5,9 +5,7 @@
 
 #include "renderer/window.h"
 
-#include <lauxlib.h>
-#include <lua.h>
-#include <lualib.h>
+#include "lua_state.h"
 
 void lua_register_window(lua_State *L);
 

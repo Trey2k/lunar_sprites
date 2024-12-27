@@ -3,6 +3,8 @@ import api_builder
 
 
 def can_build(env, platform):
+    # Bit of a hack
+    env.api_headers = []
     return True
 
 
@@ -21,10 +23,11 @@ def configure(env):
 
     env_vars.Update(env)
 
-    env.api_headers = [
+    env.api_headers += [
         'core/version_info.gen.h',
         'core/version.h',
         'core/types/typedefs.h',
+        'core/types/color.h',
         'core/types/string.h',
         'core/log.h',
         'core/memory.h',

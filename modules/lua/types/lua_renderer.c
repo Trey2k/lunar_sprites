@@ -5,6 +5,10 @@
 #include "lua_vector.h"
 #include "lua_window.h"
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 static int lua_renderer_new_window(lua_State *L) {
 	Renderer *renderer = lua_check_renderer(L, 1);
 	WindowConfig config = { 0 };

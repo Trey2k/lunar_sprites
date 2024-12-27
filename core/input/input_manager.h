@@ -17,6 +17,7 @@ void input_poll(InputManager *input_manager);
 
 void input_set_active_window(InputManager *input_manager, const LSWindow *window);
 
+void input_handle_window_open(InputManager *input_manager, const LSWindow *window);
 void input_handle_window_close(InputManager *input_manager);
 
 void input_handle_press(InputManager *input_manager, LSKeycode keycode);

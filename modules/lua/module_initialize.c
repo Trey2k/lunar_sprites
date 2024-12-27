@@ -13,7 +13,6 @@ void initialize_lua_module(ModuleInitializationLevel p_level, void *p_arg) {
 	} else if (p_level == MODULE_INITIALIZATION_LEVEL_RENDER) {
 		renderer = (Renderer *)p_arg;
 		return;
-		ls_printf("Initializing Lua module.\n");
 	} else if (p_level != MODULE_INITIALIZATION_LEVEL_MAIN) {
 		return;
 	}
@@ -21,6 +20,7 @@ void initialize_lua_module(ModuleInitializationLevel p_level, void *p_arg) {
 	LS_ASSERT(core != NULL);
 	LS_ASSERT(renderer != NULL);
 
+	ls_printf("Initializing Lua module.\n");
 	lua_project_init(core, renderer);
 }
 

@@ -3,9 +3,7 @@
 
 #include "core/core.h"
 
-#include <lauxlib.h>
-#include <lua.h>
-#include <lualib.h>
+#include "lua_state.h"
 
 void lua_register_matrix4(lua_State *L);
 

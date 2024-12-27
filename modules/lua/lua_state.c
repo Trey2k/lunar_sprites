@@ -1,6 +1,10 @@
 #include "lua_state.h"
 #include "types/lua_types.h"
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 int32 ls_lua_error_handler(lua_State *L) {
 	const char *msg = lua_tostring(L, -1);
 	luaL_traceback(L, L, msg, 2);

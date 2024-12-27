@@ -1,13 +1,15 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "core/core.h"
 #include "renderer/renderer.h"
+#include "renderer/texture.h"
 
 typedef struct Sprite Sprite;
 
 // Creates a sprite from an image file.
 LS_EXPORT Sprite *renderer_create_sprite(const Renderer *renderer, String image_path, Vector2 position, Vector2 scale, float32 rotation);
+// Creates a sprite from a Texture. The sprite will take ownership of the texture.
+LS_EXPORT Sprite *renderer_create_sprite_texture(const Renderer *renderer, Texture *texture, Vector2 position, Vector2 scale, float32 rotation);
 // Destroys a sprite.
 LS_EXPORT void sprite_destroy(Sprite *sprite);
 

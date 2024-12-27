@@ -33,7 +33,9 @@ struct Sprite {
 
 	Texture *texture;
 	Shader *shader;
+	VertexBuffer *vbo;
 	VertexArray *vao;
+	IndexBuffer *ibo;
 
 	const Renderer *renderer;
 
@@ -43,7 +45,7 @@ struct Sprite {
 Sprite *renderer_create_sprite(const Renderer *renderer, String image_path, Vector2 position, Vector2 scale, float32 rotation) {
 	Sprite *sprite = ls_malloc(sizeof(Sprite));
 	sprite->renderer = renderer;
-	sprite->texture = texture_create(image_path);
+	sprite->texture = texture_create_from_image(image_path);
 
 	sprite->size = vec2(texture_get_width(sprite->texture), texture_get_height(sprite->texture));
 	sprite->size = vec2(sprite->size.x * scale.x, sprite->size.y * scale.y);
@@ -52,14 +54,44 @@ Sprite *renderer_create_sprite(const Renderer *renderer, String image_path, Vect
 	sprite->transform = mat4_multiply(sprite->transform, mat4_rotate(rotation, vec3(0.0, 0.0, 1.0)));
 	sprite->transform = mat4_multiply(sprite->transform, mat4_scale(vec3(scale.x, scale.y, 1.0)));
 
-	VertexBuffer *vbo = renderer_create_vertex_buffer(renderer, SPRITE_VERTICIES, sizeof(SPRITE_VERTICIES));
+	sprite->vbo = renderer_create_vertex_buffer(renderer, SPRITE_VERTICIES, sizeof(SPRITE_VERTICIES), BUFFER_USAGE_STATIC);
 	BufferLayout *layout = buffer_layout_create(SPRITE_BUFFER_LAYOUT, LAYOUT_COUNT);
-	vertex_buffer_set_layout(vbo, layout);
+	vertex_buffer_set_layout(sprite->vbo, layout);
 
-	IndexBuffer *ibo = renderer_create_index_buffer(renderer, SPRITE_INDECIES, sizeof(SPRITE_INDECIES));
+	IndexBuffer *ibo = renderer_create_index_buffer(renderer, SPRITE_INDECIES, sizeof(SPRITE_INDECIES), BUFFER_USAGE_STATIC);
+	sprite->ibo = ibo;
 
 	sprite->vao = renderer_create_vertex_array(renderer);
-	vertex_arrray_add_vertex_buffer(sprite->vao, vbo);
+	const VertexBuffer *buffers[1] = { sprite->vbo };
+	vertex_arrray_set_vertex_buffers(sprite->vao, buffers, 1);
+	vertex_array_set_index_buffer(sprite->vao, ibo);
+
+	sprite->shader = renderer_create_shader(renderer, SPRITE_SHADER_SOURCE, ls_str_length(SPRITE_SHADER_SOURCE));
+
+	return sprite;
+}
+
+Sprite *renderer_create_sprite_texture(const Renderer *renderer, Texture *texture, Vector2 position, Vector2 scale, float32 rotation) {
+	Sprite *sprite = ls_malloc(sizeof(Sprite));
+	sprite->renderer = renderer;
+	sprite->texture = texture;
+
+	sprite->size = vec2(texture_get_width(sprite->texture), texture_get_height(sprite->texture));
+	sprite->size = vec2(sprite->size.x * scale.x, sprite->size.y * scale.y);
+
+	sprite->transform = mat4_translate(vec3(position.x, position.y, 0.0));
+	sprite->transform = mat4_multiply(sprite->transform, mat4_rotate(rotation, vec3(0.0, 0.0, 1.0)));
+	sprite->transform = mat4_multiply(sprite->transform, mat4_scale(vec3(scale.x, scale.y, 1.0)));
+
+	sprite->vbo = renderer_create_vertex_buffer(renderer, SPRITE_VERTICIES, sizeof(SPRITE_VERTICIES), BUFFER_USAGE_STATIC);
+	BufferLayout *layout = buffer_layout_create(SPRITE_BUFFER_LAYOUT, LAYOUT_COUNT);
+	vertex_buffer_set_layout(sprite->vbo, layout);
+
+	IndexBuffer *ibo = renderer_create_index_buffer(renderer, SPRITE_INDECIES, sizeof(SPRITE_INDECIES), BUFFER_USAGE_STATIC);
+
+	sprite->vao = renderer_create_vertex_array(renderer);
+	const VertexBuffer *buffers[1] = { sprite->vbo };
+	vertex_arrray_set_vertex_buffers(sprite->vao, buffers, 1);
 	vertex_array_set_index_buffer(sprite->vao, ibo);
 
 	sprite->shader = renderer_create_shader(renderer, SPRITE_SHADER_SOURCE, ls_str_length(SPRITE_SHADER_SOURCE));
@@ -70,6 +102,8 @@ Sprite *renderer_create_sprite(const Renderer *renderer, String image_path, Vect
 void sprite_destroy(Sprite *sprite) {
 	texture_destroy(sprite->texture);
 	shader_destroy(sprite->shader);
+	index_buffer_destroy(sprite->ibo);
+	vertex_buffer_destroy(sprite->vbo);
 	vertex_array_destroy(sprite->vao);
 
 	ls_free(sprite);
@@ -91,8 +125,7 @@ void sprite_draw(const Sprite *sprite) {
 	}
 
 	shader_set_uniform_mat4(sprite->shader, "u_transform", sprite->transform);
-
-	vertex_array_draw(sprite->vao);
+	vertex_array_draw_elements(sprite->vao);
 
 	shader_unbind(sprite->shader);
 	vertex_array_unbind(sprite->vao);

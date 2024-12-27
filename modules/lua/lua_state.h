@@ -5,11 +5,7 @@
 
 #include "renderer/renderer.h"
 
-#include <lauxlib.h>
-#include <lua.h>
-#include <lualib.h>
-
-typedef struct lua_State lua_State;
+#include "types/lua_state.h"
 
 LS_EXPORT lua_State *ls_lua_new_settings_state();
 LS_EXPORT lua_State *ls_lua_new_application_state(LSCore *core, Renderer *renderer);

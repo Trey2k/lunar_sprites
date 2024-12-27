@@ -26,9 +26,10 @@ struct Texture {
 	uint32 id;
 	uint32 width;
 	uint32 height;
+	bool is_atlas;
 };
 
-Texture *texture_create(String path) {
+Texture *texture_create_from_image(String path) {
 	String extension = os_path_get_extension(path);
 
 	TextureParseFunc parse_func = hashtable_get(texture_manager.parsers, HASH_KEY(str, extension)).ptr;
@@ -43,21 +44,19 @@ Texture *texture_create(String path) {
 	uint32 height = 0;
 
 	parse_func(path, &width, &height, &data);
-
 	if (data == NULL) {
 		ls_log(LOG_LEVEL_ERROR, "Failed to load texture %s\n", path);
 		return NULL;
 	}
-
-	Texture *texture = texture_create_from_data(width, height, data);
+	Texture *texture = texture_create(width, height, TEXTURE_FORMAT_RGBA, data);
 	ls_free(data);
 
 	return texture;
 }
 
-Texture *texture_create_from_data(uint32 width, uint32 height, const uint8 *data) {
+Texture *texture_create(uint32 width, uint32 height, TextureFormat format, const uint8 *data) {
 #if defined(OPENGL_ENABLED)
-	uint32 id = opengl_create_texture(width, height, data);
+	uint32 id = opengl_create_texture(width, height, format, data);
 #else
 	uint32 id = 0;
 #endif
@@ -86,6 +85,12 @@ void texture_bind(const Texture *texture, uint32 slot) {
 void texture_unbind(const Texture *texture) {
 #if defined(OPENGL_ENABLED)
 	opengl_bind_texture(texture->id, 0);
+#endif
+}
+
+void texture_add_sub_texture(Texture *texture, TextureFormat format, const uint8 *data, float32 x, float32 y, float32 width, float32 height) {
+#if defined(OPENGL_ENABLED)
+	opengl_texture_add_sub_texture(texture->id, format, data, x, y, width, height);
 #endif
 }
 

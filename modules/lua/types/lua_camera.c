@@ -3,6 +3,10 @@
 #include "lua_matrix.h"
 #include "lua_vector.h"
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 static Hashtable *methods = NULL;
 
 static int lua_camera_gc(lua_State *L) {

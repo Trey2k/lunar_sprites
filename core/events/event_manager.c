@@ -27,6 +27,7 @@ void event_manager_destroy(EventManager *event_manager) {
 }
 
 void event_manager_emit(const EventManager *event_manager, Event *event) {
+	event->handled = false;
 	for (size_t i = event_manager->handler_count; i > 0; i--) {
 		event_manager->handlers[i - 1](event, event_manager->user_data[i - 1]);
 		if (event->handled) {

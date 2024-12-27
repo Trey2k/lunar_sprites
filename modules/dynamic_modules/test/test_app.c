@@ -1,4 +1,5 @@
 #include "test_app.h"
+#include "ls_api.gen.h"
 #include "modules/dynamic_modules/test/ls_api.gen.h"
 
 typedef struct {
@@ -15,6 +16,10 @@ typedef struct {
 	Camera *camera;
 
 	float64 timer;
+
+	Font *font;
+
+	char *fps_text;
 } TestApplication;
 
 static void check_input(TestApplication *test_application);
@@ -50,6 +55,9 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 	test_application->root_window = renderer_create_window(renderer, ROOT_WINDOW_CONFIG);
 	test_application->input_manager = core_get_input_manager(core);
 
+	test_application->font = font_create("default.ttf");
+	test_application->fps_text = ls_str_format("FPS: %f", 0.0);
+
 	return test_application->root_window;
 }
 
@@ -70,6 +78,7 @@ void test_app_deinit(void *user_data) {
 	TestApplication *test_application = user_data;
 
 	sprite_destroy(test_application->sprite);
+	font_destroy(test_application->font);
 
 	ls_free(test_application);
 }
@@ -78,35 +87,43 @@ void test_app_update(float64 delta_time, void *user_data) {
 	TestApplication *test_application = user_data;
 
 	float32 rotation = sprite_get_rotation(test_application->sprite);
-	rotation += 0.1 * delta_time;
+	rotation += 0.01 * delta_time;
 	if (rotation >= PI * 2) {
 		rotation = 0.0;
 	}
 	sprite_set_rotation(test_application->sprite, rotation);
 
 	if (input_is_key_pressed(test_application->input_manager, LS_KEY_W)) {
-		camera_move(test_application->camera, vec3(0.0, 0.1, 0.0));
+		camera_move(test_application->camera, vec3(0.0, 0.01, 0.0));
 	}
 
 	if (input_is_key_pressed(test_application->input_manager, LS_KEY_S)) {
-		camera_move(test_application->camera, vec3(0.0, -0.1, 0.0));
+		camera_move(test_application->camera, vec3(0.0, -0.01, 0.0));
 	}
 
 	if (input_is_key_pressed(test_application->input_manager, LS_KEY_A)) {
-		camera_move(test_application->camera, vec3(-0.1, 0.0, 0.0));
+		camera_move(test_application->camera, vec3(-0.01, 0.0, 0.0));
 	}
 
 	if (input_is_key_pressed(test_application->input_manager, LS_KEY_D)) {
-		camera_move(test_application->camera, vec3(0.1, 0.0, 0.0));
+		camera_move(test_application->camera, vec3(0.01, 0.0, 0.0));
 	}
 
 	test_application->timer += delta_time;
 	check_input(test_application);
 
 	sprite_draw(test_application->sprite);
+	font_renderer_set_color(COLOR_YELLOW);
+	font_renderer_draw_text(test_application->font, "Lunar Sprites", 10, 10, 128);
+	font_renderer_set_color(COLOR_WHITE);
+	font_renderer_draw_text(test_application->font, "Hello, World!", 10, 148, 128);
+	font_renderer_set_color(COLOR_RED);
+	font_renderer_draw_text(test_application->font, test_application->fps_text, 10, 286, 64);
 
 	if (test_application->timer > 1.0) {
 		ls_printf("FPS: %f\n", 1.0 / delta_time);
+		ls_free(test_application->fps_text);
+		test_application->fps_text = ls_str_format("FPS: %f", 1.0 / delta_time);
 		test_application->timer = 0.0;
 	}
 }
@@ -129,49 +146,55 @@ static void input_handler(Event *e, void *user_data) {
 	TestApplication *test_application = user_data;
 
 	switch (e->type) {
-		case EVENT_WINDOW_CLOSE: {
-			test_application->should_stop = true;
-		} break;
-
-		case EVENT_KEY: {
-			switch (e->key.type) {
-				case EVENT_KEY_PRESSED: {
-					if (!e->key.repeated) {
-						ls_printf("Key pressed: %s\n", keycode_to_string(e->key.keycode));
-					} else {
-						ls_printf("Key repeated: %s\n", keycode_to_string(e->key.keycode));
-					}
+		case EVENT_WINDOW: {
+			switch (e->window.type) {
+				case EVENT_WINDOW_CLOSE: {
+					test_application->should_stop = true;
 				} break;
-
-				case EVENT_KEY_RELEASED: {
-					ls_printf("Key released: %s\n", keycode_to_string(e->key.keycode));
+				default: {
 				} break;
 			}
 		} break;
 
-		case EVENT_MOUSE: {
-			switch (e->mouse.type) {
-				case EVENT_MOUSE_PRESSED: {
-					ls_printf("Mouse pressed: %s\n", mouse_button_to_string(e->mouse.button));
-				} break;
+			// case EVENT_KEY: {
+			// 	switch (e->key.type) {
+			// 		case EVENT_KEY_PRESSED: {
+			// 			if (!e->key.repeated) {
+			// 				ls_printf("Key pressed: %s\n", keycode_to_string(e->key.keycode));
+			// 			} else {
+			// 				ls_printf("Key repeated: %s\n", keycode_to_string(e->key.keycode));
+			// 			}
+			// 		} break;
 
-				case EVENT_MOUSE_RELEASED: {
-					ls_printf("Mouse released: %s\n", mouse_button_to_string(e->mouse.button));
-				} break;
+			// 		case EVENT_KEY_RELEASED: {
+			// 			ls_printf("Key released: %s\n", keycode_to_string(e->key.keycode));
+			// 		} break;
+			// 	}
+			// } break;
 
-				case EVENT_MOUSE_MOVED: {
-					ls_printf("Mouse moved: %d, %d\n", e->mouse.position.x, e->mouse.position.y);
-				} break;
+			// case EVENT_MOUSE: {
+			// 	switch (e->mouse.type) {
+			// 		case EVENT_MOUSE_PRESSED: {
+			// 			ls_printf("Mouse pressed: %s\n", mouse_button_to_string(e->mouse.button));
+			// 		} break;
 
-				case EVENT_MOUSE_ENTERED: {
-					ls_printf("Mouse entered: %d, %d\n", e->mouse.position.x, e->mouse.position.y);
-				} break;
+			// 		case EVENT_MOUSE_RELEASED: {
+			// 			ls_printf("Mouse released: %s\n", mouse_button_to_string(e->mouse.button));
+			// 		} break;
 
-				case EVENT_MOUSE_LEFT: {
-					ls_printf("Mouse left: %d, %d\n", e->mouse.position.x, e->mouse.position.y);
-				} break;
-			}
-		} break;
+			// 		case EVENT_MOUSE_MOVED: {
+			// 			ls_printf("Mouse moved: %d, %d\n", e->mouse.position.x, e->mouse.position.y);
+			// 		} break;
+
+			// 		case EVENT_MOUSE_ENTERED: {
+			// 			ls_printf("Mouse entered: %d, %d\n", e->mouse.position.x, e->mouse.position.y);
+			// 		} break;
+
+			// 		case EVENT_MOUSE_LEFT: {
+			// 			ls_printf("Mouse left: %d, %d\n", e->mouse.position.x, e->mouse.position.y);
+			// 		} break;
+			// 	}
+			// } break;
 
 		default: {
 		} break;

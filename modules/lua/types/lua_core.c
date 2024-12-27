@@ -4,6 +4,10 @@
 #include "lua_event_manager.h"
 #include "lua_input_manager.h"
 
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+
 static const luaL_Reg core_meta_methods[] = {
 	{ NULL, NULL }
 };

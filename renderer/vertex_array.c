@@ -82,11 +82,11 @@ void vertex_array_unbind(const VertexArray *vertex_array) {
 	VERTEX_ARRAY_CALL(vertex_array, unbind);
 }
 
-void vertex_arrray_add_vertex_buffer(VertexArray *vertex_array, VertexBuffer *vertex_buffer) {
-	VERTEX_ARRAY_CALL(vertex_array, add_vertex_buffer, vertex_buffer);
+void vertex_arrray_set_vertex_buffers(VertexArray *vertex_array, const VertexBuffer **vertex_buffers, size_t count) {
+	VERTEX_ARRAY_CALL(vertex_array, set_vertex_buffers, vertex_buffers, count);
 }
 
-void vertex_array_set_index_buffer(VertexArray *vertex_array, IndexBuffer *index_buffer) {
+void vertex_array_set_index_buffer(VertexArray *vertex_array, const IndexBuffer *index_buffer) {
 	VERTEX_ARRAY_CALL(vertex_array, set_index_buffer, index_buffer);
 }
 
@@ -94,9 +94,8 @@ void vertex_array_draw(const VertexArray *vertex_array) {
 	VERTEX_ARRAY_CALL(vertex_array, draw);
 }
 
-const VertexBuffer *const *vertex_array_get_vertex_buffers(const VertexArray *vertex_array, uint32 *count) {
-	VERTEX_ARRAY_CALL_R(vertex_array, get_vertex_buffers, count);
-	return NULL;
+void vertex_array_draw_elements(const VertexArray *vertex_array) {
+	VERTEX_ARRAY_CALL(vertex_array, draw_elements);
 }
 
 const IndexBuffer *vertex_array_get_index_buffer(const VertexArray *vertex_array) {

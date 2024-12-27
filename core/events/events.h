@@ -36,6 +36,7 @@ typedef struct {
 } EventMouse;
 
 typedef enum {
+	EVENT_WINDOW_OPEN,
 	EVENT_WINDOW_CLOSE,
 	EVENT_WINDOW_RESIZE,
 	EVENT_WINDOW_MOVE,

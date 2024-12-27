@@ -42,7 +42,7 @@ Files extracted from upstream source:
 
 
 ## miniz
-A lightweight replacment for zlib
+A lightweight replacment for zlib.
 
 - Upstream: https://github.com/richgel999/miniz
 - Version: 3.0.2 (293d4db1b7d0ffee9756d035b9ac6f7431ef8492)
@@ -66,3 +66,14 @@ Files extracted from upstream source:
 - `LICENSE` license text copied from https://www.lua.org/license.html
 - `*.c`
 - `*.h`
+
+## RFont
+A lightweight TrueType font rendering library.
+
+- Upstream: https://github.com/ColleagueRiley/RFont
+- Version: 1481ed4572bf2b50b60d8220ad7cab3bf0efe3c6
+- License: Zlib License
+
+Files extracted from upstream source:
+- `LICENSE`
+- `RFont.h`

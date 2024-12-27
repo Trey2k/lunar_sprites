@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from renderer_builders import make_shader_source
-
 Import("env")
+env.AddMethod(make_shader_source, "make_shader_source")
 
 env.renderer_sources = [
     "renderer.c",
@@ -17,8 +17,7 @@ env.renderer_sources = [
 
     "sprite_shader.gen.c",
 ]
-
-make_shader_source("shaders/sprite.shader", "SPRITE_SHADER_SOURCE", "sprite_shader.gen.c")
+env.make_shader_source("renderer/shaders/sprite.shader", "SPRITE_SHADER_SOURCE", "renderer/sprite_shader.gen.c")
 
 if env["use_opengl"]:
     SConscript("opengl/SCsub")

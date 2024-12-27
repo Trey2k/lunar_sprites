@@ -60,6 +60,16 @@ void input_set_active_window(InputManager *input_manager, const LSWindow *window
 	input_manager->active_window = window;
 }
 
+void input_handle_window_open(InputManager *input_manager, const LSWindow *window) {
+	LS_ASSERT(window);
+
+	Event e;
+	e.type = EVENT_WINDOW;
+	e.window.type = EVENT_WINDOW_OPEN;
+	e.window.window = window;
+	event_manager_emit(input_manager->event_manager, &e);
+}
+
 void input_handle_window_close(InputManager *input_manager) {
 	LS_ASSERT(input_manager->active_window);
 
