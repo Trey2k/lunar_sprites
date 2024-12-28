@@ -71,8 +71,9 @@ Files extracted from upstream source:
 A lightweight TrueType font rendering library.
 
 - Upstream: https://github.com/ColleagueRiley/RFont
-- Version: 1481ed4572bf2b50b60d8220ad7cab3bf0efe3c6
+- Version: 4075bfe7f7b8f38a1ad8094f75ad39527574893d
 - License: Zlib License
+- Required: No
 
 Files extracted from upstream source:
 - `LICENSE`
