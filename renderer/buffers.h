@@ -114,6 +114,7 @@ LS_EXPORT void vertex_buffer_destroy(VertexBuffer *vertex_buffer);
 LS_EXPORT void vertex_buffer_bind(const VertexBuffer *vertex_buffer);
 LS_EXPORT void vertex_buffer_unbind(const VertexBuffer *vertex_buffer);
 LS_EXPORT void vertex_buffer_set_data(VertexBuffer *vertex_buffer, const void *data, uint32 size);
+LS_EXPORT void vertex_buffer_set_sub_data(VertexBuffer *vertex_buffer, const void *data, uint32 size, uint32 offset);
 LS_EXPORT void vertex_buffer_set_layout(VertexBuffer *vertex_buffer, const BufferLayout *buffer_layout);
 LS_EXPORT const BufferLayout *vertex_buffer_get_layout(const VertexBuffer *vertex_buffer);
 LS_EXPORT uint32 vertex_buffer_get_count(const VertexBuffer *vertex_buffer);
@@ -127,5 +128,6 @@ LS_EXPORT void index_buffer_destroy(IndexBuffer *index_buffer);
 LS_EXPORT void index_buffer_bind(const IndexBuffer *index_buffer);
 LS_EXPORT void index_buffer_unbind(const IndexBuffer *index_buffer);
 LS_EXPORT void index_buffer_set_data(const IndexBuffer *index_buffer, const void *data, uint32 size);
+LS_EXPORT void index_buffer_set_sub_data(const IndexBuffer *index_buffer, const void *data, uint32 size, uint32 offset);
 LS_EXPORT uint32 index_buffer_get_count(const IndexBuffer *index_buffer);
 #endif // BUFFERS_H

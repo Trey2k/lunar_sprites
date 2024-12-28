@@ -13,6 +13,7 @@
 
 typedef union {
 	void *ptr;
+	const void *cptr;
 	int64 i64;
 	uint64 u64;
 	float64 f64;
@@ -119,6 +120,7 @@ LS_EXPORT size_t slice128_get_capacity(const Slice128 *slice);
 
 typedef union {
 	char chr;
+	uint8 u8;
 } SliceValue8;
 
 typedef bool (*SliceCompareFunc8)(const SliceValue8 a, const SliceValue8 b);

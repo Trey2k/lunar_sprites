@@ -82,7 +82,7 @@ void vertex_array_unbind(const VertexArray *vertex_array) {
 	VERTEX_ARRAY_CALL(vertex_array, unbind);
 }
 
-void vertex_arrray_set_vertex_buffers(VertexArray *vertex_array, const VertexBuffer **vertex_buffers, size_t count) {
+void vertex_array_set_vertex_buffers(VertexArray *vertex_array, const VertexBuffer **vertex_buffers, size_t count) {
 	VERTEX_ARRAY_CALL(vertex_array, set_vertex_buffers, vertex_buffers, count);
 }
 

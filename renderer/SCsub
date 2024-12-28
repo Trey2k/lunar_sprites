@@ -14,10 +14,14 @@ env.renderer_sources = [
     "texture.c",
     "camera.c",
     "sprite.c",
+    "batch_renderer.c",
 
     "sprite_shader.gen.c",
+    "basic_batch_shader.gen.c",
 ]
+
 env.make_shader_source("renderer/shaders/sprite.shader", "SPRITE_SHADER_SOURCE", "renderer/sprite_shader.gen.c")
+env.make_shader_source("renderer/shaders/basic_batch.shader", "BASIC_BATCH_SHADER_SOURCE", "renderer/basic_batch_shader.gen.c")
 
 if env["use_opengl"]:
     SConscript("opengl/SCsub")

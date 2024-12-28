@@ -55,6 +55,7 @@ LS_EXPORT Matrix4 mat4_translate(const Vector3 translation);
 LS_EXPORT Matrix4 mat4_rotate(float32 angle, const Vector3 axis);
 LS_EXPORT Matrix4 mat4_scale(const Vector3 scale);
 LS_EXPORT Matrix4 mat4_multiply(const Matrix4 a, const Matrix4 b);
+LS_EXPORT Vector3 mat4_multiply_vec3(const Matrix4 matrix, const Vector3 vector);
 LS_EXPORT Matrix4 mat4_divide(const Matrix4 matrix, float32 value);
 LS_EXPORT Matrix4 mat4_add(const Matrix4 a, const Matrix4 b);
 LS_EXPORT Matrix4 mat4_subtract(const Matrix4 a, const Matrix4 b);

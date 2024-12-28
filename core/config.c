@@ -29,7 +29,7 @@ void write_config(String path, const Hashtable *config) {
 		String value = hashtable_get(config, HASH_KEY(str, key)).str;
 
 		char *line = ls_str_format("%s: %s\n", key, value);
-		os_write_file_data(file, line, ls_str_length(line));
+		os_write_file_data(file, line, ls_str_length(line) + 1);
 		ls_free(line);
 	}
 
@@ -44,14 +44,15 @@ Hashtable *read_config(String path) {
 
 	LSFile file = os_open_file(path, "r");
 	if (!file) {
+		hashtable_destroy(config);
 		ls_log(LOG_LEVEL_ERROR, "Failed to open file %s", path);
-		return config;
+		return NULL;
 	}
 
-	size_t file_size = os_get_file_size(file);
-	char *file_data = ls_malloc(file_size + 1);
-	os_read_file_data(file, file_data, file_size);
-	file_data[file_size] = '\0';
+	size_t file_size = os_get_file_size(file) + 1;
+	char *file_data = ls_malloc(file_size);
+	int32 read = os_read_file_data(file, file_data, file_size - 1);
+	file_data[read] = '\0';
 	os_close_file(file);
 
 	enum ConfigParserState state = CONFIG_STATE_NONE;
@@ -71,7 +72,7 @@ Hashtable *read_config(String path) {
 					}
 					state = CONFIG_STATE_NONE;
 				} else {
-					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);
+					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s\n", *cur_char, path);
 					goto error;
 				}
 			} break;
@@ -88,7 +89,7 @@ Hashtable *read_config(String path) {
 						*cur_char == '.') {
 					slice8_append(current_key, SLICE_VAL8(chr, *cur_char));
 				} else {
-					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);
+					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s\n", *cur_char, path);
 					goto error;
 				}
 			} break;
@@ -107,7 +108,7 @@ Hashtable *read_config(String path) {
 				} else if ((*cur_char >= ' ' && *cur_char <= '~')) {
 					slice8_append(current_value, SLICE_VAL8(chr, *cur_char));
 				} else {
-					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s", *cur_char, path);
+					ls_log(LOG_LEVEL_ERROR, "Invalid character '%c' in config file %s\n", *cur_char, path);
 					goto error;
 				}
 			} break;

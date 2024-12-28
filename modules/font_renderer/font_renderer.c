@@ -3,13 +3,10 @@
 #include "core/debug.h"
 #include "core/events/events.h"
 #include "core/memory.h"
-#include "core/types/slice.h"
 
-#include "renderer/buffers.h"
+#include "renderer/batch_renderer.h"
 #include "renderer/renderer.h"
-#include "renderer/shader.h"
 #include "renderer/texture.h"
-#include "renderer/vertex_array.h"
 #include "renderer/window.h"
 
 #define RFONT_IMPLEMENTATION
@@ -37,41 +34,13 @@ void font_destroy(Font *font) {
 
 typedef struct {
 	const Renderer *renderer;
-	Shader *shader;
-
-	uint32 current_atlas;
 	Color color;
 	bool ready;
-
-	VertexBuffer *vbo;
-	float32 *vbo_data;
-	size_t vbo_size;
-
-	VertexArray *vao;
 } FontRenderer;
-
-extern const char *const FONT_SHADER_SOURCE;
 
 static FontRenderer *font_renderer = NULL;
 
-#define VBO_LAYOUT_COUNT 3
-static const BufferElement VBO_LAYOUT[] = {
-	{ SHADER_DATA_TYPE_FLOAT3, "pos", false },
-	{ SHADER_DATA_TYPE_FLOAT2, "tex_coords", false },
-	{ SHADER_DATA_TYPE_FLOAT4, "color", false },
-};
-
 static void font_renderer_start(const LSWindow *window) {
-	font_renderer->vbo = renderer_create_vertex_buffer_empty(font_renderer->renderer, BUFFER_USAGE_DYNAMIC);
-
-	BufferLayout *vbo_layout = buffer_layout_create(VBO_LAYOUT, VBO_LAYOUT_COUNT);
-
-	vertex_buffer_set_layout(font_renderer->vbo, vbo_layout);
-
-	font_renderer->vao = renderer_create_vertex_array(font_renderer->renderer);
-
-	font_renderer->shader = renderer_create_shader(font_renderer->renderer, FONT_SHADER_SOURCE, ls_str_length(FONT_SHADER_SOURCE));
-
 	Vector2i size = window_get_size(window);
 	RFont_init(size.x, size.y);
 	font_renderer->ready = true;
@@ -99,9 +68,7 @@ static void event_handler(Event *event, void *user_data) {
 void font_renderer_init(Renderer *a_renderer, LSCore *core) {
 	font_renderer = ls_malloc(sizeof(FontRenderer));
 	font_renderer->renderer = a_renderer;
-	font_renderer->current_atlas = 0;
 	font_renderer->color = COLOR_WHITE;
-	font_renderer->vbo_data = NULL;
 
 	font_renderer->ready = false;
 	EventManager *event_manager = core_get_event_manager(core);
@@ -109,9 +76,6 @@ void font_renderer_init(Renderer *a_renderer, LSCore *core) {
 }
 
 void font_renderer_deinit() {
-	vertex_array_destroy(font_renderer->vao);
-	shader_destroy(font_renderer->shader);
-
 	ls_free(font_renderer);
 	RFont_close();
 }
@@ -136,7 +100,6 @@ Texture *font_renderer_create_atlas(uint32 atlas_width, uint32 atlas_height) {
 	LS_ASSERT(font_renderer);
 	LS_ASSERT(font_renderer->renderer);
 
-	font_renderer->current_atlas++;
 	uint8 *atlas_data = ls_calloc(atlas_width * atlas_height, sizeof(uint8));
 	Texture *atlas = texture_create(atlas_width, atlas_height, TEXTURE_FORMAT_R, atlas_data);
 	ls_free(atlas_data);
@@ -149,45 +112,12 @@ void font_renderer_bitmap_to_atlas(Texture *atlas, uint8 *bitmap, float32 width,
 	LS_ASSERT(font_renderer);
 	LS_ASSERT(font_renderer->renderer);
 	LS_ASSERT(atlas);
+
 	texture_add_sub_texture(atlas, TEXTURE_FORMAT_R, bitmap, x, y, width, height);
 }
 
 void font_renderer_render_text(Texture *atlas, float32 *vertices, float32 *tcoords, size_t nverts) {
-	LS_ASSERT(font_renderer);
-	LS_ASSERT(font_renderer->renderer);
-
-	if (!font_renderer->vbo_data) {
-		font_renderer->vbo_size = nverts * (3 + 2 + 4) * sizeof(float32);
-		font_renderer->vbo_data = ls_malloc(font_renderer->vbo_size);
-	} else if (font_renderer->vbo_size < nverts * (3 + 2 + 4) * sizeof(float32)) {
-		font_renderer->vbo_size = nverts * (3 + 2 + 4) * sizeof(float32);
-		font_renderer->vbo_data = ls_realloc(font_renderer->vbo_data, font_renderer->vbo_size);
-	}
-
-	for (size_t i = 0; i < nverts; i++) {
-		font_renderer->vbo_data[i * 9] = vertices[i * 3];
-		font_renderer->vbo_data[i * 9 + 1] = vertices[i * 3 + 1];
-		font_renderer->vbo_data[i * 9 + 2] = vertices[i * 3 + 2];
-
-		font_renderer->vbo_data[i * 9 + 3] = tcoords[i * 2];
-		font_renderer->vbo_data[i * 9 + 4] = tcoords[i * 2 + 1];
-
-		font_renderer->vbo_data[i * 9 + 5] = font_renderer->color.r;
-		font_renderer->vbo_data[i * 9 + 6] = font_renderer->color.g;
-		font_renderer->vbo_data[i * 9 + 7] = font_renderer->color.b;
-		font_renderer->vbo_data[i * 9 + 8] = font_renderer->color.a;
-	}
-
-	vertex_array_bind(font_renderer->vao);
-	shader_bind(font_renderer->shader);
-
-	vertex_buffer_set_data(font_renderer->vbo, font_renderer->vbo_data, font_renderer->vbo_size);
-	const VertexBuffer *buffers[1] = { font_renderer->vbo };
-	vertex_arrray_set_vertex_buffers(font_renderer->vao, buffers, 1);
-
-	texture_bind(atlas, 0);
-
-	vertex_array_draw(font_renderer->vao);
+	batch_renderer_draw_basic(atlas, vertices, tcoords, font_renderer->color, nverts);
 }
 
 void font_renderer_free_atlas(Texture *atlas) {

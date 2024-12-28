@@ -52,6 +52,12 @@ void opengl_vertex_buffer_set_data(OpenGLVertexBuffer *vertex_buffer, const void
 	vertex_buffer->count = size / buffer_layout_get_stride(vertex_buffer->buffer_layout);
 }
 
+void opengl_vertex_buffer_set_sub_data(OpenGLVertexBuffer *vertex_buffer, const void *data, uint32 size, uint32 offset) {
+	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->id));
+	GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, offset, size, data));
+	vertex_buffer->count = size / buffer_layout_get_stride(vertex_buffer->buffer_layout);
+}
+
 void opengl_vertex_buffer_bind(const OpenGLVertexBuffer *vertex_buffer) {
 	GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->id));
 }
@@ -113,6 +119,11 @@ void opengl_index_buffer_unbind(const OpenGLIndexBuffer *index_buffer) {
 void opengl_index_buffer_set_data(const OpenGLIndexBuffer *index_buffer, const void *data, uint32 size) {
 	GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer->id));
 	GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, buffer_usage_to_gl(index_buffer->usage)));
+}
+
+void opengl_index_buffer_set_sub_data(const OpenGLIndexBuffer *index_buffer, const void *data, uint32 size, uint32 offset) {
+	GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer->id));
+	GL_CALL(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data));
 }
 
 uint32 opengl_index_buffer_get_count(const OpenGLIndexBuffer *index_buffer) {

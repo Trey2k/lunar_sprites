@@ -87,6 +87,16 @@ Matrix4 mat4_multiply(const Matrix4 a, const Matrix4 b) {
 	return result;
 }
 
+Vector3 mat4_multiply_vec3(const Matrix4 matrix, const Vector3 vector) {
+	Vector3 result;
+
+	result.x = matrix.x0 * vector.x + matrix.y0 * vector.y + matrix.z0 * vector.z + matrix.w0;
+	result.y = matrix.x1 * vector.x + matrix.y1 * vector.y + matrix.z1 * vector.z + matrix.w1;
+	result.z = matrix.x2 * vector.x + matrix.y2 * vector.y + matrix.z2 * vector.z + matrix.w2;
+
+	return result;
+}
+
 Matrix4 mat4_divide(const Matrix4 matrix, float32 value) {
 	Matrix4 result = MAT4_IDENTITY;
 

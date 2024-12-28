@@ -197,6 +197,10 @@ void vertex_buffer_set_data(VertexBuffer *vertex_buffer, const void *data, uint3
 	VERTEX_BUFFER_CALL(vertex_buffer, set_data, data, size);
 }
 
+void vertex_buffer_set_sub_data(VertexBuffer *vertex_buffer, const void *data, uint32 size, uint32 offset) {
+	VERTEX_BUFFER_CALL(vertex_buffer, set_sub_data, data, size, offset);
+}
+
 void vertex_buffer_set_layout(VertexBuffer *vertex_buffer, const BufferLayout *buffer_layout) {
 	VERTEX_BUFFER_CALL(vertex_buffer, set_layout, buffer_layout);
 }
@@ -286,6 +290,10 @@ void index_buffer_unbind(const IndexBuffer *index_buffer) {
 
 void index_buffer_set_data(const IndexBuffer *index_buffer, const void *data, uint32 size) {
 	INDEX_BUFFER_CALL(index_buffer, set_data, data, size);
+}
+
+void index_buffer_set_sub_data(const IndexBuffer *index_buffer, const void *data, uint32 size, uint32 offset) {
+	INDEX_BUFFER_CALL(index_buffer, set_sub_data, data, size, offset);
 }
 
 uint32 index_buffer_get_count(const IndexBuffer *index_buffer) {

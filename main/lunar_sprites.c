@@ -3,6 +3,7 @@
 #include "core/core.h"
 
 #include "core/events/events.h"
+#include "renderer/batch_renderer.h"
 #include "renderer/context.h"
 #include "renderer/renderer.h"
 #include "renderer/window.h"
@@ -72,6 +73,8 @@ void ls_main_init(int32 argc, char *argv[]) {
 
 	main.root_window = main.application_interface.init(main.core, main.renderer, main.application_interface.user_data);
 
+	batch_renderer_init(main.renderer);
+
 	main.application_interface.start(main.application_interface.user_data);
 }
 
@@ -88,7 +91,11 @@ void ls_main_loop() {
 
 	renderer_clear(main.renderer);
 
+	batch_renderer_begin_frame();
 	main.application_interface.update(main.delta_time, main.application_interface.user_data);
+	batch_renderer_end_frame();
+
+	batch_renderer_flush();
 
 	if (main.root_window) {
 		window_make_current(main.root_window);
@@ -98,6 +105,8 @@ void ls_main_loop() {
 
 int32 ls_main_deinit() {
 	main.application_interface.deinit(main.application_interface.user_data);
+
+	batch_renderer_deinit();
 
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_MAIN);
 

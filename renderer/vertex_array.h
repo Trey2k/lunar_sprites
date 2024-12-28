@@ -12,7 +12,7 @@ LS_EXPORT void vertex_array_destroy(VertexArray *vertex_array);
 LS_EXPORT void vertex_array_bind(const VertexArray *vertex_array);
 LS_EXPORT void vertex_array_unbind(const VertexArray *vertex_array);
 // Vertex buffer ownership is transferred to the vertex array if manage_buffers is true
-LS_EXPORT void vertex_arrray_set_vertex_buffers(VertexArray *vertex_array, const VertexBuffer **vertex_buffer, size_t count);
+LS_EXPORT void vertex_array_set_vertex_buffers(VertexArray *vertex_array, const VertexBuffer **vertex_buffer, size_t count);
 // Index buffer ownership is transferred to the vertex array if manage_buffers is true
 LS_EXPORT void vertex_array_set_index_buffer(VertexArray *vertex_array, const IndexBuffer *index_buffer);
 

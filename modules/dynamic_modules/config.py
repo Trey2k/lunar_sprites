@@ -55,6 +55,7 @@ def configure(env):
         'renderer/texture.h',
         'renderer/camera.h',
         'renderer/sprite.h',
+        'renderer/batch_renderer.h',
     
         'main/application.h',
         'main/lunar_sprites.h',
