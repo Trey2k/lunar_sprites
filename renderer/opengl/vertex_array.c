@@ -97,7 +97,11 @@ void opengl_vertex_array_set_vertex_buffers(OpenGLVertexArray *vertex_array, con
 
 void opengl_vertex_array_set_index_buffer(OpenGLVertexArray *vertex_array, const IndexBuffer *index_buffer) {
 	opengl_vertex_array_bind(vertex_array);
-	index_buffer_bind(index_buffer);
+	if (index_buffer) {
+		index_buffer_bind(index_buffer);
+	} else {
+		GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+	}
 
 	vertex_array->index_buffer = index_buffer;
 }

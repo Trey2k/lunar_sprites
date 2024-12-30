@@ -88,7 +88,7 @@ void sprite_destroy(Sprite *sprite) {
 }
 
 void sprite_draw(const Sprite *sprite) {
-	batch_renderer_draw(sprite->texture, spriate_get_transformed_vertices(sprite), SPRITE_TEX_COORDS, SPRITE_INDECIES, COLOR_WHITE, SPRITE_VERTICIES_COUNT, SPRITE_INDECIES_COUNT);
+	batch_renderer_draw(NULL, sprite->texture, spriate_get_transformed_vertices(sprite), SPRITE_TEX_COORDS, SPRITE_INDECIES, COLOR_WHITE, SPRITE_VERTICIES_COUNT, SPRITE_INDECIES_COUNT);
 }
 
 void sprite_set_position(Sprite *sprite, Vector2 position) {

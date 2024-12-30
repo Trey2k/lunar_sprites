@@ -95,8 +95,6 @@ void ls_main_loop() {
 	main.application_interface.update(main.delta_time, main.application_interface.user_data);
 	batch_renderer_end_frame();
 
-	batch_renderer_flush();
-
 	if (main.root_window) {
 		window_make_current(main.root_window);
 		window_swap_buffers(main.root_window);

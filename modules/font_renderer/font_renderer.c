@@ -117,7 +117,7 @@ void font_renderer_bitmap_to_atlas(Texture *atlas, uint8 *bitmap, float32 width,
 }
 
 void font_renderer_render_text(Texture *atlas, float32 *vertices, float32 *tcoords, size_t nverts) {
-	batch_renderer_draw_basic(atlas, vertices, tcoords, font_renderer->color, nverts);
+	batch_renderer_draw(NULL, atlas, vertices, tcoords, NULL, font_renderer->color, nverts, 0);
 }
 
 void font_renderer_free_atlas(Texture *atlas) {

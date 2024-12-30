@@ -6,241 +6,191 @@
 
 #include "core/types/slice.h"
 
-#define BATCH_VBO_LAYOUT_COUNT 4
+#define BATCH_VBO_LAYOUT_COUNT 3
 static const BufferElement BATCH_VBO_LAYOUT[] = {
 	{ SHADER_DATA_TYPE_FLOAT3, "pos", false },
-	{ SHADER_DATA_TYPE_FLOAT, "tex_id", false },
 	{ SHADER_DATA_TYPE_FLOAT2, "tex_coords", false },
 	{ SHADER_DATA_TYPE_FLOAT4, "color", false },
 };
-#define BATCH_VBO_ROW_SIZE (3 + 1 + 2 + 4)
+#define BATCH_VBO_ROW_SIZE (3 + 2 + 4)
 #define BATCH_VBO_ELEMENT_SIZE BATCH_VBO_ROW_SIZE * sizeof(float32)
+#define VBO_MAX_SIZE 1024 * BATCH_VBO_ELEMENT_SIZE
+#define IBO_MAX_SIZE 512 * sizeof(uint32)
 
-extern const char *const BASIC_BATCH_SHADER_SOURCE;
+extern const char *const DEFAULT_BATCH_SHADER_SOURCE;
+
+typedef struct {
+	const Texture *texture;
+	const Shader *shader;
+	float32 vbo_data[VBO_MAX_SIZE];
+	uint32 ibo_data[IBO_MAX_SIZE];
+	size_t nverts;
+	size_t nindices;
+	bool use_indices;
+} Batch;
 
 typedef struct {
 	const Renderer *renderer;
 
 	Shader *shader;
 
-	VertexArray *basic_vao;
-	VertexBuffer *basic_vbo;
-	size_t basic_vbo_size;
-	Slice32 *basic_vbo_data;
-	size_t basic_nverts;
-	const Texture *basic_textures[16];
-	size_t basic_texture_count;
-
 	VertexArray *vao;
 	VertexBuffer *vbo;
 	IndexBuffer *ibo;
-	size_t vbo_size;
-	Slice32 *vbo_data;
-	size_t ibo_size;
-	Slice32 *ibo_data;
-	size_t nverts;
-	size_t nindices;
-	const Texture *textures[16];
-	size_t texture_count;
+
+	VertexArray *basic_vao;
+	VertexBuffer *basic_vbo;
+
+	Slice *batches;
+	uint32 nbatches;
 } BatchRenderer;
 
 static BatchRenderer batch_renderer;
 
 void batch_renderer_init(const Renderer *renderer) {
 	batch_renderer.renderer = renderer;
-	batch_renderer.shader = renderer_create_shader(renderer, BASIC_BATCH_SHADER_SOURCE, ls_str_length(BASIC_BATCH_SHADER_SOURCE));
+	batch_renderer.shader = renderer_create_shader(renderer, DEFAULT_BATCH_SHADER_SOURCE, ls_str_length(DEFAULT_BATCH_SHADER_SOURCE));
 	BufferLayout *vbo_layout = buffer_layout_create(BATCH_VBO_LAYOUT, BATCH_VBO_LAYOUT_COUNT);
 
-	batch_renderer.basic_texture_count = 0;
-	batch_renderer.basic_vbo_data = slice32_create(1024 * BATCH_VBO_ROW_SIZE);
-	batch_renderer.basic_vbo = renderer_create_vertex_buffer(renderer, NULL, 1024 * BATCH_VBO_ELEMENT_SIZE, BUFFER_USAGE_DYNAMIC);
-	batch_renderer.basic_vbo_size = 1024 * BATCH_VBO_ELEMENT_SIZE;
+	batch_renderer.vbo = renderer_create_vertex_buffer(renderer, NULL, VBO_MAX_SIZE, BUFFER_USAGE_DYNAMIC);
+	vertex_buffer_set_layout(batch_renderer.vbo, vbo_layout);
+
+	batch_renderer.ibo = renderer_create_index_buffer(renderer, NULL, IBO_MAX_SIZE, BUFFER_USAGE_DYNAMIC);
+
+	batch_renderer.vao = renderer_create_vertex_array(renderer);
+
+	batch_renderer.basic_vbo = renderer_create_vertex_buffer(renderer, NULL, VBO_MAX_SIZE, BUFFER_USAGE_DYNAMIC);
 	vertex_buffer_set_layout(batch_renderer.basic_vbo, vbo_layout);
+
 	batch_renderer.basic_vao = renderer_create_vertex_array(renderer);
 
-	batch_renderer.texture_count = 0;
-	batch_renderer.vbo_data = slice32_create(1024 * BATCH_VBO_ROW_SIZE);
-	batch_renderer.vbo = renderer_create_vertex_buffer(renderer, NULL, 1024 * BATCH_VBO_ELEMENT_SIZE, BUFFER_USAGE_DYNAMIC);
-	batch_renderer.vbo_size = 1024 * BATCH_VBO_ELEMENT_SIZE;
-	vertex_buffer_set_layout(batch_renderer.vbo, vbo_layout);
-	batch_renderer.ibo_data = slice32_create(1024);
-	batch_renderer.ibo = renderer_create_index_buffer(renderer, NULL, 1024 * sizeof(uint32), BUFFER_USAGE_DYNAMIC);
-	batch_renderer.ibo_size = 1024 * sizeof(uint32);
-	batch_renderer.vao = renderer_create_vertex_array(renderer);
+	batch_renderer.batches = slice_create(16, true);
 }
 
 void batch_renderer_deinit() {
-	slice32_destroy(batch_renderer.basic_vbo_data);
+	vertex_buffer_destroy(batch_renderer.vbo);
+	index_buffer_destroy(batch_renderer.ibo);
+	vertex_array_destroy(batch_renderer.vao);
+
 	vertex_buffer_destroy(batch_renderer.basic_vbo);
 	vertex_array_destroy(batch_renderer.basic_vao);
 
-	slice32_destroy(batch_renderer.vbo_data);
-	vertex_buffer_destroy(batch_renderer.vbo);
-	slice32_destroy(batch_renderer.ibo_data);
-	index_buffer_destroy(batch_renderer.ibo);
-	vertex_array_destroy(batch_renderer.vao);
+	slice_clear(batch_renderer.batches);
 
 	shader_destroy(batch_renderer.shader);
 }
 
 void batch_renderer_begin_frame() {
-	slice32_clear(batch_renderer.basic_vbo_data);
-	slice32_clear(batch_renderer.vbo_data);
-	slice32_clear(batch_renderer.ibo_data);
-	batch_renderer.basic_nverts = 0;
-	batch_renderer.nverts = 0;
-	batch_renderer.nindices = 0;
-	batch_renderer.basic_texture_count = 0;
-	batch_renderer.texture_count = 0;
+	batch_renderer.nbatches = 0;
 }
 
-void batch_renderer_end_frame() {
+static void batch_render(Batch *batch) {
+	texture_bind(batch->texture, 0);
+	shader_bind(batch->shader);
+
+	vertex_array_bind(batch_renderer.vao);
+	// Set sub data avoids reallocating the buffer
+	vertex_buffer_set_sub_data(batch_renderer.vbo, batch->vbo_data, batch->nverts * BATCH_VBO_ELEMENT_SIZE, 0);
+
+	const VertexBuffer *buffers[1] = { batch_renderer.vbo };
+	vertex_array_set_vertex_buffers(batch_renderer.vao, buffers, 1);
+
+	index_buffer_set_sub_data(batch_renderer.ibo, batch->ibo_data, batch->nindices * sizeof(uint32), 0);
+	vertex_array_set_index_buffer(batch_renderer.vao, batch_renderer.ibo);
+
+	vertex_array_draw_elements(batch_renderer.vao);
+
+	batch->nverts = 0;
+	batch->nindices = 0;
+
+	shader_unbind(batch->shader);
+	texture_unbind(batch->texture);
+}
+
+static void batch_render_no_indices(Batch *batch) {
+	texture_bind(batch->texture, 0);
+	shader_bind(batch->shader);
+
 	vertex_array_bind(batch_renderer.basic_vao);
-	if (batch_renderer.basic_nverts * BATCH_VBO_ELEMENT_SIZE > batch_renderer.basic_vbo_size) {
-		vertex_buffer_set_data(batch_renderer.basic_vbo, slice32_get_data(batch_renderer.basic_vbo_data), batch_renderer.basic_nverts * BATCH_VBO_ELEMENT_SIZE);
-	} else {
-		// Set sub data avoids reallocating the buffer
-		vertex_buffer_set_sub_data(batch_renderer.basic_vbo, slice32_get_data(batch_renderer.basic_vbo_data), batch_renderer.basic_nverts * BATCH_VBO_ELEMENT_SIZE, 0);
-	}
+	// Set sub data avoids reallocating the buffer
+	vertex_buffer_set_sub_data(batch_renderer.basic_vbo, batch->vbo_data, batch->nverts * BATCH_VBO_ELEMENT_SIZE, 0);
+
 	const VertexBuffer *buffers[1] = { batch_renderer.basic_vbo };
 	vertex_array_set_vertex_buffers(batch_renderer.basic_vao, buffers, 1);
 
-	vertex_array_bind(batch_renderer.vao);
-	if (batch_renderer.nverts * BATCH_VBO_ELEMENT_SIZE > batch_renderer.vbo_size) {
-		vertex_buffer_set_data(batch_renderer.vbo, slice32_get_data(batch_renderer.vbo_data), batch_renderer.nverts * BATCH_VBO_ELEMENT_SIZE);
-	} else {
-		// Set sub data avoids reallocating the buffer
-		vertex_buffer_set_sub_data(batch_renderer.vbo, slice32_get_data(batch_renderer.vbo_data), batch_renderer.nverts * BATCH_VBO_ELEMENT_SIZE, 0);
-	}
-
-	if (batch_renderer.nindices * sizeof(uint32) > batch_renderer.ibo_size) {
-		index_buffer_set_data(batch_renderer.ibo, slice32_get_data(batch_renderer.ibo_data), batch_renderer.nindices * sizeof(uint32));
-	} else {
-		index_buffer_set_sub_data(batch_renderer.ibo, slice32_get_data(batch_renderer.ibo_data), batch_renderer.nindices * sizeof(uint32), 0);
-	}
-
-	const VertexBuffer *buffers2[1] = { batch_renderer.vbo };
-	vertex_array_set_vertex_buffers(batch_renderer.vao, buffers2, 1);
-	vertex_array_set_index_buffer(batch_renderer.vao, batch_renderer.ibo);
-}
-
-void batch_renderer_flush() {
-	for (size_t i = 0; i < batch_renderer.basic_texture_count; i++) {
-		texture_bind(batch_renderer.basic_textures[i], i);
-	}
-
-	shader_bind(batch_renderer.shader);
-
 	vertex_array_draw(batch_renderer.basic_vao);
-	batch_renderer.basic_nverts = 0;
 
-	slice32_clear(batch_renderer.basic_vbo_data);
+	batch->nverts = 0;
 
-	// Clear the textures
-	for (size_t i = 0; i < batch_renderer.basic_texture_count; i++) {
-		texture_unbind(batch_renderer.basic_textures[i]);
-	}
+	shader_unbind(batch->shader);
+	texture_unbind(batch->texture);
+}
 
-	batch_renderer.basic_texture_count = 0;
+void batch_renderer_end_frame() {
+	for (size_t i = 0; i < batch_renderer.nbatches; i++) {
+		Batch *batch = (Batch *)slice_get(batch_renderer.batches, i).ptr;
 
-	for (size_t i = 0; i < batch_renderer.texture_count; i++) {
-		texture_bind(batch_renderer.textures[i], i);
-	}
-
-	shader_bind(batch_renderer.shader);
-
-	vertex_array_draw_elements(batch_renderer.vao);
-	batch_renderer.nverts = 0;
-	batch_renderer.nindices = 0;
-
-	slice32_clear(batch_renderer.vbo_data);
-	slice32_clear(batch_renderer.ibo_data);
-
-	// Clear the textures
-	for (size_t i = 0; i < batch_renderer.texture_count; i++) {
-		texture_unbind(batch_renderer.textures[i]);
+		if (batch->use_indices) {
+			batch_render(batch);
+		} else {
+			batch_render_no_indices(batch);
+		}
 	}
 }
 
-void batch_renderer_draw_basic(const Texture *texture, const float32 *vertices, const float32 *tex_coords, Color color, size_t nverts) {
-	int32 tex_id = -1;
-	for (size_t i = 0; i < batch_renderer.basic_texture_count; i++) {
-		if (batch_renderer.basic_textures[i] == texture) {
-			tex_id = i;
+void batch_renderer_draw(const Shader *shader, const Texture *texture, const float32 *vertices, const float32 *tex_coords, const uint32 *indices, Color color, size_t nverts, size_t nindices) {
+	LS_ASSERT(nverts * BATCH_VBO_ELEMENT_SIZE < VBO_MAX_SIZE);
+	const Shader *use_shader = shader ? shader : batch_renderer.shader;
+
+	Batch *batch = NULL;
+
+	bool use_indices = nindices > 0;
+	for (size_t i = 0; i < slice_get_size(batch_renderer.batches); i++) {
+		Batch *f_batch = (Batch *)slice_get(batch_renderer.batches, i).ptr;
+		if (f_batch->texture == texture && f_batch->shader == use_shader && f_batch->use_indices == use_indices) {
+			if (f_batch->nverts == 0) {
+				batch_renderer.nbatches++;
+			} else if (f_batch->nverts + nverts > VBO_MAX_SIZE) {
+				continue;
+			}
+			batch = f_batch;
 			break;
 		}
 	}
 
-	if (tex_id == -1) {
-		if (batch_renderer.basic_texture_count >= 16) {
-			LS_ASSERT_MSG(false, "%s", "Batch renderer only supports 16 textures. Implement batching by texture you dummy.");
-			return;
-		}
+	if (!batch) {
+		batch = ls_malloc(sizeof(Batch));
+		batch->texture = texture;
+		batch->shader = use_shader;
+		batch->nverts = 0;
+		batch->nindices = 0;
+		batch->use_indices = use_indices;
 
-		tex_id = batch_renderer.basic_texture_count;
-		batch_renderer.basic_textures[batch_renderer.basic_texture_count] = texture;
-		batch_renderer.basic_texture_count++;
+		slice_append(batch_renderer.batches, SLICE_VAL(ptr, batch));
+		batch_renderer.nbatches++;
 	}
 
 	for (size_t i = 0; i < nverts; i++) {
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, vertices[i * 3]));
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, vertices[i * 3 + 1]));
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, vertices[i * 3 + 2]));
+		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 0] = vertices[i * 3 + 0];
+		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 1] = vertices[i * 3 + 1];
+		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 2] = vertices[i * 3 + 2];
 
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, tex_id));
+		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 3] = tex_coords[i * 2 + 0];
+		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 4] = tex_coords[i * 2 + 1];
 
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, tex_coords[i * 2]));
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, tex_coords[i * 2 + 1]));
-
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, color.r));
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, color.g));
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, color.b));
-		slice32_append(batch_renderer.basic_vbo_data, SLICE_VAL32(f32, color.a));
+		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 5] = color.r;
+		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 6] = color.g;
+		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 7] = color.b;
+		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 8] = color.a;
 	}
+	batch->nverts += nverts;
 
-	batch_renderer.basic_nverts += nverts;
-}
-
-void batch_renderer_draw(const Texture *texture, const float32 *vertices, const float32 *tex_coords, const uint32 *indices, Color color, size_t nverts, size_t nindices) {
-	int32 tex_id = -1;
-	for (size_t i = 0; i < batch_renderer.texture_count; i++) {
-		if (batch_renderer.textures[i] == texture) {
-			tex_id = i;
-			break;
-		}
-	}
-
-	if (tex_id == -1) {
-		if (batch_renderer.texture_count >= 16) {
-			LS_ASSERT_MSG(false, "%s", "Batch renderer only supports 16 textures. Implement batching by texture you dummy.");
-			return;
-		}
-
-		tex_id = batch_renderer.texture_count;
-		batch_renderer.textures[batch_renderer.texture_count] = texture;
-		batch_renderer.texture_count++;
-	}
-
-	for (size_t i = 0; i < nverts; i++) {
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, vertices[i * 3]));
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, vertices[i * 3 + 1]));
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, vertices[i * 3 + 2]));
-
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, tex_id));
-
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, tex_coords[i * 2]));
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, tex_coords[i * 2 + 1]));
-
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, color.r));
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, color.g));
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, color.b));
-		slice32_append(batch_renderer.vbo_data, SLICE_VAL32(f32, color.a));
+	if (!use_indices) {
+		return;
 	}
 
 	for (size_t i = 0; i < nindices; i++) {
-		slice32_append(batch_renderer.ibo_data, SLICE_VAL32(u32, indices[i]));
+		batch->ibo_data[batch->nindices + i] = indices[i];
 	}
-
-	batch_renderer.nverts += nverts;
-	batch_renderer.nindices += nindices;
+	batch->nindices += nindices;
 }

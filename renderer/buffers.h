@@ -127,7 +127,7 @@ LS_EXPORT void index_buffer_destroy(IndexBuffer *index_buffer);
 
 LS_EXPORT void index_buffer_bind(const IndexBuffer *index_buffer);
 LS_EXPORT void index_buffer_unbind(const IndexBuffer *index_buffer);
-LS_EXPORT void index_buffer_set_data(const IndexBuffer *index_buffer, const void *data, uint32 size);
-LS_EXPORT void index_buffer_set_sub_data(const IndexBuffer *index_buffer, const void *data, uint32 size, uint32 offset);
+LS_EXPORT void index_buffer_set_data(IndexBuffer *index_buffer, const void *data, uint32 size);
+LS_EXPORT void index_buffer_set_sub_data(IndexBuffer *index_buffer, const void *data, uint32 size, uint32 offset);
 LS_EXPORT uint32 index_buffer_get_count(const IndexBuffer *index_buffer);
 #endif // BUFFERS_H

@@ -28,8 +28,8 @@ OpenGLIndexBuffer *opengl_index_buffer_create_empty(BufferUsage usage);
 OpenGLIndexBuffer *opengl_index_buffer_create(const void *data, uint32 size, BufferUsage usage);
 void opengl_index_buffer_destroy(OpenGLIndexBuffer *index_buffer);
 
-void opengl_index_buffer_set_data(const OpenGLIndexBuffer *index_buffer, const void *data, uint32 size);
-void opengl_index_buffer_set_sub_data(const OpenGLIndexBuffer *index_buffer, const void *data, uint32 size, uint32 offset);
+void opengl_index_buffer_set_data(OpenGLIndexBuffer *index_buffer, const void *data, uint32 size);
+void opengl_index_buffer_set_sub_data(OpenGLIndexBuffer *index_buffer, const void *data, uint32 size, uint32 offset);
 
 void opengl_index_buffer_bind(const OpenGLIndexBuffer *index_buffer);
 void opengl_index_buffer_unbind(const OpenGLIndexBuffer *index_buffer);

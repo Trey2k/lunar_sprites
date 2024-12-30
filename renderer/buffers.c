@@ -288,11 +288,11 @@ void index_buffer_unbind(const IndexBuffer *index_buffer) {
 	INDEX_BUFFER_CALL(index_buffer, unbind);
 }
 
-void index_buffer_set_data(const IndexBuffer *index_buffer, const void *data, uint32 size) {
+void index_buffer_set_data(IndexBuffer *index_buffer, const void *data, uint32 size) {
 	INDEX_BUFFER_CALL(index_buffer, set_data, data, size);
 }
 
-void index_buffer_set_sub_data(const IndexBuffer *index_buffer, const void *data, uint32 size, uint32 offset) {
+void index_buffer_set_sub_data(IndexBuffer *index_buffer, const void *data, uint32 size, uint32 offset) {
 	INDEX_BUFFER_CALL(index_buffer, set_sub_data, data, size, offset);
 }
 
