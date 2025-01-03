@@ -22,6 +22,17 @@ void ui_element_destroy(UIElement *element) {
 	}
 }
 
+void ui_element_set_anchor(UIElement *element, uint32 anchors) {
+	switch (element->type) {
+		case UI_ELEMENT_TYPE_LABEL:
+			element->label.anchors = anchors;
+			break;
+		default:
+			ls_log_fatal("Unknown element type: %d\n", element->type);
+			break;
+	}
+}
+
 const UIElementTheme *ui_element_get_theme(const UIElement *element) {
 	switch (element->type) {
 		case UI_ELEMENT_TYPE_LABEL:

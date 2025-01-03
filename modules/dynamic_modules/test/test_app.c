@@ -21,21 +21,7 @@ typedef struct {
 	Font *font;
 
 	char *fps_text;
-
-	uint32 to_add;
-	uint32 b_to_add;
 } TestApplication;
-
-static UIElementTheme DEFAULT_THEME = {
-	.background_color = COLOR_DARK_GREY,
-	.border_color = COLOR_LIGHT_GREY,
-	.radius = 0,
-	.border_size = 0,
-	.font_color = COLOR_WHITE,
-	.font_size = 64,
-	.font = NULL,
-	.texture = NULL,
-};
 
 static void check_input(TestApplication *test_application);
 static void input_handler(Event *event, void *user_data);
@@ -72,9 +58,6 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 
 	test_application->fps_text = ls_str_format("FPS: %f", 0.0);
 
-	test_application->to_add = 1;
-	test_application->b_to_add = 1;
-
 	return test_application->root_window;
 }
 
@@ -87,11 +70,10 @@ void test_app_start(void *user_data) {
 	renderer_set_clear_color(test_application->renderer, 0.0, 0.0, 0.0, 1.0);
 
 	test_application->font = font_create("default.ttf");
-	DEFAULT_THEME.font = test_application->font;
 
 	LS_ASSERT(test_application->font);
 
-	test_application->label = ui_label_create(&DEFAULT_THEME, "Hello, World!", vec2u(0, 0));
+	test_application->label = ui_label_create(test_application->font, "Hello, World!", vec2u(0, 0));
 
 	ui_add_element(test_application->label);
 
@@ -116,20 +98,6 @@ void test_app_deinit(void *user_data) {
 
 void test_app_update(float64 delta_time, void *user_data) {
 	TestApplication *test_application = user_data;
-
-	if (DEFAULT_THEME.radius >= 50) {
-		test_application->to_add = -1;
-	} else if (DEFAULT_THEME.radius <= 0) {
-		test_application->to_add = 1;
-	}
-
-	if (DEFAULT_THEME.border_size >= 10) {
-		test_application->b_to_add = -1;
-	} else if (DEFAULT_THEME.border_size <= 0) {
-		test_application->b_to_add = 1;
-	}
-
-	DEFAULT_THEME.radius += test_application->to_add;
 
 	float32 rotation = sprite_get_rotation(test_application->sprite);
 	rotation += 0.01 * delta_time;
@@ -159,8 +127,7 @@ void test_app_update(float64 delta_time, void *user_data) {
 
 	sprite_draw(test_application->sprite);
 
-	if (test_application->timer > 0.25) {
-		DEFAULT_THEME.border_size += test_application->b_to_add;
+	if (test_application->timer > 1.0) {
 		ls_printf("FPS: %f\n", 1.0 / delta_time);
 		ls_free(test_application->fps_text);
 		test_application->fps_text = ls_str_format("FPS: %f", 1.0 / delta_time);

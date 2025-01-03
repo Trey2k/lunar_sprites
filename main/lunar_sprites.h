@@ -17,8 +17,8 @@ bool ls_should_stop();
 LS_EXPORT void ls_set_application_interface(ApplicationInterface application_interface);
 
 // Registers a callback to be called every frame.
-// The call occures at the start of the frame, unless end_of_frame is true.
-// When end_of_frame is true the call occures at the end of the frame.
+// The call occurs at the start of the frame, unless end_of_frame is true.
+// When end_of_frame is true the call occurs at the end of the frame.
 LS_EXPORT void ls_register_update_callback(OnUpdateCallback callback, bool end_of_frame);
 
 // Does not call exit() directly, but instead completes deinitialization and returns the exit code from the entry point.

@@ -10,9 +10,12 @@
 typedef struct {
 	char *text;
 	char buffer[UI_LABEL_BUFFER_SIZE];
-	const UIElementTheme *theme;
+	UIElementTheme *theme;
 
 	Vector2u position;
+	Vector2u min_size;
+	uint32 padding;
+	uint32 anchors;
 	// Is calculated when the label is drawn
 	Vector2u size;
 } UILabel;
