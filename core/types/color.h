@@ -82,6 +82,72 @@ typedef struct Color {
 #define COLOR_TURQUOISE \
 	(Color) { .r = 0.25f, .g = 0.88f, .b = 0.82f, .a = 1.0f }
 
+#define COLOR_LIGHT_RED \
+	(Color) { .r = 1.0f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
+
+#define COLOR_LIGHT_GREEN \
+	(Color) { .r = 0.5f, .g = 1.0f, .b = 0.5f, .a = 1.0f }
+
+#define COLOR_LIGHT_BLUE \
+	(Color) { .r = 0.5f, .g = 0.5f, .b = 1.0f, .a = 1.0f }
+
+#define COLOR_LIGHT_YELLOW \
+	(Color) { .r = 1.0f, .g = 1.0f, .b = 0.5f, .a = 1.0f }
+
+#define COLOR_LIGHT_CYAN \
+	(Color) { .r = 0.5f, .g = 1.0f, .b = 1.0f, .a = 1.0f }
+
+#define COLOR_LIGHT_MAGENTA \
+	(Color) { .r = 1.0f, .g = 0.5f, .b = 1.0f, .a = 1.0f }
+
+#define COLOR_LIGHT_GREY \
+	(Color) { .r = 0.75f, .g = 0.75f, .b = 0.75f, .a = 1.0f }
+
+#define COLOR_LIGHT_PINK \
+	(Color) { .r = 1.0f, .g = 0.5f, .b = 0.75f, .a = 1.0f }
+
+#define COLOR_LIGHT_ORANGE \
+	(Color) { .r = 1.0f, .g = 0.75f, .b = 0.5f, .a = 1.0f }
+
+#define COLOR_LIGHT_PURPLE \
+	(Color) { .r = 0.75f, .g = 0.5f, .b = 1.0f, .a = 1.0f }
+
+#define COLOR_LIGHT_BROWN \
+	(Color) { .r = 0.75f, .g = 0.5f, .b = 0.25f, .a = 1.0f }
+
+#define COLOR_DARK_RED \
+	(Color) { .r = 0.5f, .g = 0.0f, .b = 0.0f, .a = 1.0f }
+
+#define COLOR_DARK_GREEN \
+	(Color) { .r = 0.0f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
+
+#define COLOR_DARK_BLUE \
+	(Color) { .r = 0.0f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
+
+#define COLOR_DARK_YELLOW \
+	(Color) { .r = 0.5f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
+
+#define COLOR_DARK_CYAN \
+	(Color) { .r = 0.0f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
+
+#define COLOR_DARK_MAGENTA \
+	(Color) { .r = 0.5f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
+
+#define COLOR_DARK_GREY \
+	(Color) { .r = 0.25f, .g = 0.25f, .b = 0.25f, .a = 1.0f }
+
+#define COLOR_DARK_PINK \
+	(Color) { .r = 0.5f, .g = 0.0f, .b = 0.25f, .a = 1.0f }
+
+#define COLOR_DARK_ORANGE \
+	(Color) { .r = 0.5f, .g = 0.25f, .b = 0.0f, .a = 1.0f }
+
+#define COLOR_DARK_PURPLE \
+	(Color) { .r = 0.25f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
+
+#define COLOR_DARK_BROWN \
+	(Color) { .r = 0.25f, .g = 0.125f, .b = 0.0f, .a = 1.0f }
+
 // Creates a color from RGBA values.
 _FORCE_INLINE_ Color color_create(float32 r, float32 g, float32 b, float32 a) {
 	return (Color){ .r = r, .g = g, .b = b, .a = a };

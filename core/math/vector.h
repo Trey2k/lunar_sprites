@@ -22,6 +22,14 @@ typedef union {
 
 typedef union {
 	struct {
+		uint32 x;
+		uint32 y;
+	};
+	uint32 vec[2];
+} Vector2u;
+
+typedef union {
+	struct {
 		float32 x;
 		float32 y;
 		float32 z;
@@ -38,10 +46,21 @@ typedef union {
 	int32 vec[3];
 } Vector3i;
 
+typedef union {
+	struct {
+		uint32 x;
+		uint32 y;
+		uint32 z;
+	};
+	uint32 vec[3];
+} Vector3u;
+
 #define vec2(x, y) ((Vector2){ { x, y } })
 #define vec2i(x, y) ((Vector2i){ { x, y } })
+#define vec2u(x, y) ((Vector2u){ { x, y } })
 #define vec3(x, y, z) ((Vector3){ { x, y, z } })
 #define vec3i(x, y, z) ((Vector3i){ { x, y, z } })
+#define vec3u(x, y, z) ((Vector3u){ { x, y, z } })
 
 #define VEC2_UP vec2(0.0f, 1.0f)
 #define VEC2_DOWN vec2(0.0f, -1.0f)
@@ -79,6 +98,14 @@ LS_EXPORT Vector2i vec2i_mul(Vector2i a, Vector2i b);
 LS_EXPORT Vector2i vec2i_div(Vector2i a, Vector2i b);
 LS_EXPORT Vector2i vec2i_negate(Vector2i a);
 
+LS_EXPORT bool vec2u_equals(Vector2u a, Vector2u b);
+LS_EXPORT void vec2u_copy(Vector2u *dest, Vector2u src);
+LS_EXPORT Vector2u vec2u_add(Vector2u a, Vector2u b);
+LS_EXPORT Vector2u vec2u_sub(Vector2u a, Vector2u b);
+LS_EXPORT Vector2u vec2u_mul(Vector2u a, Vector2u b);
+LS_EXPORT Vector2u vec2u_div(Vector2u a, Vector2u b);
+LS_EXPORT Vector2u vec2u_negate(Vector2u a);
+
 LS_EXPORT bool vec3_equals(Vector3 a, Vector3 b);
 LS_EXPORT void vec3_copy(Vector3 *dest, Vector3 src);
 LS_EXPORT Vector3 vec3_add(Vector3 a, Vector3 b);
@@ -94,5 +121,13 @@ LS_EXPORT Vector3i vec3i_sub(Vector3i a, Vector3i b);
 LS_EXPORT Vector3i vec3i_mul(Vector3i a, Vector3i b);
 LS_EXPORT Vector3i vec3i_div(Vector3i a, Vector3i b);
 LS_EXPORT Vector3i vec3i_negate(Vector3i a);
+
+LS_EXPORT bool vec3u_equals(Vector3u a, Vector3u b);
+LS_EXPORT void vec3u_copy(Vector3u *dest, Vector3u src);
+LS_EXPORT Vector3u vec3u_add(Vector3u a, Vector3u b);
+LS_EXPORT Vector3u vec3u_sub(Vector3u a, Vector3u b);
+LS_EXPORT Vector3u vec3u_mul(Vector3u a, Vector3u b);
+LS_EXPORT Vector3u vec3u_div(Vector3u a, Vector3u b);
+LS_EXPORT Vector3u vec3u_negate(Vector3u a);
 
 #endif // VECTOR_H

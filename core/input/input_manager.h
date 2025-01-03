@@ -28,7 +28,7 @@ void input_handle_mouse_release(InputManager *input_manager, LSMouseButton butto
 void input_handle_mouse_move(InputManager *input_manager, Vector2i position);
 void input_handle_mouse_enter(InputManager *input_manager, Vector2i position);
 void input_handle_mouse_leave(InputManager *input_manager, Vector2i position);
-void input_handle_resize(InputManager *input_manager, Vector2i size);
+void input_handle_resize(InputManager *input_manager, Vector2u size);
 
 bool input_is_ready(const InputManager *input_manager);
 

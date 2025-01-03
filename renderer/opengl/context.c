@@ -3,6 +3,7 @@
 #include "core/core.h"
 
 #include "renderer/opengl/debug.h"
+#include <GL/gl.h>
 
 #if defined(EGL_ENABLED)
 #include "renderer/opengl/egl/context.h"
@@ -48,7 +49,7 @@ static void opengl_context_event_handler(Event *event, void *user_data) {
 				return;
 			}
 
-			Vector2i size = event->window.size;
+			Vector2u size = event->window.size;
 			GL_CALL(glViewport(0, 0, size.x, size.y));
 		} break;
 
@@ -61,7 +62,7 @@ static void opengl_init(OpenGLContext *context, const LSCore *core, const LSWind
 	GL_CALL(glEnable(GL_BLEND));
 	GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-	Vector2i size = window_get_size(window);
+	Vector2u size = window_get_size(window);
 	GL_CALL(glViewport(0, 0, size.x, size.y));
 	EventManager *event_manager = core_get_event_manager(core);
 	event_manager_add_handler(event_manager, opengl_context_event_handler, context);

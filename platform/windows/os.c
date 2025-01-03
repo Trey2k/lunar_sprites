@@ -133,7 +133,7 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 		case WM_SIZE: {
 			input_set_active_window(window->input_manager, window->parent);
 
-			input_handle_resize(window->input_manager, vec2i(LOWORD(l_param), HIWORD(l_param)));
+			input_handle_resize(window->input_manager, vec2u(LOWORD(l_param), HIWORD(l_param)));
 
 			input_set_active_window(window->input_manager, NULL);
 			return 0;

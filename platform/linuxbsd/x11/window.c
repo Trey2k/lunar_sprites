@@ -75,13 +75,13 @@ void x11_window_set_size(X11Window *window, int32 width, int32 height) {
 	XResizeWindow(window->display, window->window, width, height);
 }
 
-Vector2i x11_window_get_size(const X11Window *window) {
+Vector2u x11_window_get_size(const X11Window *window) {
 	LS_ASSERT(window);
 
 	XWindowAttributes attributes;
 	XGetWindowAttributes(window->display, window->window, &attributes);
 
-	return vec2i(attributes.width, attributes.height);
+	return vec2u(attributes.width, attributes.height);
 }
 
 static void handle_event(X11Window *window, XEvent *event) {
@@ -133,7 +133,7 @@ static void handle_event(X11Window *window, XEvent *event) {
 					(xce.width > 0 && xce.height > 0)) {
 				window->width = xce.width;
 				window->height = xce.height;
-				input_handle_resize(window->input_manager, vec2i(window->width, window->height));
+				input_handle_resize(window->input_manager, vec2u(window->width, window->height));
 			}
 
 		} break;

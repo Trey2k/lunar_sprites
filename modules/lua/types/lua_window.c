@@ -39,9 +39,9 @@ static int lua_window_set_size(lua_State *L) {
 static int lua_window_get_size(lua_State *L) {
 	LSWindow *window = lua_check_window(L, 1);
 
-	Vector2i size = window_get_size(window);
+	Vector2u size = window_get_size(window);
 
-	lua_push_vector2i(L, size);
+	lua_push_vector2u(L, size);
 
 	return 1;
 }

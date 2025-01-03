@@ -101,7 +101,7 @@ void renderer_set_active_window(Renderer *renderer, const LSWindow *window) {
 	renderer->active_window = window;
 }
 
-Vector2i renderer_get_viewport_size(const Renderer *renderer) {
+Vector2u renderer_get_viewport_size(const Renderer *renderer) {
 	return window_get_size(renderer->active_window);
 }
 

@@ -33,7 +33,7 @@ LS_EXPORT void renderer_clear(const Renderer *renderer);
 // Returns the backend used by the renderer.
 LS_EXPORT RendererBackend renderer_get_backend(const Renderer *renderer);
 
-LS_EXPORT Vector2i renderer_get_viewport_size(const Renderer *renderer);
+LS_EXPORT Vector2u renderer_get_viewport_size(const Renderer *renderer);
 
 _FORCE_INLINE_ String renderer_backend_to_string(RendererBackend backend) {
 	switch (backend) {

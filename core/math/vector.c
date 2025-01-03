@@ -58,6 +58,35 @@ Vector2i vec2i_negate(Vector2i a) {
 	return vec2i(-a.x, -a.y);
 }
 
+bool vec2u_equals(Vector2u a, Vector2u b) {
+	return a.x == b.x && a.y == b.y;
+}
+
+void vec2u_copy(Vector2u *dest, Vector2u src) {
+	dest->x = src.x;
+	dest->y = src.y;
+}
+
+Vector2u vec2u_add(Vector2u a, Vector2u b) {
+	return vec2u(a.x + b.x, a.y + b.y);
+}
+
+Vector2u vec2u_sub(Vector2u a, Vector2u b) {
+	return vec2u(a.x - b.x, a.y - b.y);
+}
+
+Vector2u vec2u_mul(Vector2u a, Vector2u b) {
+	return vec2u(a.x * b.x, a.y * b.y);
+}
+
+Vector2u vec2u_div(Vector2u a, Vector2u b) {
+	return vec2u(a.x / b.x, a.y / b.y);
+}
+
+Vector2u vec2u_negate(Vector2u a) {
+	return vec2u(-a.x, -a.y);
+}
+
 bool vec3_equals(Vector3 a, Vector3 b) {
 	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
@@ -116,4 +145,34 @@ Vector3i vec3i_div(Vector3i a, Vector3i b) {
 
 Vector3i vec3i_negate(Vector3i a) {
 	return vec3i(-a.x, -a.y, -a.z);
+}
+
+bool vec3u_equals(Vector3u a, Vector3u b) {
+	return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
+void vec3u_copy(Vector3u *dest, Vector3u src) {
+	dest->x = src.x;
+	dest->y = src.y;
+	dest->z = src.z;
+}
+
+Vector3u vec3u_add(Vector3u a, Vector3u b) {
+	return vec3u(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+Vector3u vec3u_sub(Vector3u a, Vector3u b) {
+	return vec3u(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+Vector3u vec3u_mul(Vector3u a, Vector3u b) {
+	return vec3u(a.x * b.x, a.y * b.y, a.z * b.z);
+}
+
+Vector3u vec3u_div(Vector3u a, Vector3u b) {
+	return vec3u(a.x / b.x, a.y / b.y, a.z / b.z);
+}
+
+Vector3u vec3u_negate(Vector3u a) {
+	return vec3u(-a.x, -a.y, -a.z);
 }

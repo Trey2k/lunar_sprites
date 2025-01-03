@@ -18,9 +18,13 @@ env_thirdparty.disable_warnings()
 env_thirdparty.add_source_files(thirdparty_obj, thirdparty_sources)
 env.modules_sources += thirdparty_obj
 
+env.make_shader_source("modules/ui/shaders/ui.shader", "UI_SHADER_SOURCE", "modules/ui/ui_shader.gen.c")
+
 module_obj = []
 
 env_ui.add_source_files(module_obj, "*.c")
+env_ui.add_source_files(module_obj, "elements/*.c")
+env_ui.add_source_files(module_obj, "ui_shader.gen.c")
 env.modules_sources += module_obj
 
 env.Depends(module_obj, thirdparty_obj)

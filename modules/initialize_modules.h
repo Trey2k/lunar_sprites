@@ -12,6 +12,8 @@ typedef enum {
 	MODULE_INITIALIZATION_LEVEL_FLAGS,
 	// MODULE_INITIALIZATION_LEVEL_MAIN is triggered after main initialization. p_arg is NULL.
 	MODULE_INITIALIZATION_LEVEL_MAIN,
+	// MODULE_INITIALIZATION_LEVEL_APPLICATION is triggered after the application interface has been initialized. p_arg is a pointer to the root window.
+	MODULE_INITIALIZATION_LEVEL_APPLICATION,
 } ModuleInitializationLevel;
 
 void initialize_modules(ModuleInitializationLevel p_level, void *p_arg);

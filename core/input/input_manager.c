@@ -123,7 +123,7 @@ void input_handle_release(InputManager *input_manager, LSKeycode keycode) {
 	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_resize(InputManager *input_manager, Vector2i size) {
+void input_handle_resize(InputManager *input_manager, Vector2u size) {
 	LS_ASSERT(input_manager->active_window);
 
 	Event e;

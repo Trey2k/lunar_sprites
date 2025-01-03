@@ -150,7 +150,7 @@ void batch_renderer_draw(const Shader *shader, const Texture *texture, const flo
 		if (f_batch->texture == texture && f_batch->shader == use_shader && f_batch->use_indices == use_indices) {
 			if (f_batch->nverts == 0) {
 				batch_renderer.nbatches++;
-			} else if (f_batch->nverts + nverts > VBO_MAX_SIZE) {
+			} else if ((f_batch->nverts + nverts) * BATCH_VBO_ELEMENT_SIZE > VBO_MAX_SIZE) {
 				continue;
 			}
 			batch = f_batch;
@@ -183,14 +183,14 @@ void batch_renderer_draw(const Shader *shader, const Texture *texture, const flo
 		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 7] = color.b;
 		batch->vbo_data[((batch->nverts + i) * BATCH_VBO_ROW_SIZE) + 8] = color.a;
 	}
-	batch->nverts += nverts;
-
 	if (!use_indices) {
+		batch->nverts += nverts;
 		return;
 	}
 
 	for (size_t i = 0; i < nindices; i++) {
-		batch->ibo_data[batch->nindices + i] = indices[i];
+		batch->ibo_data[batch->nindices + i] = indices[i] + batch->nverts;
 	}
+	batch->nverts += nverts;
 	batch->nindices += nindices;
 }

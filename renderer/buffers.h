@@ -93,8 +93,8 @@ _FORCE_INLINE_ uint32 shader_data_type_get_component_count(ShaderDataType type) 
 typedef struct {
 	ShaderDataType type;
 	String name;
-	uint32 offset;
 	bool normalized;
+	uint32 offset;
 } BufferElement;
 
 typedef struct BufferLayout BufferLayout;

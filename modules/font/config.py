@@ -6,6 +6,6 @@ def can_build(env, platform):
 
 def configure(env):
     env.api_headers += [
-        "modules/font_renderer/font_renderer.h",
+        "modules/font/font.h",
     ]
-    print("Configuring font_renderer")
+

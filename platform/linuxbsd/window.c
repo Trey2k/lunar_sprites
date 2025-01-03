@@ -144,7 +144,7 @@ void platform_window_set_size(PlatformWindow *window, int32 width, int32 height)
 	};
 }
 
-Vector2i platform_window_get_size(const PlatformWindow *window) {
+Vector2u platform_window_get_size(const PlatformWindow *window) {
 	switch (window->display_server) {
 #if defined(X11_ENABLED)
 		case DISPLAY_SERVER_X11: {
@@ -154,7 +154,7 @@ Vector2i platform_window_get_size(const PlatformWindow *window) {
 
 		default:
 			ls_log_fatal("Unknown display server: %d\n", window->display_server);
-			return vec2i(0, 0);
+			return vec2u(0, 0);
 	};
 }
 

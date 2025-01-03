@@ -272,6 +272,140 @@ Vector2i lua_to_vector2i(lua_State *L, int index) {
 	return *(Vector2i *)lua_touserdata(L, index);
 }
 
+static int lua_vector2u_eq(lua_State *L) {
+	Vector2u *v1 = luaL_checkudata(L, 1, "MT_VECTOR2U");
+	Vector2u *v2 = luaL_checkudata(L, 2, "MT_VECTOR2U");
+	lua_pushboolean(L, vec2u_equals(*v1, *v2));
+	return 1;
+}
+
+static int lua_vector2u_add(lua_State *L) {
+	Vector2u *v1 = luaL_checkudata(L, 1, "MT_VECTOR2U");
+	Vector2u *v2 = luaL_checkudata(L, 2, "MT_VECTOR2U");
+	Vector2u *v3 = lua_newuserdata(L, sizeof(Vector2u));
+	*v3 = vec2u_add(*v1, *v2);
+	luaL_setmetatable(L, "MT_VECTOR2U");
+	return 1;
+}
+
+static int lua_vector2u_sub(lua_State *L) {
+	Vector2u *v1 = luaL_checkudata(L, 1, "MT_VECTOR2U");
+	Vector2u *v2 = luaL_checkudata(L, 2, "MT_VECTOR2U");
+	Vector2u *v3 = lua_newuserdata(L, sizeof(Vector2u));
+	*v3 = vec2u_sub(*v1, *v2);
+	luaL_setmetatable(L, "MT_VECTOR2U");
+	return 1;
+}
+
+static int lua_vector2u_mul(lua_State *L) {
+	Vector2u *v1 = luaL_checkudata(L, 1, "MT_VECTOR2U");
+	Vector2u *v2 = luaL_checkudata(L, 2, "MT_VECTOR2U");
+	Vector2u *v3 = lua_newuserdata(L, sizeof(Vector2u));
+	*v3 = vec2u_mul(*v1, *v2);
+	luaL_setmetatable(L, "MT_VECTOR2U");
+	return 1;
+}
+
+static int lua_vector2u_div(lua_State *L) {
+	Vector2u *v1 = luaL_checkudata(L, 1, "MT_VECTOR2U");
+	Vector2u *v2 = luaL_checkudata(L, 2, "MT_VECTOR2U");
+	Vector2u *v3 = lua_newuserdata(L, sizeof(Vector2u));
+	*v3 = vec2u_div(*v1, *v2);
+	luaL_setmetatable(L, "MT_VECTOR2U");
+	return 1;
+}
+
+static int lua_vector2u_tostring(lua_State *L) {
+	Vector2u *v = luaL_checkudata(L, 1, "MT_VECTOR2U");
+	lua_pushfstring(L, "Vector2u(%u, %u)", v->x, v->y);
+	return 1;
+}
+
+static int lua_vecto2u_index(lua_State *L) {
+	Vector2u *v = luaL_checkudata(L, 1, "MT_VECTOR2U");
+	const char *key = luaL_checkstring(L, 2);
+	if (ls_str_equals(key, "x") == 0) {
+		lua_pushinteger(L, v->x);
+	} else if (ls_str_equals(key, "y") == 0) {
+		lua_pushinteger(L, v->y);
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+static int lua_vector2u_newindex(lua_State *L) {
+	Vector2u *v = luaL_checkudata(L, 1, "MT_VECTOR2U");
+	const char *key = luaL_checkstring(L, 2);
+	if (ls_str_equals(key, "x") == 0) {
+		v->x = luaL_checkinteger(L, 3);
+	} else if (ls_str_equals(key, "y") == 0) {
+		v->y = luaL_checkinteger(L, 3);
+	}
+	return 0;
+}
+
+static const luaL_Reg vector2u_meta_methods[] = {
+	{ "__eq", lua_vector2u_eq },
+	{ "__add", lua_vector2u_add },
+	{ "__sub", lua_vector2u_sub },
+	{ "__mul", lua_vector2u_mul },
+	{ "__div", lua_vector2u_div },
+	{ "__tostring", lua_vector2u_tostring },
+	{ "__index", lua_vecto2u_index },
+	{ "__newindex", lua_vector2u_newindex },
+	{ NULL, NULL }
+};
+
+static int lua_new_vector2u(lua_State *L) {
+	Vector2u *v = lua_newuserdata(L, sizeof(Vector2u));
+	v->x = luaL_checkinteger(L, 1);
+	v->y = luaL_checkinteger(L, 2);
+	luaL_setmetatable(L, "MT_VECTOR2U");
+	return 1;
+}
+
+void lua_register_vector2u(lua_State *L) {
+	luaL_newmetatable(L, "MT_VECTOR2U");
+
+	luaL_setfuncs(L, vector2u_meta_methods, 0);
+	lua_pop(L, 1);
+
+	lua_pushcfunction(L, lua_new_vector2u);
+	lua_setglobal(L, "vec2u");
+}
+
+void lua_push_vector2u(lua_State *L, Vector2u v) {
+	Vector2u *vec = lua_newuserdata(L, sizeof(Vector2u));
+	*vec = v;
+	luaL_setmetatable(L, "MT_VECTOR2U");
+}
+
+bool lua_is_vector2u(lua_State *L, int index) {
+	if (!lua_isuserdata(L, index)) {
+		return 0;
+	}
+
+	if (lua_getmetatable(L, index)) {
+		lua_getfield(L, LUA_REGISTRYINDEX, "MT_VECTOR2U");
+		if (lua_rawequal(L, -1, -2)) {
+			lua_pop(L, 2);
+			return 1;
+		}
+		lua_pop(L, 2);
+	}
+
+	return 0;
+}
+
+Vector2u lua_check_vector2u(lua_State *L, int index) {
+	return *(Vector2u *)luaL_checkudata(L, index, "MT_VECTOR2U");
+}
+
+Vector2u lua_to_vector2u(lua_State *L, int index) {
+	return *(Vector2u *)lua_touserdata(L, index);
+}
+
 static int lua_vector3_eq(lua_State *L) {
 	Vector3 *v1 = luaL_checkudata(L, 1, "MT_VECTOR3");
 	Vector3 *v2 = luaL_checkudata(L, 2, "MT_VECTOR3");
@@ -548,4 +682,143 @@ Vector3i lua_check_vector3i(lua_State *L, int index) {
 
 Vector3i lua_to_vector3i(lua_State *L, int index) {
 	return *(Vector3i *)lua_touserdata(L, index);
+}
+
+static int lua_vector3u_eq(lua_State *L) {
+	Vector3u *v1 = luaL_checkudata(L, 1, "MT_VECTOR3U");
+	Vector3u *v2 = luaL_checkudata(L, 2, "MT_VECTOR3U");
+	lua_pushboolean(L, vec3u_equals(*v1, *v2));
+	return 1;
+}
+
+static int lua_vector3u_add(lua_State *L) {
+	Vector3u *v1 = luaL_checkudata(L, 1, "MT_VECTOR3U");
+	Vector3u *v2 = luaL_checkudata(L, 2, "MT_VECTOR3U");
+	Vector3u *v3 = lua_newuserdata(L, sizeof(Vector3u));
+	*v3 = vec3u_add(*v1, *v2);
+	luaL_setmetatable(L, "MT_VECTOR3U");
+	return 1;
+}
+
+static int lua_vector3u_sub(lua_State *L) {
+	Vector3u *v1 = luaL_checkudata(L, 1, "MT_VECTOR3U");
+	Vector3u *v2 = luaL_checkudata(L, 2, "MT_VECTOR3U");
+	Vector3u *v3 = lua_newuserdata(L, sizeof(Vector3u));
+	*v3 = vec3u_sub(*v1, *v2);
+	luaL_setmetatable(L, "MT_VECTOR3U");
+	return 1;
+}
+
+static int lua_vector3u_mul(lua_State *L) {
+	Vector3u *v1 = luaL_checkudata(L, 1, "MT_VECTOR3U");
+	Vector3u *v2 = luaL_checkudata(L, 2, "MT_VECTOR3U");
+	Vector3u *v3 = lua_newuserdata(L, sizeof(Vector3u));
+	*v3 = vec3u_mul(*v1, *v2);
+	luaL_setmetatable(L, "MT_VECTOR3U");
+	return 1;
+}
+
+static int lua_vector3u_div(lua_State *L) {
+	Vector3u *v1 = luaL_checkudata(L, 1, "MT_VECTOR3U");
+	Vector3u *v2 = luaL_checkudata(L, 2, "MT_VECTOR3U");
+	Vector3u *v3 = lua_newuserdata(L, sizeof(Vector3u));
+	*v3 = vec3u_div(*v1, *v2);
+	luaL_setmetatable(L, "MT_VECTOR3U");
+	return 1;
+}
+
+static int lua_vector3u_tostring(lua_State *L) {
+	Vector3u *v = luaL_checkudata(L, 1, "MT_VECTOR3U");
+	lua_pushfstring(L, "Vector3u(%u, %u, %u)", v->x, v->y, v->z);
+	return 1;
+}
+
+static int lua_vecto3u_index(lua_State *L) {
+	Vector3u *v = luaL_checkudata(L, 1, "MT_VECTOR3U");
+	const char *key = luaL_checkstring(L, 2);
+	if (ls_str_equals(key, "x") == 0) {
+		lua_pushinteger(L, v->x);
+	} else if (ls_str_equals(key, "y") == 0) {
+		lua_pushinteger(L, v->y);
+	} else if (ls_str_equals(key, "z") == 0) {
+		lua_pushinteger(L, v->z);
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+static int lua_vector3u_newindex(lua_State *L) {
+	Vector3u *v = luaL_checkudata(L, 1, "MT_VECTOR3U");
+	const char *key = luaL_checkstring(L, 2);
+	if (ls_str_equals(key, "x") == 0) {
+		v->x = luaL_checkinteger(L, 3);
+	} else if (ls_str_equals(key, "y") == 0) {
+		v->y = luaL_checkinteger(L, 3);
+	} else if (ls_str_equals(key, "z") == 0) {
+		v->z = luaL_checkinteger(L, 3);
+	}
+	return 0;
+}
+
+static const luaL_Reg vector3u_meta_methods[] = {
+	{ "__eq", lua_vector3u_eq },
+	{ "__add", lua_vector3u_add },
+	{ "__sub", lua_vector3u_sub },
+	{ "__mul", lua_vector3u_mul },
+	{ "__div", lua_vector3u_div },
+	{ "__tostring", lua_vector3u_tostring },
+	{ "__index", lua_vecto3u_index },
+	{ "__newindex", lua_vector3u_newindex },
+	{ NULL, NULL }
+};
+
+static int lua_new_vector3u(lua_State *L) {
+	Vector3u *v = lua_newuserdata(L, sizeof(Vector3u));
+	v->x = luaL_checkinteger(L, 1);
+	v->y = luaL_checkinteger(L, 2);
+	v->z = luaL_checkinteger(L, 3);
+	luaL_setmetatable(L, "MT_VECTOR3U");
+	return 1;
+}
+
+void lua_register_vector3u(lua_State *L) {
+	luaL_newmetatable(L, "MT_VECTOR3U");
+
+	luaL_setfuncs(L, vector3u_meta_methods, 0);
+	lua_pop(L, 1);
+
+	lua_pushcfunction(L, lua_new_vector3u);
+	lua_setglobal(L, "vec3u");
+}
+
+void lua_push_vector3u(lua_State *L, Vector3u v) {
+	Vector3u *vec = lua_newuserdata(L, sizeof(Vector3u));
+	*vec = v;
+	luaL_setmetatable(L, "MT_VECTOR3U");
+}
+
+bool lua_is_vector3u(lua_State *L, int index) {
+	if (!lua_isuserdata(L, index)) {
+		return 0;
+	}
+
+	if (lua_getmetatable(L, index)) {
+		lua_getfield(L, LUA_REGISTRYINDEX, "MT_VECTOR3U");
+		if (lua_rawequal(L, -1, -2)) {
+			lua_pop(L, 2);
+			return 1;
+		}
+		lua_pop(L, 2);
+	}
+
+	return 0;
+}
+
+Vector3u lua_check_vector3u(lua_State *L, int index) {
+	return *(Vector3u *)luaL_checkudata(L, index, "MT_VECTOR3U");
+}
+
+Vector3u lua_to_vector3u(lua_State *L, int index) {
+	return *(Vector3u *)lua_touserdata(L, index);
 }

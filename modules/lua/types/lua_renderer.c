@@ -120,9 +120,9 @@ static int lua_renderer_get_backend(lua_State *L) {
 static int lua_renderer_get_viewport_size(lua_State *L) {
 	Renderer *renderer = lua_check_renderer(L, 1);
 
-	Vector2i size = renderer_get_viewport_size(renderer);
+	Vector2u size = renderer_get_viewport_size(renderer);
 
-	lua_push_vector2i(L, size);
+	lua_push_vector2u(L, size);
 
 	return 1;
 }

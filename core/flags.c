@@ -38,9 +38,21 @@ void flag_manager_destroy(FlagManager *manager) {
 	struct Flag *flag = manager->first;
 	while (flag) {
 		struct Flag *next = flag->next;
-		ls_free(flag->value);
-		ls_free(flag->name);
-		ls_free(flag->description);
+		if (flag->type == FLAG_TYPE_STRING) {
+			ls_free(flag->value->str);
+		}
+		if (flag->value) {
+			ls_free(flag->value);
+		}
+
+		if (flag->name) {
+			ls_free(flag->name);
+		}
+
+		if (flag->description) {
+			ls_free(flag->description);
+		}
+
 		ls_free(flag);
 		flag = next;
 	}

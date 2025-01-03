@@ -61,7 +61,7 @@ static void lua_push_event(lua_State *L, Event *event) {
 			lua_setfield(L, -2, "window");
 			lua_push_vector2i(L, event->window.position);
 			lua_setfield(L, -2, "position");
-			lua_push_vector2i(L, event->window.size);
+			lua_push_vector2u(L, event->window.size);
 			lua_setfield(L, -2, "size");
 
 			lua_setfield(L, -2, "window");

@@ -99,7 +99,7 @@ void window_set_size(LSWindow *window, int32 width, int32 height) {
 	platform_window_set_size(window->platform_window, width, height);
 }
 
-Vector2i window_get_size(const LSWindow *window) {
+Vector2u window_get_size(const LSWindow *window) {
 	LS_ASSERT(window);
 	LS_ASSERT(window->platform_window);
 
