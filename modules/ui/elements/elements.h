@@ -19,6 +19,9 @@ struct UIElement {
 	Vector2u position;
 	Vector2u size;
 
+	Vector2u min_size;
+	Vector2u max_size;
+
 	uint32 anchors;
 };
 

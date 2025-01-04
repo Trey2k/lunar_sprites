@@ -18,17 +18,19 @@ static UIElementTheme DEFAULT_LABEL_THEME = {
 	.texture = NULL,
 };
 
-UIElement *ui_label_create(const Font *font, String text, Vector2u position) {
-	UIElement *element = ls_malloc(sizeof(UIElement));
+UIElement *ui_label_create(const Font *font, String text) {
+	UIElement *element = (UIElement *)ls_malloc(sizeof(UIElement));
 	element->type = UI_ELEMENT_TYPE_LABEL;
 	element->label.text = ls_str_copy(text);
-	element->label.theme = ls_malloc(sizeof(UIElementTheme));
+	element->label.theme = (UIElementTheme *)ls_malloc(sizeof(UIElementTheme));
 	*element->label.theme = DEFAULT_LABEL_THEME;
 	element->label.render_lines = slice_create(16, true);
 	element->label.theme->font = font;
 	element->label.padding = 10;
 
-	element->anchors = UI_ANCHOR_TOP | UI_ANCHOR_BOTTOM | UI_ANCHOR_LEFT;
+	element->anchors = UI_ANCHOR_TOP | UI_ANCHOR_RIGHT;
+	element->min_size = vec2u(0, 0);
+	element->max_size = vec2u(0, 0);
 
 	return element;
 }
@@ -38,33 +40,11 @@ void ui_label_destroy(UILabel *label) {
 	slice_destroy(label->render_lines);
 }
 
-//TODO: Try to simplify this function
-void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector2u inner_bounds) {
-	LS_ASSERT(label_elm->type == UI_ELEMENT_TYPE_LABEL);
-
+static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 	UIElementTheme *theme = label_elm->label.theme;
 
-	// Check if the text has been cached, and is still relevant
-	if (vec2u_equals(label_elm->label.prev_inner_bounds, inner_bounds) &&
-			vec2u_equals(label_elm->label.prev_outer_bounds, outer_bounds)) {
-		return;
-	}
-	label_elm->label.prev_inner_bounds = inner_bounds;
-	label_elm->label.prev_outer_bounds = outer_bounds;
-
-	Vector2u max_size = vec2u_sub(outer_bounds, inner_bounds);
-	// Otherwise, recalculate the text size and render lines
 	size_t text_len = ls_str_length(label_elm->label.text);
-	Vector2u text_size = ui_get_text_size(theme, label_elm->label.text);
-	slice_clear(label_elm->label.render_lines);
-
-	if (text_size.x <= max_size.x) {
-		// Text fits on one line
-		char *new_line = ls_str_copy(label_elm->label.text);
-		slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
-		label_elm->size = vec2u_add(text_size, vec2u(label_elm->label.padding, label_elm->label.padding));
-		return;
-	}
+	Vector2u text_size = ui_get_text_size(label_elm->label.theme, label_elm->label.text);
 
 	// Text does not fit on one line, split it up
 	char *l_text = label_elm->label.text;
@@ -129,7 +109,62 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 		max_x = max_x < text_size.x ? text_size.x : max_x;
 	}
 
-	label_elm->size = vec2u(max_x + label_elm->label.padding, used_y + label_elm->label.padding);
+	return vec2u(max_x, used_y);
+}
+
+//TODO: Try to simplify this function
+void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector2u inner_bounds) {
+	LS_ASSERT(label_elm->type == UI_ELEMENT_TYPE_LABEL);
+
+	UIElementTheme *theme = label_elm->label.theme;
+
+	// Check if the text has been cached, and is still relevant
+	if (vec2u_equals(label_elm->label.prev_inner_bounds, inner_bounds) &&
+			vec2u_equals(label_elm->label.prev_outer_bounds, outer_bounds)) {
+		return;
+	}
+	label_elm->label.prev_inner_bounds = inner_bounds;
+	label_elm->label.prev_outer_bounds = outer_bounds;
+
+	Vector2u max_size = vec2u_sub(outer_bounds, inner_bounds);
+	if (label_elm->max_size.x > 0) {
+		max_size.x = label_elm->max_size.x;
+	}
+
+	if (label_elm->max_size.y > 0) {
+		max_size.y = label_elm->max_size.y;
+	}
+
+	if (max_size.x < label_elm->min_size.x) {
+		max_size.x = label_elm->min_size.x;
+	}
+
+	if (max_size.y < label_elm->min_size.y) {
+		max_size.y = label_elm->min_size.y;
+	}
+
+	// Otherwise, recalculate the text size and render lines
+	Vector2u text_size = ui_get_text_size(theme, label_elm->label.text);
+	slice_clear(label_elm->label.render_lines);
+
+	if (text_size.x > max_size.x) {
+		// Text does not fit on one line, split it up
+		text_size = ui_label_split_lines(label_elm, max_size);
+		label_elm->size = vec2u_add(text_size, vec2u(label_elm->label.padding, label_elm->label.padding));
+	} else {
+		// Text fits on one line
+		char *new_line = ls_str_copy(label_elm->label.text);
+		slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+		label_elm->size = vec2u_add(text_size, vec2u(label_elm->label.padding, label_elm->label.padding));
+	}
+
+	if (label_elm->min_size.y > 0 && label_elm->size.y < label_elm->min_size.y) {
+		label_elm->size.y = label_elm->min_size.y;
+	}
+
+	if (label_elm->min_size.y > 0 && label_elm->size.x < label_elm->min_size.x) {
+		label_elm->size.x = label_elm->min_size.x;
+	}
 }
 
 static void label_draw_lines(UIElement *label_elm, String text, Vector2u outer_bounds, Vector2u inner_bounds, Vector2u text_position) {

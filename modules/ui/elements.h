@@ -30,7 +30,7 @@ LS_EXPORT void ui_element_calculate_position(UIElement *element, Vector2u outer_
 
 // Label
 // A label is a UI element that draws text within bounds, wrapping the text if it does not fit.
-LS_EXPORT UIElement *ui_label_create(const Font *font, String text, Vector2u position);
+LS_EXPORT UIElement *ui_label_create(const Font *font, String text);
 // Sets the text of the label.
 LS_EXPORT void ui_label_set_text(UIElement *element, String text);
 

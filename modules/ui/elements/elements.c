@@ -63,7 +63,13 @@ void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Ve
 	if (element->anchors & UI_ANCHOR_TOP && element->anchors & UI_ANCHOR_BOTTOM) {
 		element->position.y = inner_bounds.y;
 		element->size.y = outer_bounds.y - inner_bounds.y;
+		if (element->size.y < element->min_size.y) {
+			element->size.y = element->min_size.y;
+		}
 
+		if (element->size.y > element->max_size.y) {
+			element->size.y = element->max_size.y;
+		}
 	} else if (element->anchors & UI_ANCHOR_TOP) {
 		element->position.y = inner_bounds.y;
 	} else if (element->anchors & UI_ANCHOR_BOTTOM) {
@@ -73,6 +79,13 @@ void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Ve
 	if (element->anchors & UI_ANCHOR_LEFT && element->anchors & UI_ANCHOR_RIGHT) {
 		element->position.x = inner_bounds.x;
 		element->size.x = outer_bounds.x - inner_bounds.x;
+		if (element->size.x < element->min_size.x) {
+			element->size.x = element->min_size.x;
+		}
+
+		if (element->size.x > element->max_size.x) {
+			element->size.x = element->max_size.x;
+		}
 	} else if (element->anchors & UI_ANCHOR_LEFT) {
 		element->position.x = inner_bounds.x;
 	} else if (element->anchors & UI_ANCHOR_RIGHT) {
