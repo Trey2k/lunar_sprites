@@ -7,7 +7,7 @@
 #include "modules/ui/elements.h"
 #include "modules/ui/ui.h"
 
-UIElement *ui_label_create(const Font *font, String text) {
+UIElement *ui_label_create(const Font *font, String text, uint32 anchors) {
 	UIElement *element = (UIElement *)ls_malloc(sizeof(UIElement));
 	element->type = UI_ELEMENT_TYPE_LABEL;
 	element->label.text = ls_str_copy(text);
@@ -21,13 +21,16 @@ UIElement *ui_label_create(const Font *font, String text) {
 		.font_size = 64,
 		.font = NULL,
 		.texture = NULL,
+		.text_alignment = UI_TEXT_ALIGN_CENTER,
 	};
 
 	element->label.render_lines = slice_create(16, true);
+	element->label.render_lines_width = slice32_create(16);
+
 	element->label.theme->font = font;
 	element->label.padding = 10;
 
-	element->anchors = UI_ANCHOR_TOP | UI_ANCHOR_RIGHT;
+	element->anchors = anchors;
 	element->min_size = vec2u(0, 0);
 	element->max_size = vec2u(0, 0);
 
@@ -37,6 +40,67 @@ UIElement *ui_label_create(const Font *font, String text) {
 void ui_label_destroy(UILabel *label) {
 	ls_free(label->text);
 	slice_destroy(label->render_lines);
+}
+
+void ui_label_set_theme(UIElement *element, const UIElementTheme *theme) {
+	LS_ASSERT(element->type == UI_ELEMENT_TYPE_LABEL);
+
+	*element->label.theme = *theme;
+}
+
+static void label_draw_lines(UIElement *label_elm, String text, Vector2u outer_bounds, Vector2u inner_bounds) {
+	UILabel *label = &label_elm->label;
+	size_t n_lines = slice_get_size(label->render_lines);
+	for (size_t i = 0; i < n_lines; i++) {
+		Vector2u rendor_pos = label_elm->position; //vec2u_add(l, vec2u(label->padding, label->padding));
+		rendor_pos.y += i * label->theme->font_size;
+
+		uint32 line_width = slice32_get(label->render_lines_width, i).u32;
+
+		switch (label->theme->text_alignment) {
+			case UI_TEXT_ALIGN_CENTER: {
+				rendor_pos.x = (label_elm->size.x / 2) - (line_width / 2);
+			} break;
+			case UI_TEXT_ALIGN_RIGHT: {
+				rendor_pos.x = label_elm->size.x - line_width - label->padding;
+			} break;
+			case UI_TEXT_ALIGN_LEFT:
+			default:
+				break;
+		};
+		char *line = slice_get(label->render_lines, i).ptr;
+		Vector2u line_size = ui_draw_text(label->theme, line, rendor_pos);
+		rendor_pos.y += line_size.y;
+	}
+}
+
+void ui_draw_label(UIElement *label_elm, Vector2u outer_bounds, Vector2u inner_bounds) {
+	// Only draw the background if it has an alpha value
+	UILabel *label = &label_elm->label;
+	Vector2u label_size = label_elm->size;
+
+	if (label->theme->background_color.a > 0) {
+		// Add some padding to the used space
+		Vector2u bg_space = vec2u_sub(label_size,
+				vec2u(label->theme->border_size * 2, label->theme->border_size * 2));
+
+		if (label->theme->border_size > 0) {
+			ui_draw_rect(label->theme->texture, label->theme->border_color, label->theme->radius, label_elm->position, label_size);
+			Vector2u bg_position = vec2u(label_elm->position.x + label->theme->border_size, label_elm->position.y + label->theme->border_size);
+			ui_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, bg_position, bg_space);
+		} else {
+			ui_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, label_elm->position, label_size);
+		}
+	}
+
+	label_draw_lines(label_elm, label->text, outer_bounds, inner_bounds);
+}
+
+void ui_label_set_text(UIElement *element, String text) {
+	LS_ASSERT(element->type == UI_ELEMENT_TYPE_LABEL);
+
+	ls_free(element->label.text);
+	element->label.text = ls_str_copy(text);
 }
 
 static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
@@ -63,6 +127,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 					ls_str_copy_to(new_line, l_text, text_len - i);
 					new_line[text_len - i] = '\0';
 					slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+					slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
 					// Add 1 to skip the space character
 					l_text = &l_text[(text_len - i) + 1];
 					used_y += text_size.y;
@@ -86,6 +151,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 					new_line[text_len - i] = '\0';
 					ls_str_copy_to(new_line, l_text, text_len - i);
 					slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+					slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
 					l_text = &l_text[text_len - i];
 					used_y += text_size.y;
 					max_x = max_x < text_size.x ? text_size.x : max_x;
@@ -104,6 +170,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 		// The remaining text fits on one line
 		char *new_line = ls_str_copy(l_text);
 		slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+		slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
 		used_y += text_size.y;
 		max_x = max_x < text_size.x ? text_size.x : max_x;
 	}
@@ -143,9 +210,10 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 	}
 
 	// Otherwise, recalculate the text size and render lines
-	Vector2u text_size = ui_get_text_size(theme, label_elm->label.text);
 	slice_clear(label_elm->label.render_lines);
+	slice32_clear(label_elm->label.render_lines_width);
 
+	Vector2u text_size = ui_get_text_size(theme, label_elm->label.text);
 	if (text_size.x > max_size.x) {
 		// Text does not fit on one line, split it up
 		text_size = ui_label_split_lines(label_elm, max_size);
@@ -154,6 +222,7 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 		// Text fits on one line
 		char *new_line = ls_str_copy(label_elm->label.text);
 		slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+		slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
 		label_elm->size = vec2u_add(text_size, vec2u(label_elm->label.padding, label_elm->label.padding));
 	}
 
@@ -164,49 +233,4 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 	if (label_elm->min_size.y > 0 && label_elm->size.x < label_elm->min_size.x) {
 		label_elm->size.x = label_elm->min_size.x;
 	}
-}
-
-static void label_draw_lines(UIElement *label_elm, String text, Vector2u outer_bounds, Vector2u inner_bounds, Vector2u text_position) {
-	UILabel *label = &label_elm->label;
-	size_t n_lines = slice_get_size(label->render_lines);
-	Vector2u rendor_pos = text_position;
-	for (size_t i = 0; i < n_lines; i++) {
-		char *line = slice_get(label->render_lines, i).ptr;
-		Vector2u line_size = ui_draw_text(label->theme, line, rendor_pos);
-		rendor_pos.y += line_size.y;
-	}
-}
-
-void ui_draw_label(UIElement *label_elm, Vector2u outer_bounds, Vector2u inner_bounds) {
-	// Only draw the background if it has an alpha value
-	Vector2u text_position = label_elm->position;
-
-	UILabel *label = &label_elm->label;
-	Vector2u label_size = label_elm->size;
-
-	if (label->theme->background_color.a > 0) {
-		// Add some padding to the used space
-
-		text_position = vec2u(label_elm->position.x + (label->padding / 2), label_elm->position.y + (label->padding / 2));
-
-		Vector2u bg_space = vec2u_sub(label_size,
-				vec2u(label->theme->border_size * 2, label->theme->border_size * 2));
-
-		if (label->theme->border_size > 0) {
-			ui_draw_rect(label->theme->texture, label->theme->border_color, label->theme->radius, label_elm->position, label_size);
-			Vector2u bg_position = vec2u(label_elm->position.x + label->theme->border_size, label_elm->position.y + label->theme->border_size);
-			ui_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, bg_position, bg_space);
-		} else {
-			ui_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, label_elm->position, label_size);
-		}
-	}
-
-	label_draw_lines(label_elm, label->text, outer_bounds, inner_bounds, text_position);
-}
-
-void ui_label_set_text(UIElement *element, String text) {
-	LS_ASSERT(element->type == UI_ELEMENT_TYPE_LABEL);
-
-	ls_free(element->label.text);
-	element->label.text = ls_str_copy(text);
 }

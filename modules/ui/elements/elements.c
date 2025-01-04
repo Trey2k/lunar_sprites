@@ -46,6 +46,22 @@ Vector2u ui_element_get_position(const UIElement *element) {
 	return element->position;
 }
 
+void ui_element_set_min_size(UIElement *element, Vector2u min_size) {
+	element->min_size = min_size;
+}
+
+Vector2u ui_element_get_min_size(const UIElement *element) {
+	return element->min_size;
+}
+
+void ui_element_set_max_size(UIElement *element, Vector2u max_size) {
+	element->max_size = max_size;
+}
+
+Vector2u ui_element_get_max_size(const UIElement *element) {
+	return element->max_size;
+}
+
 void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds) {
 	// Start by calculating the size of the element.
 	// The element at this point will set its size to be the minimum size based ont the bounds.
@@ -63,11 +79,11 @@ void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Ve
 	if (element->anchors & UI_ANCHOR_TOP && element->anchors & UI_ANCHOR_BOTTOM) {
 		element->position.y = inner_bounds.y;
 		element->size.y = outer_bounds.y - inner_bounds.y;
-		if (element->size.y < element->min_size.y) {
+		if (element->min_size.y > 0 && element->size.y < element->min_size.y) {
 			element->size.y = element->min_size.y;
 		}
 
-		if (element->size.y > element->max_size.y) {
+		if (element->max_size.y > 0 && element->size.y > element->max_size.y) {
 			element->size.y = element->max_size.y;
 		}
 	} else if (element->anchors & UI_ANCHOR_TOP) {
@@ -79,11 +95,11 @@ void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Ve
 	if (element->anchors & UI_ANCHOR_LEFT && element->anchors & UI_ANCHOR_RIGHT) {
 		element->position.x = inner_bounds.x;
 		element->size.x = outer_bounds.x - inner_bounds.x;
-		if (element->size.x < element->min_size.x) {
+		if (element->min_size.x > 0 && element->size.x < element->min_size.x) {
 			element->size.x = element->min_size.x;
 		}
 
-		if (element->size.x > element->max_size.x) {
+		if (element->max_size.x > 0 && element->size.x > element->max_size.x) {
 			element->size.x = element->max_size.x;
 		}
 	} else if (element->anchors & UI_ANCHOR_LEFT) {

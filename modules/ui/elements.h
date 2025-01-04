@@ -23,6 +23,14 @@ LS_EXPORT void ui_element_destroy(UIElement *element);
 LS_EXPORT Vector2u ui_element_get_size(const UIElement *element);
 // Returns the position of the element, relative to the top-left corner of its bounds.
 LS_EXPORT Vector2u ui_element_get_position(const UIElement *element);
+// Set the minimum size of the element.
+LS_EXPORT void ui_element_set_min_size(UIElement *element, Vector2u min_size);
+// Get the minimum size of the element.
+LS_EXPORT Vector2u ui_element_get_min_size(const UIElement *element);
+// Set the maximum size of the element.
+LS_EXPORT void ui_element_set_max_size(UIElement *element, Vector2u max_size);
+// Get the maximum size of the element.
+LS_EXPORT Vector2u ui_element_get_max_size(const UIElement *element);
 // Sets the anchor points of the element.
 LS_EXPORT void ui_element_set_anchor(UIElement *element, uint32 anchors);
 // Calculates the minimum size and position of the element based on the outer and inner bounds and anchor points.
@@ -30,9 +38,11 @@ LS_EXPORT void ui_element_calculate_position(UIElement *element, Vector2u outer_
 
 // Label
 // A label is a UI element that draws text within bounds, wrapping the text if it does not fit.
-LS_EXPORT UIElement *ui_label_create(const Font *font, String text);
+LS_EXPORT UIElement *ui_label_create(const Font *font, String text, uint32 anchors);
 // Sets the text of the label.
 LS_EXPORT void ui_label_set_text(UIElement *element, String text);
+// Sets the theme of the label. The theme is copied.
+LS_EXPORT void ui_label_set_theme(UIElement *element, const UIElementTheme *theme);
 
 // VBoxContainer
 // A VBoxContainer is a UI element that arranges its children vertically.

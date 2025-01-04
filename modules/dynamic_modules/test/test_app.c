@@ -73,7 +73,7 @@ void test_app_start(void *user_data) {
 
 	LS_ASSERT(test_application->font);
 
-	test_application->label = ui_label_create(test_application->font, "Hello, World!");
+	test_application->label = ui_label_create(test_application->font, "Hello, World!", UI_ANCHOR_LEFT | UI_ANCHOR_RIGHT | UI_ANCHOR_CENTER);
 
 	ui_add_element(test_application->label);
 

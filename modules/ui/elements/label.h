@@ -15,6 +15,8 @@ typedef struct {
 	uint32 padding;
 
 	Slice *render_lines;
+	Slice32 *render_lines_width;
+
 	Vector2u prev_inner_bounds;
 	Vector2u prev_outer_bounds;
 
