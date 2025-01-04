@@ -1,9 +1,11 @@
 #include "elements.h"
 
 void ui_draw_element(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds) {
+	// Updated element size and position
+	ui_element_calculate_position(element, outer_bounds, inner_bounds);
 	switch (element->type) {
 		case UI_ELEMENT_TYPE_LABEL:
-			ui_draw_label(&element->label, outer_bounds, inner_bounds);
+			ui_draw_label(element, outer_bounds, inner_bounds);
 			break;
 		default:
 			ls_log_fatal("Unknown element type: %d\n", element->type);
@@ -23,14 +25,7 @@ void ui_element_destroy(UIElement *element) {
 }
 
 void ui_element_set_anchor(UIElement *element, uint32 anchors) {
-	switch (element->type) {
-		case UI_ELEMENT_TYPE_LABEL:
-			element->label.anchors = anchors;
-			break;
-		default:
-			ls_log_fatal("Unknown element type: %d\n", element->type);
-			break;
-	}
+	element->anchors = anchors;
 }
 
 const UIElementTheme *ui_element_get_theme(const UIElement *element) {
@@ -44,21 +39,53 @@ const UIElementTheme *ui_element_get_theme(const UIElement *element) {
 }
 
 Vector2u ui_element_get_size(const UIElement *element) {
-	switch (element->type) {
-		case UI_ELEMENT_TYPE_LABEL:
-			return element->label.size;
-		default:
-			ls_log_fatal("Unknown element type: %d\n", element->type);
-			return vec2u(0, 0);
-	}
+	return element->size;
 }
 
 Vector2u ui_element_get_position(const UIElement *element) {
+	return element->position;
+}
+
+void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds) {
+	// Start by calculating the size of the element.
+	// The element at this point will set its size to be the minimum size based ont the bounds.
+	// It is acceptable to have a size of 0,0 at this point.
 	switch (element->type) {
-		case UI_ELEMENT_TYPE_LABEL:
-			return element->label.position;
+		case UI_ELEMENT_TYPE_LABEL: {
+			ui_label_calculate_size(element, outer_bounds, inner_bounds);
+		} break;
 		default:
 			ls_log_fatal("Unknown element type: %d\n", element->type);
-			return vec2u(0, 0);
+			return;
+	}
+
+	// Calculate the position and size of the element based on the anchor points.
+	if (element->anchors & UI_ANCHOR_TOP && element->anchors & UI_ANCHOR_BOTTOM) {
+		element->position.y = inner_bounds.y;
+		element->size.y = outer_bounds.y - inner_bounds.y;
+
+	} else if (element->anchors & UI_ANCHOR_TOP) {
+		element->position.y = inner_bounds.y;
+	} else if (element->anchors & UI_ANCHOR_BOTTOM) {
+		element->position.y = outer_bounds.y - element->size.y;
+	}
+
+	if (element->anchors & UI_ANCHOR_LEFT && element->anchors & UI_ANCHOR_RIGHT) {
+		element->position.x = inner_bounds.x;
+		element->size.x = outer_bounds.x - inner_bounds.x;
+	} else if (element->anchors & UI_ANCHOR_LEFT) {
+		element->position.x = inner_bounds.x;
+	} else if (element->anchors & UI_ANCHOR_RIGHT) {
+		element->position.x = outer_bounds.x - element->size.x;
+	}
+
+	if (element->anchors & UI_ANCHOR_CENTER) {
+		if (!(element->anchors & UI_ANCHOR_LEFT) && !(element->anchors & UI_ANCHOR_RIGHT)) {
+			element->position.x = ((outer_bounds.x + inner_bounds.x) / 2) - (element->size.x / 2);
+		}
+
+		if (!(element->anchors & UI_ANCHOR_TOP) && !(element->anchors & UI_ANCHOR_BOTTOM)) {
+			element->position.y = ((outer_bounds.y + inner_bounds.y) / 2) - (element->size.y / 2);
+		}
 	}
 }

@@ -15,6 +15,11 @@ struct UIElement {
 	union {
 		UILabel label;
 	};
+
+	Vector2u position;
+	Vector2u size;
+
+	uint32 anchors;
 };
 
 #endif // UI_ELEMENT_IMPL_H

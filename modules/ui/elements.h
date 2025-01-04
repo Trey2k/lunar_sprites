@@ -25,12 +25,12 @@ LS_EXPORT Vector2u ui_element_get_size(const UIElement *element);
 LS_EXPORT Vector2u ui_element_get_position(const UIElement *element);
 // Sets the anchor points of the element.
 LS_EXPORT void ui_element_set_anchor(UIElement *element, uint32 anchors);
+// Calculates the minimum size and position of the element based on the outer and inner bounds and anchor points.
+LS_EXPORT void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds);
 
 // Label
 // A label is a UI element that draws text within bounds, wrapping the text if it does not fit.
 LS_EXPORT UIElement *ui_label_create(const Font *font, String text, Vector2u position);
-// Returns the theme of the label for modifying.
-LS_EXPORT UIElementTheme *ui_label_get_theme(UIElement *element);
 // Sets the text of the label.
 LS_EXPORT void ui_label_set_text(UIElement *element, String text);
 

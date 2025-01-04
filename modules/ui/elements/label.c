@@ -7,7 +7,7 @@
 #include "modules/ui/elements.h"
 #include "modules/ui/ui.h"
 
-static const UIElementTheme DEFAULT_LABEL_THEME = {
+static UIElementTheme DEFAULT_LABEL_THEME = {
 	.background_color = COLOR_DARK_GREY,
 	.border_color = COLOR_GREY,
 	.radius = 10,
@@ -24,168 +24,150 @@ UIElement *ui_label_create(const Font *font, String text, Vector2u position) {
 	element->label.text = ls_str_copy(text);
 	element->label.theme = ls_malloc(sizeof(UIElementTheme));
 	*element->label.theme = DEFAULT_LABEL_THEME;
-
-	element->label.anchors = UI_ANCHOR_TOP | UI_ANCHOR_RIGHT;
-
-	element->label.min_size = vec2u(0, 0);
-
+	element->label.render_lines = slice_create(16, true);
 	element->label.theme->font = font;
-
-	element->label.position = position;
-
 	element->label.padding = 10;
+
+	element->anchors = UI_ANCHOR_TOP | UI_ANCHOR_BOTTOM | UI_ANCHOR_LEFT;
 
 	return element;
 }
 
-UIElementTheme *ui_label_get_theme(UIElement *element) {
-	LS_ASSERT(element->type == UI_ELEMENT_TYPE_LABEL);
-	return element->label.theme;
-}
-
 void ui_label_destroy(UILabel *label) {
 	ls_free(label->text);
+	slice_destroy(label->render_lines);
 }
 
-static Vector2u label_get_used_sapce(UILabel *label, String text, Vector2u outer_bounds, Vector2u inner_bounds) {
-	ls_str_copy_to(label->buffer, text, UI_LABEL_BUFFER_SIZE);
-	size_t text_len = ls_str_length(label->buffer);
-	Vector2u total_space_used = vec2u(0, 0);
+//TODO: Try to simplify this function
+void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector2u inner_bounds) {
+	LS_ASSERT(label_elm->type == UI_ELEMENT_TYPE_LABEL);
 
-	// See if the text fits on one line
-	Vector2u text_size = ui_get_text_size(label->theme, text);
-	if (text_size.x > outer_bounds.x) {
-		// Text does not fit on one line, split it up
-		while (text_size.x > outer_bounds.x) {
-			label->buffer[text_len - 1] = '\0';
-			text_len--;
-			text_size = ui_get_text_size(label->theme, label->buffer);
-		}
+	UIElementTheme *theme = label_elm->label.theme;
 
-		// Draw the first part of the text
-		total_space_used = ui_get_text_size(label->theme, label->buffer);
+	// Check if the text has been cached, and is still relevant
+	if (vec2u_equals(label_elm->label.prev_inner_bounds, inner_bounds) &&
+			vec2u_equals(label_elm->label.prev_outer_bounds, outer_bounds)) {
+		return;
+	}
+	label_elm->label.prev_inner_bounds = inner_bounds;
+	label_elm->label.prev_outer_bounds = outer_bounds;
 
-		// If we can, draw the rest of the text
-		Vector2u next_line_size = ui_get_text_size(label->theme, &text[text_len]);
-		Vector2u new_inner_bounds = vec2u(inner_bounds.x, inner_bounds.y + text_size.y);
+	Vector2u max_size = vec2u_sub(outer_bounds, inner_bounds);
+	// Otherwise, recalculate the text size and render lines
+	size_t text_len = ls_str_length(label_elm->label.text);
+	Vector2u text_size = ui_get_text_size(theme, label_elm->label.text);
+	slice_clear(label_elm->label.render_lines);
 
-		if (next_line_size.y <= new_inner_bounds.y) {
-			Vector2u space_ued = label_get_used_sapce(label, &text[text_len], outer_bounds, new_inner_bounds);
-			total_space_used.y += space_ued.y;
-		}
-	} else {
-		// Text fits on one line, draw it
-		total_space_used = ui_get_text_size(label->theme, label->buffer);
+	if (text_size.x <= max_size.x) {
+		// Text fits on one line
+		char *new_line = ls_str_copy(label_elm->label.text);
+		slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+		label_elm->size = vec2u_add(text_size, vec2u(label_elm->label.padding, label_elm->label.padding));
+		return;
 	}
 
-	return total_space_used;
+	// Text does not fit on one line, split it up
+	char *l_text = label_elm->label.text;
+	uint32 used_y = 0;
+	uint32 max_x = 0;
+	while (text_size.x > max_size.x) {
+		// Try to split the text at a space character first
+		bool split_on_space = false;
+		for (size_t i = 0; i < text_len; i++) {
+			if (l_text[text_len - i] == ' ') {
+				l_text[text_len - i] = '\0';
+				text_size = ui_get_text_size(theme, l_text);
+				l_text[text_len - i] = ' ';
+				if (text_size.x <= max_size.x) {
+					// The line now fits
+					char *new_line = ls_malloc(text_len - i);
+					ls_str_copy_to(new_line, l_text, text_len - i);
+					new_line[text_len - i] = '\0';
+					slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+					// Add 1 to skip the space character
+					l_text = &l_text[(text_len - i) + 1];
+					used_y += text_size.y;
+					max_x = max_x < text_size.x ? text_size.x : max_x;
+					split_on_space = true;
+					break;
+				}
+			}
+		}
+
+		// We failed to split on a space, so split on the last character that fits
+		if (!split_on_space) {
+			for (size_t i = 0; i < text_len; i++) {
+				char old_c = l_text[text_len - i];
+				l_text[text_len - i] = '\0';
+				text_size = ui_get_text_size(theme, l_text);
+				l_text[text_len - i] = old_c;
+				if (text_size.x <= max_size.x) {
+					// The line now fits
+					char *new_line = ls_malloc(text_len - i);
+					new_line[text_len - i] = '\0';
+					ls_str_copy_to(new_line, l_text, text_len - i);
+					slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+					l_text = &l_text[text_len - i];
+					used_y += text_size.y;
+					max_x = max_x < text_size.x ? text_size.x : max_x;
+					break;
+				}
+			}
+		}
+
+		text_size = ui_get_text_size(theme, l_text);
+		if (text_size.y + used_y > max_size.y) {
+			break;
+		}
+	}
+
+	if (text_size.y + used_y <= max_size.y) {
+		// The remaining text fits on one line
+		char *new_line = ls_str_copy(l_text);
+		slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+		used_y += text_size.y;
+		max_x = max_x < text_size.x ? text_size.x : max_x;
+	}
+
+	label_elm->size = vec2u(max_x + label_elm->label.padding, used_y + label_elm->label.padding);
 }
 
-static Vector2u label_draw_lines(UILabel *label, String text, Vector2u outer_bounds, Vector2u inner_bounds, Vector2u text_position) {
-	// calculate position relative to ouuter bounds
-
-	ls_str_copy_to(label->buffer, text, UI_LABEL_BUFFER_SIZE);
-	size_t text_len = ls_str_length(label->buffer);
-	Vector2u total_space_used = vec2u(0, 0);
-
-	// See if the text fits on one line
-	Vector2u text_size = ui_get_text_size(label->theme, text);
-	if (text_size.x > outer_bounds.x) {
-		// Text does not fit on one line, split it up
-		while (text_size.x > outer_bounds.x) {
-			label->buffer[text_len - 1] = '\0';
-			text_len--;
-			text_size = ui_get_text_size(label->theme, label->buffer);
-		}
-
-		// Draw the first part of the text
-		total_space_used = ui_draw_text(label->theme, label->buffer, text_position);
-
-		// If we can, draw the rest of the text
-		Vector2u next_line_size = ui_get_text_size(label->theme, &text[text_len]);
-		Vector2u new_inner_bounds = vec2u(inner_bounds.x, inner_bounds.y + text_size.y);
-
-		if (next_line_size.y <= new_inner_bounds.y) {
-			Vector2u space_ued = label_draw_lines(label, &text[text_len], outer_bounds, new_inner_bounds, text_position);
-			total_space_used.y += space_ued.y;
-		}
-	} else {
-		// Text fits on one line, draw it
-		total_space_used = ui_draw_text(label->theme, label->buffer, text_position);
-	}
-
-	return total_space_used;
-}
-
-// Returns draw position, and updates the minimum size of the label
-static void label_calculate_position(UILabel *label, Vector2u outer_bounds, Vector2u inner_bounds) {
-	Vector2u l_size = label_get_used_sapce(label, label->text, outer_bounds, inner_bounds);
-
-	if (label->anchors & UI_ANCHOR_TOP && label->anchors & UI_ANCHOR_BOTTOM) {
-		label->position.y = inner_bounds.y;
-		label->min_size.y = outer_bounds.y;
-	} else if (label->anchors & UI_ANCHOR_TOP) {
-		label->position.y = inner_bounds.y;
-	} else if (label->anchors & UI_ANCHOR_BOTTOM) {
-		label->position.y = outer_bounds.y - (l_size.y + label->padding);
-	}
-
-	if (label->anchors & UI_ANCHOR_LEFT && label->anchors & UI_ANCHOR_RIGHT) {
-		label->position.x = inner_bounds.x;
-		label->min_size.x = outer_bounds.x;
-	} else if (label->anchors & UI_ANCHOR_LEFT) {
-		label->position.x = inner_bounds.x;
-	} else if (label->anchors & UI_ANCHOR_RIGHT) {
-		label->position.x = outer_bounds.x - (l_size.x + label->padding);
-	}
-
-	if (label->anchors & UI_ANCHOR_CENTER) {
-		// Center the label on the X axis if it is not anchored to the left or right
-		if (!(label->anchors & UI_ANCHOR_LEFT || label->anchors & UI_ANCHOR_RIGHT)) {
-			label->position.x = ((outer_bounds.x + inner_bounds.x) / 2) - (l_size.x / 2);
-		}
-
-		// Center the label on the Y axis if it is not anchored to the top or bottom
-		if (!(label->anchors & UI_ANCHOR_TOP || label->anchors & UI_ANCHOR_BOTTOM)) {
-			label->position.y = ((outer_bounds.y + inner_bounds.y) / 2) - (l_size.y / 2);
-		}
+static void label_draw_lines(UIElement *label_elm, String text, Vector2u outer_bounds, Vector2u inner_bounds, Vector2u text_position) {
+	UILabel *label = &label_elm->label;
+	size_t n_lines = slice_get_size(label->render_lines);
+	Vector2u rendor_pos = text_position;
+	for (size_t i = 0; i < n_lines; i++) {
+		char *line = slice_get(label->render_lines, i).ptr;
+		Vector2u line_size = ui_draw_text(label->theme, line, rendor_pos);
+		rendor_pos.y += line_size.y;
 	}
 }
 
-void ui_draw_label(UILabel *label, Vector2u outer_bounds, Vector2u inner_bounds) {
+void ui_draw_label(UIElement *label_elm, Vector2u outer_bounds, Vector2u inner_bounds) {
 	// Only draw the background if it has an alpha value
-	label_calculate_position(label, outer_bounds, inner_bounds);
-	Vector2u text_position = label->position;
+	Vector2u text_position = label_elm->position;
+
+	UILabel *label = &label_elm->label;
+	Vector2u label_size = label_elm->size;
 
 	if (label->theme->background_color.a > 0) {
-		Vector2u used_space = label_get_used_sapce(label, label->text, outer_bounds, inner_bounds);
 		// Add some padding to the used space
 
-		Vector2u outline_space = vec2u_add(used_space, vec2u(label->padding, label->padding));
+		text_position = vec2u(label_elm->position.x + (label->padding / 2), label_elm->position.y + (label->padding / 2));
 
-		if (label->min_size.x > used_space.x) {
-			outline_space.x = label->min_size.x;
-		}
-
-		if (label->min_size.y > used_space.y) {
-			outline_space.y = label->min_size.y;
-		}
-
-		text_position = vec2u(label->position.x + (label->padding / 2), label->position.y + (label->padding / 2));
-
-		Vector2u bg_space = vec2u_sub(outline_space,
+		Vector2u bg_space = vec2u_sub(label_size,
 				vec2u(label->theme->border_size * 2, label->theme->border_size * 2));
 
 		if (label->theme->border_size > 0) {
-			ui_draw_rect(label->theme->texture, label->theme->border_color, label->theme->radius, label->position, outline_space);
-			Vector2u bg_position = vec2u(label->position.x + label->theme->border_size, label->position.y + label->theme->border_size);
+			ui_draw_rect(label->theme->texture, label->theme->border_color, label->theme->radius, label_elm->position, label_size);
+			Vector2u bg_position = vec2u(label_elm->position.x + label->theme->border_size, label_elm->position.y + label->theme->border_size);
 			ui_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, bg_position, bg_space);
 		} else {
-			ui_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, label->position, outline_space);
+			ui_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, label_elm->position, label_size);
 		}
 	}
 
-	label_draw_lines(label, label->text, outer_bounds, inner_bounds, text_position);
+	label_draw_lines(label_elm, label->text, outer_bounds, inner_bounds, text_position);
 }
 
 void ui_label_set_text(UIElement *element, String text) {
