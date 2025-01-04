@@ -15,8 +15,7 @@ static void ui_horizontal_container_get_child_bounds(UIElement *element, Vector2
 		Vector2u child_inner_bounds = vec2u(inner_bounds.x + x_offset, inner_bounds.y);
 		Vector2u child_outer_bounds = vec2u(inner_bounds.x + x_offset + child_x_space, outer_bounds.y);
 		ui_element_calculate_position(child, child_outer_bounds, child_inner_bounds);
-		Vector2u child_size = ui_element_get_size(child);
-		x_offset += child_size.x + element->horizontal_container.spacing;
+		x_offset += child_x_space + element->horizontal_container.spacing;
 		slice32_append(child_bounds, SLICE_VAL32(u32, child_inner_bounds.x));
 		slice32_append(child_bounds, SLICE_VAL32(u32, child_inner_bounds.y));
 		slice32_append(child_bounds, SLICE_VAL32(u32, child_outer_bounds.x));
@@ -28,7 +27,7 @@ UIElement *ui_horizontal_container_create(uint32 spacing, uint32 anchors) {
 	UIElement *element = (UIElement *)ls_malloc(sizeof(UIElement));
 	element->type = UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER;
 	element->horizontal_container.spacing = spacing;
-	element->horizontal_container.children = slice_create(16, true);
+	element->horizontal_container.children = slice_create(16, false);
 	element->horizontal_container.child_bounds = slice32_create(16 * 4);
 
 	element->size = vec2u(0, 0);
@@ -42,6 +41,11 @@ UIElement *ui_horizontal_container_create(uint32 spacing, uint32 anchors) {
 }
 
 void ui_horizontal_container_destroy(UIHorizontalContainer *container) {
+	for (size_t i = 0; i < slice_get_size(container->children); i++) {
+		UIElement *child = slice_get(container->children, i).ptr;
+		ui_element_destroy(child);
+	}
+
 	slice_destroy(container->children);
 	slice32_destroy(container->child_bounds);
 }

@@ -1,6 +1,7 @@
 #include "ui.h"
 
 #include "core/debug.h"
+#include "core/types/slice.h"
 #include "elements.h"
 
 #include "renderer/buffers.h"
@@ -103,6 +104,11 @@ void ui_deinit() {
 	index_buffer_destroy(ui_renderer.ibo);
 	vertex_array_destroy(ui_renderer.vao);
 
+	for (size_t i = 0; i < slice_get_size(ui_renderer.elements); i++) {
+		UIElement *element = slice_get(ui_renderer.elements, i).ptr;
+		ui_element_destroy(element);
+	}
+
 	slice_destroy(ui_renderer.elements);
 }
 
@@ -163,8 +169,10 @@ void ui_add_element(UIElement *element) {
 void ui_remove_element(const UIElement *element) {
 	size_t n_elements = slice_get_size(ui_renderer.elements);
 	for (size_t i = 0; i < n_elements; i++) {
-		if (slice_get(ui_renderer.elements, i).ptr == element) {
+		UIElement *elm = slice_get(ui_renderer.elements, i).ptr;
+		if (elm == element) {
 			slice_remove(ui_renderer.elements, i);
+			ui_element_destroy(elm);
 			break;
 		}
 	}

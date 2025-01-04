@@ -80,7 +80,7 @@ void test_app_start(void *user_data) {
 	LS_ASSERT(test_application->font);
 
 	test_application->label1 = ui_label_create(test_application->font, "Hello, World! #1", UI_ANCHOR_FILL);
-	test_application->label2 = ui_label_create(test_application->font, "Hello, World! #2", UI_ANCHOR_FILL);
+	test_application->label2 = ui_label_create(test_application->font, "Hello, World! #2", UI_ANCHOR_CENTER);
 	test_application->label3 = ui_label_create(test_application->font, "Hello, World! #3", UI_ANCHOR_FILL);
 
 	test_application->vertical_container = ui_vertical_container_create(10, UI_ANCHOR_FILL);
@@ -106,11 +106,6 @@ void test_app_deinit(void *user_data) {
 	sprite_destroy(test_application->sprite);
 	camera_destroy(test_application->camera);
 	font_destroy(test_application->font);
-	ui_element_destroy(test_application->label1);
-	ui_element_destroy(test_application->label2);
-	ui_element_destroy(test_application->label3);
-	ui_element_destroy(test_application->vertical_container);
-	ui_element_destroy(test_application->horizontal_container);
 
 	ls_free(test_application->fps_text);
 
