@@ -121,7 +121,8 @@ void platform_window_set_size(PlatformWindow *window, int32 width, int32 height)
 Vector2u platform_window_get_size(const PlatformWindow *window) {
 	RECT rect;
 	GetWindowRect(window->window, &rect);
-	return vec2u(rect.right - rect.left, rect.bottom - rect.top);
+	// TODO: Find out why the height is 12 and 38 pixels too large
+	return vec2u((rect.right - rect.left) - 12, (rect.bottom - rect.top) - 38);
 }
 
 bool platform_window_is_visible(const PlatformWindow *window) {

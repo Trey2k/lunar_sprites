@@ -7,23 +7,22 @@
 #include "modules/ui/elements.h"
 #include "modules/ui/ui.h"
 
-static UIElementTheme DEFAULT_LABEL_THEME = {
-	.background_color = COLOR_DARK_GREY,
-	.border_color = COLOR_GREY,
-	.radius = 10,
-	.border_size = 2,
-	.font_color = COLOR_WHITE,
-	.font_size = 64,
-	.font = NULL,
-	.texture = NULL,
-};
-
 UIElement *ui_label_create(const Font *font, String text) {
 	UIElement *element = (UIElement *)ls_malloc(sizeof(UIElement));
 	element->type = UI_ELEMENT_TYPE_LABEL;
 	element->label.text = ls_str_copy(text);
 	element->label.theme = (UIElementTheme *)ls_malloc(sizeof(UIElementTheme));
-	*element->label.theme = DEFAULT_LABEL_THEME;
+	*element->label.theme = (UIElementTheme){
+		.background_color = COLOR_DARK_GREY,
+		.border_color = COLOR_GREY,
+		.radius = 10,
+		.border_size = 2,
+		.font_color = COLOR_WHITE,
+		.font_size = 64,
+		.font = NULL,
+		.texture = NULL,
+	};
+
 	element->label.render_lines = slice_create(16, true);
 	element->label.theme->font = font;
 	element->label.padding = 10;
