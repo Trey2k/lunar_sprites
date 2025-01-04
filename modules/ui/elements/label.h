@@ -3,15 +3,11 @@
 
 #include "core/core.h"
 
-#include "../theme.h"
 #include "modules/ui/elements.h"
-
-#define UI_LABEL_BUFFER_SIZE 1024
+#include "modules/ui/theme.h"
 
 typedef struct {
 	char *text;
-	char buffer[UI_LABEL_BUFFER_SIZE];
-
 	uint32 padding;
 
 	Slice *render_lines;

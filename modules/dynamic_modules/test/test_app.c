@@ -17,7 +17,13 @@ typedef struct {
 
 	float64 timer;
 
-	UIElement *label;
+	UIElement *label1;
+	UIElement *label2;
+	UIElement *label3;
+
+	UIElement *vertical_container;
+	UIElement *horizontal_container;
+
 	Font *font;
 
 	char *fps_text;
@@ -73,9 +79,20 @@ void test_app_start(void *user_data) {
 
 	LS_ASSERT(test_application->font);
 
-	test_application->label = ui_label_create(test_application->font, "Hello, World!", UI_ANCHOR_LEFT | UI_ANCHOR_RIGHT | UI_ANCHOR_CENTER);
+	test_application->label1 = ui_label_create(test_application->font, "Hello, World! #1", UI_ANCHOR_FILL);
+	test_application->label2 = ui_label_create(test_application->font, "Hello, World! #2", UI_ANCHOR_FILL);
+	test_application->label3 = ui_label_create(test_application->font, "Hello, World! #3", UI_ANCHOR_FILL);
 
-	ui_add_element(test_application->label);
+	test_application->vertical_container = ui_vertical_container_create(10, UI_ANCHOR_FILL);
+	test_application->horizontal_container = ui_horizontal_container_create(10, UI_ANCHOR_FILL);
+
+	ui_horizontal_container_add_child(test_application->horizontal_container, test_application->label2);
+	ui_horizontal_container_add_child(test_application->horizontal_container, test_application->label3);
+
+	ui_vertical_container_add_child(test_application->vertical_container, test_application->label1);
+	ui_vertical_container_add_child(test_application->vertical_container, test_application->horizontal_container);
+
+	ui_add_element(test_application->vertical_container);
 
 	test_application->sprite = renderer_create_sprite(test_application->renderer, "moon.png", vec2(0, 0), vec2(0.25, 0.25), 0.0);
 	Vector2u viewport_size = window_get_size(test_application->root_window);
@@ -89,7 +106,11 @@ void test_app_deinit(void *user_data) {
 	sprite_destroy(test_application->sprite);
 	camera_destroy(test_application->camera);
 	font_destroy(test_application->font);
-	ui_element_destroy(test_application->label);
+	ui_element_destroy(test_application->label1);
+	ui_element_destroy(test_application->label2);
+	ui_element_destroy(test_application->label3);
+	ui_element_destroy(test_application->vertical_container);
+	ui_element_destroy(test_application->horizontal_container);
 
 	ls_free(test_application->fps_text);
 

@@ -44,12 +44,20 @@ LS_EXPORT void ui_label_set_text(UIElement *element, String text);
 // Sets the theme of the label. The theme is copied.
 LS_EXPORT void ui_label_set_theme(UIElement *element, const UIElementTheme *theme);
 
-// VBoxContainer
-// A VBoxContainer is a UI element that arranges its children vertically.
-// LS_EXPORT UIElement *ui_container_vbox_create(Vector2u position);
-// // Adds a child to the VBoxContainer.
-// LS_EXPORT void ui_container_vbox_add_child(UIElement *element, UIElement *child);
-// // Removes a child from the VBoxContainer.
-// LS_EXPORT void ui_container_vbox_remove_child(UIElement *element, UIElement *child);
+// VerticalContaienr
+// A VerticalContaienr is a UI element that arranges its children vertically.
+LS_EXPORT UIElement *ui_vertical_container_create(uint32 spacing, uint32 anchors);
+// Adds a child to the VerticalContaienr.
+LS_EXPORT void ui_vertical_container_add_child(UIElement *element, UIElement *child);
+// Removes a child from the VerticalContaienr.
+LS_EXPORT void ui_vertical_container_remove_child(UIElement *element, UIElement *child);
+
+// HorizontalContainer
+// A HorizontalContainer is a UI element that arranges its children horizontally.
+LS_EXPORT UIElement *ui_horizontal_container_create(uint32 spacing, uint32 anchors);
+// Adds a child to the HorizontalContainer.
+LS_EXPORT void ui_horizontal_container_add_child(UIElement *element, UIElement *child);
+// Removes a child from the HorizontalContainer.
+LS_EXPORT void ui_horizontal_container_remove_child(UIElement *element, UIElement *child);
 
 #endif // UI_ELEMENTS_H

@@ -1,19 +1,25 @@
 #ifndef UI_ELEMENT_IMPL_H
 #define UI_ELEMENT_IMPL_H
 
-#include "../elements.h"
+#include "modules/ui/elements.h"
 
+#include "horizontal_container.h"
 #include "label.h"
+#include "vertical_container.h"
 
 typedef enum {
 	UI_ELEMENT_TYPE_NONE,
 	UI_ELEMENT_TYPE_LABEL,
+	UI_ELEMENT_TYPE_VERTICAL_CONTAINER,
+	UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER,
 } UIElementType;
 
 struct UIElement {
 	UIElementType type;
 	union {
 		UILabel label;
+		UIVerticalContainer vertical_container;
+		UIHorizontalContainer horizontal_container;
 	};
 
 	Vector2u position;

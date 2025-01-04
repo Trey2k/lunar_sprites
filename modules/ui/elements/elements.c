@@ -7,6 +7,12 @@ void ui_draw_element(UIElement *element, Vector2u outer_bounds, Vector2u inner_b
 		case UI_ELEMENT_TYPE_LABEL:
 			ui_draw_label(element, outer_bounds, inner_bounds);
 			break;
+		case UI_ELEMENT_TYPE_VERTICAL_CONTAINER:
+			ui_vertical_container_draw(element, outer_bounds, inner_bounds);
+			break;
+		case UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER:
+			ui_horizontal_container_draw(element, outer_bounds, inner_bounds);
+			break;
 		default:
 			ls_log_fatal("Unknown element type: %d\n", element->type);
 			break;
@@ -18,6 +24,12 @@ void ui_element_destroy(UIElement *element) {
 		case UI_ELEMENT_TYPE_LABEL:
 			ui_label_destroy(&element->label);
 			break;
+		case UI_ELEMENT_TYPE_VERTICAL_CONTAINER:
+			ui_vertical_container_destroy(&element->vertical_container);
+			break;
+		case UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER:
+			ui_horizontal_container_destroy(&element->horizontal_container);
+			break;
 		default:
 			ls_log_fatal("Unknown element type: %d\n", element->type);
 			break;
@@ -26,16 +38,6 @@ void ui_element_destroy(UIElement *element) {
 
 void ui_element_set_anchor(UIElement *element, uint32 anchors) {
 	element->anchors = anchors;
-}
-
-const UIElementTheme *ui_element_get_theme(const UIElement *element) {
-	switch (element->type) {
-		case UI_ELEMENT_TYPE_LABEL:
-			return element->label.theme;
-		default:
-			ls_log_fatal("Unknown element type: %d\n", element->type);
-			return NULL;
-	}
 }
 
 Vector2u ui_element_get_size(const UIElement *element) {
@@ -69,6 +71,12 @@ void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Ve
 	switch (element->type) {
 		case UI_ELEMENT_TYPE_LABEL: {
 			ui_label_calculate_size(element, outer_bounds, inner_bounds);
+		} break;
+		case UI_ELEMENT_TYPE_VERTICAL_CONTAINER: {
+			ui_vertical_container_calculate_size(element, outer_bounds, inner_bounds);
+		} break;
+		case UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER: {
+			ui_horizontal_container_calculate_size(element, outer_bounds, inner_bounds);
 		} break;
 		default:
 			ls_log_fatal("Unknown element type: %d\n", element->type);

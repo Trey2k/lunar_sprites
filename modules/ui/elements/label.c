@@ -51,18 +51,22 @@ void ui_label_set_theme(UIElement *element, const UIElementTheme *theme) {
 static void label_draw_lines(UIElement *label_elm, String text, Vector2u outer_bounds, Vector2u inner_bounds) {
 	UILabel *label = &label_elm->label;
 	size_t n_lines = slice_get_size(label->render_lines);
+	uint32 font_size = label->theme->font_size;
+	uint32 total_text_height = n_lines * font_size;
 	for (size_t i = 0; i < n_lines; i++) {
-		Vector2u rendor_pos = label_elm->position; //vec2u_add(l, vec2u(label->padding, label->padding));
+		Vector2u rendor_pos = label_elm->position;
+		// center the text vertically
+		rendor_pos.y += (label_elm->size.y / 2) - (total_text_height / 2);
 		rendor_pos.y += i * label->theme->font_size;
 
 		uint32 line_width = slice32_get(label->render_lines_width, i).u32;
 
 		switch (label->theme->text_alignment) {
 			case UI_TEXT_ALIGN_CENTER: {
-				rendor_pos.x = (label_elm->size.x / 2) - (line_width / 2);
+				rendor_pos.x = label_elm->position.x + (label_elm->size.x / 2) - (line_width / 2);
 			} break;
 			case UI_TEXT_ALIGN_RIGHT: {
-				rendor_pos.x = label_elm->size.x - line_width - label->padding;
+				rendor_pos.x = label_elm->position.x + label_elm->size.x - line_width;
 			} break;
 			case UI_TEXT_ALIGN_LEFT:
 			default:
