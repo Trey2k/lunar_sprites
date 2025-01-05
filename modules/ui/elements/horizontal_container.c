@@ -122,7 +122,11 @@ void ui_horizontal_container_draw(UIElement *element) {
 				total_width += child->size.x + container->spacing;
 			}
 
-			uint32 x_offset = (element->size.x - total_width) / 2;
+			uint32 x_offset = 0;
+			if (element->size.x > total_width) {
+				x_offset = (element->size.x - total_width) / 2;
+			}
+
 			Vector2u child_position = element->position;
 			child_position.x += x_offset;
 
@@ -140,7 +144,11 @@ void ui_horizontal_container_draw(UIElement *element) {
 				total_width += child->size.x + container->spacing;
 			}
 
-			uint32 x_offset = element->size.x - total_width;
+			uint32 x_offset = 0;
+			if (element->size.x > total_width) {
+				x_offset = element->size.x - total_width;
+			}
+
 			Vector2u child_position = element->position;
 			child_position.x += x_offset;
 

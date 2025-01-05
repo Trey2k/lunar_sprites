@@ -124,7 +124,11 @@ void ui_vertical_container_draw(UIElement *element) {
 				total_height += child->size.y + vertical_container->spacing;
 			}
 
-			uint32 y_offset = (element->size.y - total_height) / 2;
+			uint32 y_offset = 0;
+			if (element->size.y > total_height) {
+				y_offset = (element->size.y - total_height) / 2;
+			}
+
 			Vector2u child_position = element->position;
 			child_position.y += y_offset;
 
@@ -142,7 +146,11 @@ void ui_vertical_container_draw(UIElement *element) {
 				total_height += child->size.y + vertical_container->spacing;
 			}
 
-			uint32 y_offset = element->size.y - total_height;
+			uint32 y_offset = 0;
+			if (element->size.y > total_height) {
+				y_offset = element->size.y - total_height;
+			}
+
 			Vector2u child_position = element->position;
 			child_position.y += y_offset;
 

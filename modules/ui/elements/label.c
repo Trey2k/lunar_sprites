@@ -173,8 +173,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 				}
 			} break;
 			default: {
-				// Find the last character before the max width
-
+				failed = true;
 			} break;
 		};
 		text_size = ui_get_text_size(theme, l_text);
@@ -190,7 +189,8 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 			if (text_size.x > max_x) {
 				max_x = text_size.x;
 			}
-			break;
+			// Exit the loop
+			text_size = vec2u(0, 0);
 		}
 	}
 
