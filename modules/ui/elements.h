@@ -6,7 +6,7 @@
 
 typedef struct UIElement UIElement;
 
-void ui_draw_element(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds);
+void ui_draw_element(UIElement *element);
 
 // Element Anchors
 #define UI_ANCHOR_TOP 0x01 // 0000 0001
@@ -15,6 +15,33 @@ void ui_draw_element(UIElement *element, Vector2u outer_bounds, Vector2u inner_b
 #define UI_ANCHOR_RIGHT 0x08 // 0000 1000
 #define UI_ANCHOR_CENTER 0x10 // 0001 0000
 #define UI_ANCHOR_FILL 0x0F // 0000 1111
+
+typedef enum {
+	UI_LAYOUT_MODE_NONE,
+	UI_LAYOUT_MODE_POSITION,
+	UI_LAYOUT_MODE_ANCHOR,
+	UI_LAYOUT_MODE_CONTAINER,
+} UILayoutMode;
+
+typedef enum {
+	UI_TEXT_WRAP_NONE,
+	UI_TEXT_WRAP_WORD,
+	UI_TEXT_WRAP_CHAR,
+} UITextWrapMode;
+
+typedef enum {
+	UI_ALIGNMENT_BEGIN,
+	UI_ALIGNMENT_CENTER,
+	UI_ALIGNMENT_END,
+} UIAllignment;
+
+typedef struct {
+	UILayoutMode mode;
+	union {
+		Vector2u position;
+		uint32 anchors;
+	};
+} UILayout;
 
 // Destroys the given UI element.
 LS_EXPORT void ui_element_destroy(UIElement *element);
@@ -31,14 +58,14 @@ LS_EXPORT Vector2u ui_element_get_min_size(const UIElement *element);
 LS_EXPORT void ui_element_set_max_size(UIElement *element, Vector2u max_size);
 // Get the maximum size of the element.
 LS_EXPORT Vector2u ui_element_get_max_size(const UIElement *element);
-// Sets the anchor points of the element.
-LS_EXPORT void ui_element_set_anchor(UIElement *element, uint32 anchors);
+// Sets the layout of the element.
+LS_EXPORT void ui_element_set_layout(UIElement *element, UILayout layout);
 // Calculates the minimum size and position of the element based on the outer and inner bounds and anchor points.
 LS_EXPORT void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds);
 
 // Label
 // A label is a UI element that draws text within bounds, wrapping the text if it does not fit.
-LS_EXPORT UIElement *ui_label_create(const Font *font, String text, uint32 anchors);
+LS_EXPORT UIElement *ui_label_create(const Font *font, String text, UITextWrapMode wrap_mode);
 // Sets the text of the label.
 LS_EXPORT void ui_label_set_text(UIElement *element, String text);
 // Sets the theme of the label. The theme is copied.
@@ -46,7 +73,7 @@ LS_EXPORT void ui_label_set_theme(UIElement *element, const UIElementTheme *them
 
 // VerticalContaienr
 // A VerticalContaienr is a UI element that arranges its children vertically.
-LS_EXPORT UIElement *ui_vertical_container_create(uint32 spacing, uint32 anchors);
+LS_EXPORT UIElement *ui_vertical_container_create(uint32 spacing, UIAllignment alignment);
 // Adds a child to the VerticalContaienr.
 LS_EXPORT void ui_vertical_container_add_child(UIElement *element, UIElement *child);
 // Removes a child from the VerticalContaienr.
@@ -54,7 +81,7 @@ LS_EXPORT void ui_vertical_container_remove_child(UIElement *element, UIElement 
 
 // HorizontalContainer
 // A HorizontalContainer is a UI element that arranges its children horizontally.
-LS_EXPORT UIElement *ui_horizontal_container_create(uint32 spacing, uint32 anchors);
+LS_EXPORT UIElement *ui_horizontal_container_create(uint32 spacing, UIAllignment alignment);
 // Adds a child to the HorizontalContainer.
 LS_EXPORT void ui_horizontal_container_add_child(UIElement *element, UIElement *child);
 // Removes a child from the HorizontalContainer.

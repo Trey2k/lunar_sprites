@@ -12,6 +12,7 @@ typedef struct {
 
 	Slice *render_lines;
 	Slice32 *render_lines_width;
+	UITextWrapMode wrap_mode;
 
 	Vector2u prev_inner_bounds;
 	Vector2u prev_outer_bounds;
@@ -19,7 +20,7 @@ typedef struct {
 	UIElementTheme *theme;
 } UILabel;
 
-void ui_draw_label(UIElement *label, Vector2u outer_bounds, Vector2u inner_bounds);
+void ui_draw_label(UIElement *label);
 void ui_label_destroy(UILabel *label);
 
 void ui_label_calculate_size(UIElement *label, Vector2u outer_bounds, Vector2u inner_bounds);

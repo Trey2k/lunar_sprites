@@ -9,12 +9,12 @@
 typedef struct {
 	uint32 spacing;
 	Slice *children;
-	Slice32 *child_bounds;
+	UIAllignment alignment;
 } UIVerticalContainer;
 
 void ui_vertical_container_destroy(UIVerticalContainer *container);
 
-void ui_vertical_container_draw(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds);
+void ui_vertical_container_draw(UIElement *element);
 void ui_vertical_container_calculate_size(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds);
 
 #endif // UI_VERTICAL_CONTAINER_H

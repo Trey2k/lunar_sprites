@@ -64,7 +64,10 @@ static void ui_on_update(float64 delta_time) {
 	for (size_t i = 0; i < n_elements; i++) {
 		UIElement *element = slice_get(ui_renderer.elements, i).ptr;
 		// Root elements bounds are the window size.
-		ui_draw_element(element, outer_bounds, inner_bounds);
+
+		// Updated element size and position
+		ui_element_calculate_position(element, outer_bounds, inner_bounds);
+		ui_draw_element(element);
 	}
 
 	ui_flush_batch();

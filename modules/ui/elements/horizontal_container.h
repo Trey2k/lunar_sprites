@@ -9,11 +9,11 @@
 typedef struct {
 	uint32 spacing;
 	Slice *children;
-	Slice32 *child_bounds;
+	UIAllignment alignment;
 } UIHorizontalContainer;
 
 void ui_horizontal_container_destroy(UIHorizontalContainer *container);
-void ui_horizontal_container_draw(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds);
+void ui_horizontal_container_draw(UIElement *element);
 void ui_horizontal_container_calculate_size(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds);
 
 #endif // UI_HORIZONTAL_CONTAINER_H

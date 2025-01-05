@@ -79,12 +79,12 @@ void test_app_start(void *user_data) {
 
 	LS_ASSERT(test_application->font);
 
-	test_application->label1 = ui_label_create(test_application->font, "Hello, World! #1", UI_ANCHOR_FILL);
-	test_application->label2 = ui_label_create(test_application->font, "Hello, World! #2", UI_ANCHOR_CENTER);
-	test_application->label3 = ui_label_create(test_application->font, "Hello, World! #3", UI_ANCHOR_FILL);
+	test_application->label1 = ui_label_create(test_application->font, "Hello, World! #1", UI_TEXT_WRAP_WORD);
+	test_application->label2 = ui_label_create(test_application->font, "Hello, World! #2", UI_TEXT_WRAP_WORD);
+	test_application->label3 = ui_label_create(test_application->font, "Hello, World! #3", UI_TEXT_WRAP_WORD);
 
-	test_application->vertical_container = ui_vertical_container_create(10, UI_ANCHOR_FILL);
-	test_application->horizontal_container = ui_horizontal_container_create(10, UI_ANCHOR_FILL);
+	test_application->vertical_container = ui_vertical_container_create(10, UI_ALIGNMENT_CENTER);
+	test_application->horizontal_container = ui_horizontal_container_create(10, UI_ALIGNMENT_CENTER);
 
 	ui_horizontal_container_add_child(test_application->horizontal_container, test_application->label2);
 	ui_horizontal_container_add_child(test_application->horizontal_container, test_application->label3);

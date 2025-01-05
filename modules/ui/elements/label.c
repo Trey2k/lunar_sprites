@@ -7,7 +7,7 @@
 #include "modules/ui/elements.h"
 #include "modules/ui/ui.h"
 
-UIElement *ui_label_create(const Font *font, String text, uint32 anchors) {
+UIElement *ui_label_create(const Font *font, String text, UITextWrapMode wrap_mode) {
 	UIElement *element = (UIElement *)ls_malloc(sizeof(UIElement));
 	element->type = UI_ELEMENT_TYPE_LABEL;
 	element->label.text = ls_str_copy(text);
@@ -24,13 +24,16 @@ UIElement *ui_label_create(const Font *font, String text, uint32 anchors) {
 		.text_alignment = UI_TEXT_ALIGN_CENTER,
 	};
 
+	element->label.wrap_mode = wrap_mode;
+
 	element->label.render_lines = slice_create(16, true);
 	element->label.render_lines_width = slice32_create(16);
 
 	element->label.theme->font = font;
 	element->label.padding = 10;
 
-	element->anchors = anchors;
+	element->layout.mode = UI_LAYOUT_MODE_ANCHOR;
+	element->layout.anchors = UI_ANCHOR_TOP | UI_ANCHOR_LEFT;
 	element->min_size = vec2u(0, 0);
 	element->max_size = vec2u(0, 0);
 
@@ -48,7 +51,7 @@ void ui_label_set_theme(UIElement *element, const UIElementTheme *theme) {
 	*element->label.theme = *theme;
 }
 
-static void label_draw_lines(UIElement *label_elm, String text, Vector2u outer_bounds, Vector2u inner_bounds) {
+static void label_draw_lines(UIElement *label_elm, String text) {
 	UILabel *label = &label_elm->label;
 	size_t n_lines = slice_get_size(label->render_lines);
 	uint32 font_size = label->theme->font_size;
@@ -78,7 +81,7 @@ static void label_draw_lines(UIElement *label_elm, String text, Vector2u outer_b
 	}
 }
 
-void ui_draw_label(UIElement *label_elm, Vector2u outer_bounds, Vector2u inner_bounds) {
+void ui_draw_label(UIElement *label_elm) {
 	// Only draw the background if it has an alpha value
 	UILabel *label = &label_elm->label;
 	Vector2u label_size = label_elm->size;
@@ -97,7 +100,7 @@ void ui_draw_label(UIElement *label_elm, Vector2u outer_bounds, Vector2u inner_b
 		}
 	}
 
-	label_draw_lines(label_elm, label->text, outer_bounds, inner_bounds);
+	label_draw_lines(label_elm, label->text);
 }
 
 void ui_label_set_text(UIElement *element, String text) {
@@ -113,70 +116,82 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 	size_t text_len = ls_str_length(label_elm->label.text);
 	Vector2u text_size = ui_get_text_size(label_elm->label.theme, label_elm->label.text);
 
-	// Text does not fit on one line, split it up
-	char *l_text = label_elm->label.text;
 	uint32 used_y = 0;
 	uint32 max_x = 0;
+
+	char *l_text = label_elm->label.text;
 	while (text_size.x > max_size.x) {
-		// Try to split the text at a space character first
-		bool split_on_space = false;
-		for (size_t i = 0; i < text_len; i++) {
-			if (l_text[text_len - i] == ' ') {
-				l_text[text_len - i] = '\0';
-				text_size = ui_get_text_size(theme, l_text);
-				l_text[text_len - i] = ' ';
-				if (text_size.x <= max_size.x) {
-					// The line now fits
-					char *new_line = ls_malloc(text_len - i);
-					ls_str_copy_to(new_line, l_text, text_len - i);
-					new_line[text_len - i] = '\0';
-					slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
-					slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
-					// Add 1 to skip the space character
-					l_text = &l_text[(text_len - i) + 1];
-					used_y += text_size.y;
-					max_x = max_x < text_size.x ? text_size.x : max_x;
-					split_on_space = true;
-					break;
+		bool failed = false;
+		switch (label_elm->label.wrap_mode) {
+			case UI_TEXT_WRAP_WORD: {
+				// Find the last space before the max width
+				for (size_t i = 0; i < text_len; i++) {
+					if (l_text[text_len - i] == ' ') {
+						l_text[text_len - i] = '\0';
+						Vector2u line_size = ui_get_text_size(theme, l_text);
+						l_text[text_len - i] = ' ';
+						if (line_size.x < max_size.x) {
+							char *new_line = ls_malloc(text_len - i);
+							ls_str_copy_to(new_line, l_text, text_len - i);
+							new_line[text_len - i] = '\0';
+							slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+							slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, line_size.x));
+							l_text += (text_len - i) + 1;
+							text_len -= i;
+							used_y += line_size.y;
+							if (line_size.x > max_x) {
+								max_x = line_size.x;
+							}
+							break;
+						}
+					}
 				}
-			}
-		}
-
-		// We failed to split on a space, so split on the last character that fits
-		if (!split_on_space) {
-			for (size_t i = 0; i < text_len; i++) {
-				char old_c = l_text[text_len - i];
-				l_text[text_len - i] = '\0';
-				text_size = ui_get_text_size(theme, l_text);
-				l_text[text_len - i] = old_c;
-				if (text_size.x <= max_size.x) {
-					// The line now fits
-					char *new_line = ls_malloc(text_len - i);
-					new_line[text_len - i] = '\0';
-					ls_str_copy_to(new_line, l_text, text_len - i);
-					slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
-					slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
-					l_text = &l_text[text_len - i];
-					used_y += text_size.y;
-					max_x = max_x < text_size.x ? text_size.x : max_x;
-					break;
+				failed = true;
+			} break;
+			case UI_TEXT_WRAP_CHAR: {
+				for (size_t i = 0; i < text_len; i++) {
+					if (l_text[text_len - i] == ' ') {
+						char old_c = l_text[text_len - i];
+						l_text[text_len - i] = '\0';
+						Vector2u line_size = ui_get_text_size(theme, l_text);
+						l_text[text_len - i] = old_c;
+						if (line_size.x < max_size.x) {
+							char *new_line = ls_malloc(text_len - i);
+							ls_str_copy_to(new_line, l_text, text_len - i);
+							new_line[text_len - i] = '\0';
+							slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+							slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, line_size.x));
+							l_text += (text_len - i);
+							text_len -= i;
+							used_y += line_size.y;
+							if (line_size.x > max_x) {
+								max_x = line_size.x;
+							}
+							break;
+						}
+					}
 				}
-			}
-		}
+			} break;
+			default: {
+				// Find the last character before the max width
 
+			} break;
+		};
 		text_size = ui_get_text_size(theme, l_text);
 		if (text_size.y + used_y > max_size.y) {
 			break;
 		}
-	}
 
-	if (text_size.y + used_y <= max_size.y) {
-		// The remaining text fits on one line
-		char *new_line = ls_str_copy(l_text);
-		slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
-		slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
-		used_y += text_size.y;
-		max_x = max_x < text_size.x ? text_size.x : max_x;
+		if (failed || text_size.x < max_size.x) {
+			char *new_line = ls_str_copy(l_text);
+			slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+			slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
+			used_y += text_size.y;
+			if (text_size.x > max_x) {
+				max_x = text_size.x;
+			}
+			break;
+		}
 	}
 
 	return vec2u(max_x, used_y);
@@ -193,6 +208,8 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 			vec2u_equals(label_elm->label.prev_outer_bounds, outer_bounds)) {
 		return;
 	}
+
+	// Otherwise, recalculate the text size and render lines
 	label_elm->label.prev_inner_bounds = inner_bounds;
 	label_elm->label.prev_outer_bounds = outer_bounds;
 
@@ -213,12 +230,11 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 		max_size.y = label_elm->min_size.y;
 	}
 
-	// Otherwise, recalculate the text size and render lines
 	slice_clear(label_elm->label.render_lines);
 	slice32_clear(label_elm->label.render_lines_width);
 
 	Vector2u text_size = ui_get_text_size(theme, label_elm->label.text);
-	if (text_size.x > max_size.x) {
+	if (text_size.x > max_size.x && label_elm->label.wrap_mode != UI_TEXT_WRAP_NONE) {
 		// Text does not fit on one line, split it up
 		text_size = ui_label_split_lines(label_elm, max_size);
 		label_elm->size = vec2u_add(text_size, vec2u(label_elm->label.padding, label_elm->label.padding));

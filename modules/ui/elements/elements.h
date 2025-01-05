@@ -28,7 +28,7 @@ struct UIElement {
 	Vector2u min_size;
 	Vector2u max_size;
 
-	uint32 anchors;
+	UILayout layout;
 };
 
 #endif // UI_ELEMENT_IMPL_H
