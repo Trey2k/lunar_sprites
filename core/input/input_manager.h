@@ -23,11 +23,11 @@ void input_handle_window_close(InputManager *input_manager);
 void input_handle_press(InputManager *input_manager, LSKeycode keycode);
 void input_handle_release(InputManager *input_manager, LSKeycode keycode);
 
-void input_handle_mouse_press(InputManager *input_manager, LSMouseButton button, Vector2i position);
-void input_handle_mouse_release(InputManager *input_manager, LSMouseButton button, Vector2i position);
-void input_handle_mouse_move(InputManager *input_manager, Vector2i position);
-void input_handle_mouse_enter(InputManager *input_manager, Vector2i position);
-void input_handle_mouse_leave(InputManager *input_manager, Vector2i position);
+void input_handle_mouse_press(InputManager *input_manager, LSMouseButton button, Vector2u position);
+void input_handle_mouse_release(InputManager *input_manager, LSMouseButton button, Vector2u position);
+void input_handle_mouse_move(InputManager *input_manager, Vector2u position);
+void input_handle_mouse_enter(InputManager *input_manager, Vector2u position);
+void input_handle_mouse_leave(InputManager *input_manager, Vector2u position);
 void input_handle_resize(InputManager *input_manager, Vector2u size);
 
 bool input_is_ready(const InputManager *input_manager);
@@ -42,6 +42,6 @@ LS_EXPORT bool input_is_mouse_just_pressed(const InputManager *input_manager, LS
 LS_EXPORT bool input_is_mouse_released(const InputManager *input_manager, LSMouseButton button);
 LS_EXPORT bool input_is_mouse_just_released(const InputManager *input_manager, LSMouseButton button);
 
-Vector2i input_get_mouse_position(const InputManager *input_manager);
+Vector2u input_get_mouse_position(const InputManager *input_manager);
 
 #endif // INPUT_MANAGER_H

@@ -30,7 +30,7 @@ typedef enum {
 typedef struct {
 	EventMouseType type;
 	LSMouseButton button;
-	Vector2i position;
+	Vector2u position;
 
 	const LSWindow *window;
 } EventMouse;

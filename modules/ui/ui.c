@@ -2,7 +2,7 @@
 
 #include "core/debug.h"
 #include "core/types/slice.h"
-#include "elements.h"
+#include "elements/elements.h"
 
 #include "renderer/buffers.h"
 #include "renderer/renderer.h"
@@ -73,6 +73,34 @@ static void ui_on_update(float64 delta_time) {
 	ui_flush_batch();
 }
 
+static void ui_mouse_event_handler(Event *event) {
+	Vector2u mouse_pos = event->mouse.position;
+	for (size_t i = 0; i < slice_get_size(ui_renderer.elements); i++) {
+		UIElement *element = slice_get(ui_renderer.elements, i).ptr;
+		if (mouse_pos.x >= element->position.x && mouse_pos.x <= element->position.x + element->size.x &&
+				mouse_pos.y >= element->position.y && mouse_pos.y <= element->position.y + element->size.y) {
+			ui_element_handle_event(element, event);
+		}
+
+		if (event->handled) {
+			break;
+		}
+	}
+}
+
+static void ui_event_handler(Event *event, void *user_data) {
+	switch (event->type) {
+		case EVENT_MOUSE: {
+			ui_mouse_event_handler(event);
+		} break;
+		case EVENT_KEY: {
+			// TODO: Handle key events
+		} break;
+		default:
+			break;
+	}
+}
+
 void ui_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
 	ui_renderer.shader = renderer_create_shader(renderer, UI_SHADER_SOURCE, ls_str_length(UI_SHADER_SOURCE));
 
@@ -81,16 +109,10 @@ void ui_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
 	vertex_buffer_set_layout(ui_renderer.vbo, vbo_layout);
 
 	ui_renderer.ibo = renderer_create_index_buffer(renderer, NULL, UI_BATCH_IBO_MAX_SIZE, BUFFER_USAGE_DYNAMIC);
-
 	ui_renderer.vao = renderer_create_vertex_array(renderer);
-
 	ui_renderer.vbo_size = 0;
 	ui_renderer.ibo_size = 0;
 	ui_renderer.vert_count = 0;
-
-	for (size_t i = 0; i < 16; i++) {
-		ui_renderer.texture[i] = NULL;
-	}
 
 	ui_renderer.renderer = renderer;
 	ui_renderer.window = window;
@@ -98,6 +120,7 @@ void ui_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
 
 	// Called before the main frame for now, might change later.
 	ls_register_update_callback(ui_on_update, true);
+	event_manager_add_handler(core_get_event_manager(core), ui_event_handler, NULL);
 }
 
 void ui_deinit() {

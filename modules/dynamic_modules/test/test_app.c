@@ -143,7 +143,7 @@ void test_app_update(float64 delta_time, void *user_data) {
 
 	sprite_draw(test_application->sprite);
 
-	if (test_application->timer > 1.0) {
+	if (test_application->timer > 30.0) {
 		ls_printf("FPS: %f\n", 1.0 / delta_time);
 		ls_free(test_application->fps_text);
 		test_application->fps_text = ls_str_format("FPS: %f", 1.0 / delta_time);

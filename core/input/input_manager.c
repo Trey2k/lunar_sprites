@@ -24,7 +24,7 @@ struct InputManager {
 	ButtonState mouse_button_state[LS_MOUSE_BUTTON_LAST + 1];
 	ButtonState previous_mouse_button_state[LS_MOUSE_BUTTON_LAST + 1];
 
-	Vector2i mouse_position;
+	Vector2u mouse_position;
 
 	const EventManager *event_manager;
 
@@ -175,7 +175,7 @@ bool input_is_key_just_released(const InputManager *input_manager, LSKeycode key
 	return !input_manager->key_state[keycode].pressed && input_manager->previous_key_state[keycode].pressed;
 }
 
-void input_handle_mouse_press(InputManager *input_manager, LSMouseButton button, Vector2i position) {
+void input_handle_mouse_press(InputManager *input_manager, LSMouseButton button, Vector2u position) {
 	LS_ASSERT(button >= 0 && button <= LS_MOUSE_BUTTON_LAST);
 
 	if (!input_manager->mouse_button_state[button].pressed) {
@@ -196,7 +196,7 @@ void input_handle_mouse_press(InputManager *input_manager, LSMouseButton button,
 	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_mouse_release(InputManager *input_manager, LSMouseButton button, Vector2i position) {
+void input_handle_mouse_release(InputManager *input_manager, LSMouseButton button, Vector2u position) {
 	LS_ASSERT(button >= 0 && button <= LS_MOUSE_BUTTON_LAST);
 
 	input_manager->mouse_button_state[button].pressed = false;
@@ -212,7 +212,7 @@ void input_handle_mouse_release(InputManager *input_manager, LSMouseButton butto
 	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_mouse_move(InputManager *input_manager, Vector2i position) {
+void input_handle_mouse_move(InputManager *input_manager, Vector2u position) {
 	input_manager->mouse_position = position;
 
 	Event e;
@@ -225,7 +225,7 @@ void input_handle_mouse_move(InputManager *input_manager, Vector2i position) {
 	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_mouse_enter(InputManager *input_manager, Vector2i position) {
+void input_handle_mouse_enter(InputManager *input_manager, Vector2u position) {
 	LS_ASSERT(input_manager->active_window);
 
 	input_manager->mouse_position = position;
@@ -240,7 +240,7 @@ void input_handle_mouse_enter(InputManager *input_manager, Vector2i position) {
 	event_manager_emit(input_manager->event_manager, &e);
 }
 
-void input_handle_mouse_leave(InputManager *input_manager, Vector2i position) {
+void input_handle_mouse_leave(InputManager *input_manager, Vector2u position) {
 	input_manager->mouse_position = position;
 
 	Event e;
@@ -277,6 +277,6 @@ bool input_is_mouse_just_released(const InputManager *input_manager, LSMouseButt
 	return !input_manager->mouse_button_state[button].pressed && input_manager->previous_mouse_button_state[button].pressed;
 }
 
-Vector2i ls_get_mouse_position(const InputManager *input_manager) {
+Vector2u ls_get_mouse_position(const InputManager *input_manager) {
 	return input_manager->mouse_position;
 }

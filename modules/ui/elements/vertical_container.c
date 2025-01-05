@@ -166,3 +166,32 @@ void ui_vertical_container_draw(UIElement *element) {
 			break;
 	};
 }
+
+static void ui_vertical_container_handle_mouse_event(UIElement *element, Event *event) {
+	LS_ASSERT(element->type == UI_ELEMENT_TYPE_VERTICAL_CONTAINER);
+
+	UIVerticalContainer *vertical_container = &element->vertical_container;
+	for (size_t i = 0; i < slice_get_size(vertical_container->children); i++) {
+		UIElement *child = slice_get(vertical_container->children, i).ptr;
+		if (event->mouse.position.x >= child->position.x && event->mouse.position.x <= child->position.x + child->size.x &&
+				event->mouse.position.y >= child->position.y && event->mouse.position.y <= child->position.y + child->size.y) {
+			ui_element_handle_event(child, event);
+		}
+
+		if (event->handled) {
+			break;
+		}
+	}
+}
+
+void ui_vertical_container_handle_event(UIElement *element, Event *event) {
+	LS_ASSERT(element->type == UI_ELEMENT_TYPE_VERTICAL_CONTAINER);
+
+	switch (event->type) {
+		case EVENT_MOUSE: {
+			ui_vertical_container_handle_mouse_event(element, event);
+		} break;
+		default:
+			break;
+	}
+}

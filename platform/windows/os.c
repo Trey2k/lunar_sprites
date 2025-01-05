@@ -79,49 +79,49 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 
 		case WM_MOUSEMOVE: {
 			input_handle_mouse_move(window->input_manager,
-					vec2i(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_LBUTTONDOWN: {
 			input_handle_mouse_press(window->input_manager, LS_MOUSE_BUTTON_LEFT,
-					vec2i(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_RBUTTONDOWN: {
 			input_handle_mouse_press(window->input_manager, LS_MOUSE_BUTTON_RIGHT,
-					vec2i(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_MBUTTONDOWN: {
 			input_handle_mouse_press(window->input_manager, LS_MOUSE_BUTTON_MIDDLE,
-					vec2i(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_LBUTTONUP: {
 			input_handle_mouse_release(window->input_manager, LS_MOUSE_BUTTON_LEFT,
-					vec2i(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_RBUTTONUP: {
 			input_handle_mouse_release(window->input_manager, LS_MOUSE_BUTTON_RIGHT,
-					vec2i(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_MBUTTONUP: {
 			input_handle_mouse_release(window->input_manager, LS_MOUSE_BUTTON_MIDDLE,
-					vec2i(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_MOUSELEAVE: {
 			input_handle_mouse_leave(window->input_manager,
-					vec2i(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 

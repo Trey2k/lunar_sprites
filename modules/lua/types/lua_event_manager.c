@@ -46,7 +46,7 @@ static void lua_push_event(lua_State *L, Event *event) {
 			lua_setfield(L, -2, "type");
 			lua_pushinteger(L, event->mouse.button);
 			lua_setfield(L, -2, "button");
-			lua_push_vector2i(L, event->mouse.position);
+			lua_push_vector2u(L, event->mouse.position);
 			lua_setfield(L, -2, "position");
 			lua_push_const_window(L, event->mouse.window);
 			lua_setfield(L, -2, "window");

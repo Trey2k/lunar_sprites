@@ -296,7 +296,7 @@ static int mousedown_callback(int eventType, const EmscriptenMouseEvent *e, void
 
 	web_event->type = WEBW_EVENT_MOUSEDOWN;
 	web_event->mbutton = web_map_mbutton(e->button);
-	web_event->position = vec2i(e->clientX, e->clientY);
+	web_event->position = vec2u(e->clientX, e->clientY);
 
 	slice_append(window->events, SLICE_VAL(ptr, web_event));
 
@@ -310,7 +310,7 @@ static int mouseup_callback(int eventType, const EmscriptenMouseEvent *e, void *
 
 	web_event->type = WEBW_EVENT_MOUSEUP;
 	web_event->mbutton = web_map_mbutton(e->button);
-	web_event->position = vec2i(e->clientX, e->clientY);
+	web_event->position = vec2u(e->clientX, e->clientY);
 
 	slice_append(window->events, SLICE_VAL(ptr, web_event));
 	return 0;
@@ -322,7 +322,7 @@ static int mousemove_callback(int eventType, const EmscriptenMouseEvent *e, void
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
 
 	web_event->type = WEBW_EVENT_MOUSEMOVE;
-	web_event->position = vec2i(e->clientX, e->clientY);
+	web_event->position = vec2u(e->clientX, e->clientY);
 
 	slice_append(window->events, SLICE_VAL(ptr, web_event));
 	return 0;
@@ -334,7 +334,7 @@ static int mouseenter_callback(int eventType, const EmscriptenMouseEvent *e, voi
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
 
 	web_event->type = WEBW_EVENT_MOUSEENTER;
-	web_event->position = vec2i(e->clientX, e->clientY);
+	web_event->position = vec2u(e->clientX, e->clientY);
 
 	slice_append(window->events, SLICE_VAL(ptr, web_event));
 	return 0;
@@ -346,7 +346,7 @@ static int mouseleave_callback(int eventType, const EmscriptenMouseEvent *e, voi
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
 
 	web_event->type = WEBW_EVENT_MOUSELEAVE;
-	web_event->position = vec2i(e->clientX, e->clientY);
+	web_event->position = vec2u(e->clientX, e->clientY);
 
 	slice_append(window->events, SLICE_VAL(ptr, web_event));
 	return 0;
