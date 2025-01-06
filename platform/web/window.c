@@ -50,12 +50,11 @@ typedef struct {
 
 } WebWindowEvent;
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, const LSWindow *parent) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, LSWindow *parent) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 
 	window->title = config.title;
-	window->width = config.size.x;
-	window->height = config.size.y;
+	window->size = config.size;
 	window->position = config.position;
 	window->root_window = config.root_window;
 	window->hidden = false;
@@ -223,19 +222,24 @@ void platform_window_set_title(PlatformWindow *window, const char *title) {
 	window->title = title;
 }
 
-void platform_window_set_size(PlatformWindow *window, int32 width, int32 height) {
+void platform_window_set_min_size(PlatformWindow *window, Vector2u size) {
 	LS_ASSERT(window);
 
-	window->width = width;
-	window->height = height;
+	LS_ASSERT_MSG(false, "%s", "Not implemented");
+}
 
-	set_canvas_size(window->canvas_id, width, height);
+void platform_window_set_size(PlatformWindow *window, Vector2u size) {
+	LS_ASSERT(window);
+
+	window->size = size;
+
+	set_canvas_size(window->canvas_id, size.x, size.y);
 }
 
 Vector2u platform_window_get_size(const PlatformWindow *window) {
 	LS_ASSERT(window);
 
-	return vec2u(window->width, window->height);
+	return window->size;
 }
 
 bool platform_window_is_visible(const PlatformWindow *window) {

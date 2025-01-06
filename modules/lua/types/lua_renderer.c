@@ -14,8 +14,8 @@ static int lua_renderer_new_window(lua_State *L) {
 	WindowConfig config = { 0 };
 
 	// sane defaults
-	config.position = vec2i(0, 0);
-	config.size = vec2i(640, 480);
+	config.position = vec2u(0, 0);
+	config.size = vec2u(640, 480);
 	config.title = "Lunar Sprits";
 	config.fullscreen = false;
 	config.hidden = false;
@@ -24,12 +24,12 @@ static int lua_renderer_new_window(lua_State *L) {
 	if (lua_istable(L, 2)) {
 		lua_getfield(L, 2, "position");
 		if (lua_is_vector2i(L, -1)) {
-			config.position = lua_to_vector2i(L, -1);
+			config.position = lua_to_vector2u(L, -1);
 		}
 
 		lua_getfield(L, 2, "size");
 		if (lua_is_vector2i(L, -1)) {
-			config.size = lua_to_vector2i(L, -1);
+			config.size = lua_to_vector2u(L, -1);
 		}
 
 		lua_getfield(L, 2, "title");

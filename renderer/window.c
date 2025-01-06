@@ -92,11 +92,18 @@ void window_set_fullscreen(LSWindow *window, bool fullscreen) {
 	platform_window_set_fullscreen(window->platform_window, fullscreen);
 }
 
-void window_set_size(LSWindow *window, int32 width, int32 height) {
+void window_set_min_size(LSWindow *window, Vector2u size) {
 	LS_ASSERT(window);
 	LS_ASSERT(window->platform_window);
 
-	platform_window_set_size(window->platform_window, width, height);
+	platform_window_set_min_size(window->platform_window, size);
+}
+
+void window_set_size(LSWindow *window, Vector2u size) {
+	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
+
+	platform_window_set_size(window->platform_window, size);
 }
 
 Vector2u window_get_size(const LSWindow *window) {

@@ -8,10 +8,9 @@
 #include <emscripten/html5.h>
 
 struct PlatformWindow {
-	int32 width;
-	int32 height;
+	Vector2u size;
 
-	Vector2i position;
+	Vector2u position;
 	String title;
 
 	bool fullscreen;

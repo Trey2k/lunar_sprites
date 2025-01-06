@@ -7,9 +7,9 @@
 
 void webgl_init_canvas(PlatformWindow *window) {
 	if (!window->root_window) {
-		new_canvas(window->canvas_id, window->width, window->height, window->position.x, window->position.y);
+		new_canvas(window->canvas_id, window->size.x, window->size.y, window->position.x, window->position.y);
 	} else {
-		set_canvas_size(window->canvas_id, window->width, window->height);
+		set_canvas_size(window->canvas_id, window->size.x, window->size.y);
 		set_canvas_position(window->canvas_id, window->position.x, window->position.y);
 	}
 

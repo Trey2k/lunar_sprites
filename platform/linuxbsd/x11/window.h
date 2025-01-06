@@ -35,7 +35,8 @@ void x11_window_destroy(X11Window *window);
 void x11_window_poll(X11Window *window);
 
 void x11_window_set_title(X11Window *window, String title);
-void x11_window_set_size(X11Window *window, int32 width, int32 height);
+void x11_window_set_min_size(X11Window *window, Vector2u size);
+void x11_window_set_size(X11Window *window, Vector2u size);
 Vector2u x11_window_get_size(const X11Window *window);
 
 void x11_window_set_fullscreen(X11Window *window, bool fullscreen);

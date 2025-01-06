@@ -14,8 +14,9 @@ typedef int LSNativeWindow;
 #endif // LINUXBSD_ENABLED
 
 typedef struct {
-	Vector2i position;
-	Vector2i size;
+	Vector2u position;
+	Vector2u size;
+	Vector2u min_size;
 
 	String title;
 
@@ -33,7 +34,8 @@ LS_EXPORT LSNativeWindow window_get_native_window(const LSWindow *window);
 LS_EXPORT void window_poll(const LSWindow *window);
 
 LS_EXPORT void window_set_title(LSWindow *window, const char *title);
-LS_EXPORT void window_set_size(LSWindow *window, int32 width, int32 height);
+LS_EXPORT void window_set_min_size(LSWindow *window, Vector2u size);
+LS_EXPORT void window_set_size(LSWindow *window, Vector2u size);
 LS_EXPORT Vector2u window_get_size(const LSWindow *window);
 
 LS_EXPORT void window_make_current(const LSWindow *window);

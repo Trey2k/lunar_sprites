@@ -13,7 +13,7 @@
 
 typedef struct PlatformWindow PlatformWindow;
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, const LSWindow *parent);
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, LSWindow *parent);
 void platform_destroy_window(PlatformWindow *window);
 
 LSNativeWindow platform_window_get_native_window(const PlatformWindow *window);
@@ -21,7 +21,8 @@ LSNativeWindow platform_window_get_native_window(const PlatformWindow *window);
 void platform_window_poll(PlatformWindow *window);
 
 void platform_window_set_title(PlatformWindow *window, String title);
-void platform_window_set_size(PlatformWindow *window, int32 width, int32 height);
+void platform_window_set_min_size(PlatformWindow *window, Vector2u size);
+void platform_window_set_size(PlatformWindow *window, Vector2u size);
 Vector2u platform_window_get_size(const PlatformWindow *window);
 
 void platform_window_set_fullscreen(PlatformWindow *window, bool fullscreen);

@@ -6,12 +6,12 @@
 #include <windows.h>
 #include <windowsx.h>
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, const LSWindow *parent) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, LSWindow *parent) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 
 	window->title = config.title;
-	window->width = config.size.x;
-	window->height = config.size.y;
+	window->size = config.size;
+	window->min_size = config.min_size;
 	window->hidden = true;
 	window->fullscreen = false;
 	window->parent = parent;
@@ -23,7 +23,7 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 			LS_WIN_CLASS_NAME,
 			window->title,
 			WS_OVERLAPPEDWINDOW,
-			CW_USEDEFAULT, CW_USEDEFAULT, window->width, window->height,
+			CW_USEDEFAULT, CW_USEDEFAULT, window->size.x, window->size.y,
 			NULL, NULL, NULL, window);
 	if (!window->window) {
 		ls_log_fatal("Failed to create window!\n");
@@ -78,7 +78,7 @@ void platform_window_set_fullscreen(PlatformWindow *window, bool fullscreen) {
 				SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 	} else {
 		SetWindowLong(window->window, GWL_STYLE, WS_OVERLAPPEDWINDOW);
-		SetWindowPos(window->window, NULL, 0, 0, window->width, window->height,
+		SetWindowPos(window->window, NULL, 0, 0, window->size.x, window->size.y,
 				SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 	}
 
@@ -110,19 +110,19 @@ void platform_window_set_title(PlatformWindow *window, String title) {
 	window->title = title;
 }
 
-void platform_window_set_size(PlatformWindow *window, int32 width, int32 height) {
+void platform_window_set_min_size(PlatformWindow *window, Vector2u size) {
+	window->min_size = size;
+}
+
+void platform_window_set_size(PlatformWindow *window, Vector2u size) {
 	RECT rect;
 	GetWindowRect(window->window, &rect);
-	MoveWindow(window->window, rect.left, rect.top, width, height, TRUE);
-	window->width = width;
-	window->height = height;
+	MoveWindow(window->window, rect.left, rect.top, size.x, size.y, TRUE);
+	window->size = size;
 }
 
 Vector2u platform_window_get_size(const PlatformWindow *window) {
-	RECT rect;
-	GetWindowRect(window->window, &rect);
-	// TODO: Find out why the height is 12 and 38 pixels too large
-	return vec2u((rect.right - rect.left) - 12, (rect.bottom - rect.top) - 38);
+	return window->size;
 }
 
 bool platform_window_is_visible(const PlatformWindow *window) {

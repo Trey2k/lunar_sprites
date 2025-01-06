@@ -28,10 +28,9 @@ static int lua_window_set_title(lua_State *L) {
 
 static int lua_window_set_size(lua_State *L) {
 	LSWindow *window = lua_check_window(L, 1);
-	int32 width = luaL_checkinteger(L, 2);
-	int32 height = luaL_checkinteger(L, 3);
+	Vector2u size = lua_check_vector2u(L, 2);
 
-	window_set_size(window, width, height);
+	window_set_size(window, size);
 
 	return 0;
 }

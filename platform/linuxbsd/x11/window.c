@@ -47,8 +47,11 @@ X11Window *x11_window_create(const X11Server *server, WindowConfig config) {
 	}
 
 	x11_window_set_fullscreen(window, config.fullscreen);
-
 	x11_window_set_title(window, window->title);
+
+	if (config.min_size.x > 0 && config.min_size.y > 0) {
+		x11_window_set_min_size(window, config.min_size);
+	}
 
 	return window;
 }
@@ -71,8 +74,18 @@ void x11_window_set_title(X11Window *window, String title) {
 	XStoreName(window->display, window->window, title);
 }
 
-void x11_window_set_size(X11Window *window, int32 width, int32 height) {
-	XResizeWindow(window->display, window->window, width, height);
+void x11_window_set_min_size(X11Window *window, Vector2u size) {
+	XSizeHints *hints = XAllocSizeHints();
+	hints->flags = PMinSize;
+	hints->min_width = size.x;
+	hints->min_height = size.y;
+
+	XSetWMNormalHints(window->display, window->window, hints);
+	XFree(hints);
+}
+
+void x11_window_set_size(X11Window *window, Vector2u size) {
+	XResizeWindow(window->display, window->window, size.x, size.y);
 }
 
 Vector2u x11_window_get_size(const X11Window *window) {

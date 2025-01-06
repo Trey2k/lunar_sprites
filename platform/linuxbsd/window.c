@@ -12,7 +12,7 @@
 #include "platform/linuxbsd/x11/window.h"
 #endif
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, const LSWindow *parent) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, LSWindow *parent) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 	window->display_server = os->display_server;
 
@@ -130,11 +130,25 @@ void platform_window_set_title(PlatformWindow *window, String title) {
 	};
 }
 
-void platform_window_set_size(PlatformWindow *window, int32 width, int32 height) {
+void platform_window_set_min_size(PlatformWindow *window, Vector2u size) {
 	switch (window->display_server) {
 #if defined(X11_ENABLED)
 		case DISPLAY_SERVER_X11: {
-			x11_window_set_size(window->x11_window, width, height);
+			x11_window_set_min_size(window->x11_window, size);
+			break;
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+	};
+}
+
+void platform_window_set_size(PlatformWindow *window, Vector2u size) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			x11_window_set_size(window->x11_window, size);
 			break;
 		} break;
 #endif

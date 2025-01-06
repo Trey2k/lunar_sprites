@@ -8,8 +8,8 @@
 struct PlatformWindow {
 	HWND window;
 
-	int32 width;
-	int32 height;
+	Vector2u size;
+	Vector2u min_size;
 	String title;
 
 	bool fullscreen;

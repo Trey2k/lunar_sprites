@@ -53,8 +53,9 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 	test_application->should_stop = false;
 
 	const WindowConfig ROOT_WINDOW_CONFIG = {
-		.position = vec2i(0, 0),
-		.size = vec2i(1200, 800),
+		.position = vec2u(0, 0),
+		.size = vec2u(1200, 800),
+		.min_size = vec2u(1200, 800),
 		.title = "Lunar Sprites Test Application",
 		.fullscreen = false,
 		.hidden = false,

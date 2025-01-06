@@ -133,9 +133,18 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 		case WM_SIZE: {
 			input_set_active_window(window->input_manager, window->parent);
 
-			input_handle_resize(window->input_manager, vec2u(LOWORD(l_param), HIWORD(l_param)));
+			window->size = vec2u(LOWORD(l_param), HIWORD(l_param));
+
+			input_handle_resize(window->input_manager, window->size);
 
 			input_set_active_window(window->input_manager, NULL);
+			return 0;
+		} break;
+
+		case WM_GETMINMAXINFO: {
+			MINMAXINFO *min_max_info = (MINMAXINFO *)l_param;
+			min_max_info->ptMinTrackSize.x = window->min_size.x;
+			min_max_info->ptMinTrackSize.y = window->min_size.y;
 			return 0;
 		} break;
 	};
