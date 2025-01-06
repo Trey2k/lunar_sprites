@@ -48,7 +48,7 @@ typedef enum {
 
 typedef struct {
 	EventWindowType type;
-	Vector2i position;
+	Vector2u position;
 	Vector2u size;
 	const LSWindow *window;
 } EventWindow;

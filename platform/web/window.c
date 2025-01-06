@@ -46,7 +46,7 @@ typedef struct {
 		LSMouseButton mbutton;
 	};
 
-	Vector2i position;
+	Vector2u position;
 
 } WebWindowEvent;
 
