@@ -66,10 +66,16 @@ static void label_draw_lines(UIElement *label_elm, String text) {
 
 		switch (label->theme->text_alignment) {
 			case UI_TEXT_ALIGN_CENTER: {
-				rendor_pos.x = label_elm->position.x + (label_elm->size.x / 2) - (line_width / 2);
+				rendor_pos.x = label_elm->position.x;
+				if (line_width < label_elm->size.x) {
+					rendor_pos.x += (label_elm->size.x / 2) - (line_width / 2);
+				}
 			} break;
 			case UI_TEXT_ALIGN_RIGHT: {
-				rendor_pos.x = label_elm->position.x + label_elm->size.x - line_width;
+				rendor_pos.x = label_elm->position.x;
+				if (line_width < label_elm->size.x) {
+					rendor_pos.x += label_elm->size.x - line_width;
+				}
 			} break;
 			case UI_TEXT_ALIGN_LEFT:
 			default:
@@ -214,6 +220,7 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 	label_elm->label.prev_outer_bounds = outer_bounds;
 
 	Vector2u max_size = vec2u_sub(outer_bounds, inner_bounds);
+
 	if (label_elm->max_size.x > 0) {
 		max_size.x = label_elm->max_size.x;
 	}
@@ -246,6 +253,17 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 		label_elm->size = vec2u_add(text_size, vec2u(label_elm->label.padding, label_elm->label.padding));
 	}
 
+	// TODO: Add container layout settings
+	if (label_elm->layout.mode == UI_LAYOUT_MODE_CONTAINER) {
+		if (label_elm->layout.container_size.x > 0) {
+			label_elm->size.x = label_elm->layout.container_size.x;
+		}
+
+		if (label_elm->layout.container_size.y > 0) {
+			label_elm->size.y = label_elm->layout.container_size.y;
+		}
+	}
+
 	if (label_elm->min_size.y > 0 && label_elm->size.y < label_elm->min_size.y) {
 		label_elm->size.y = label_elm->min_size.y;
 	}
@@ -262,4 +280,11 @@ void ui_label_handle_event(UIElement *label_elm, Event *event) {
 	}
 
 	ls_printf("Label clicked: %s\n", label_elm->label.text);
+}
+
+void ui_label_set_layout(UIElement *label_elm, UILayout layout) {
+	LS_ASSERT(label_elm->type == UI_ELEMENT_TYPE_LABEL);
+	label_elm->layout = layout;
+	// Force a recalculation of the label
+	label_elm->label.prev_inner_bounds = vec2u(0, 0);
 }

@@ -42,6 +42,6 @@ LS_EXPORT bool input_is_mouse_just_pressed(const InputManager *input_manager, LS
 LS_EXPORT bool input_is_mouse_released(const InputManager *input_manager, LSMouseButton button);
 LS_EXPORT bool input_is_mouse_just_released(const InputManager *input_manager, LSMouseButton button);
 
-Vector2u input_get_mouse_position(const InputManager *input_manager);
+LS_EXPORT Vector2u input_get_mouse_position(const InputManager *input_manager);
 
 #endif // INPUT_MANAGER_H

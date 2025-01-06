@@ -277,6 +277,6 @@ bool input_is_mouse_just_released(const InputManager *input_manager, LSMouseButt
 	return !input_manager->mouse_button_state[button].pressed && input_manager->previous_mouse_button_state[button].pressed;
 }
 
-Vector2u ls_get_mouse_position(const InputManager *input_manager) {
+Vector2u input_get_mouse_position(const InputManager *input_manager) {
 	return input_manager->mouse_position;
 }

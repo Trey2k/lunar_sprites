@@ -9,12 +9,10 @@ static void ui_vertical_container_child_size(UIElement *element, Vector2u outer_
 
 	size_t n_children = slice_get_size(element->vertical_container.children);
 	uint32 y_offset = element->vertical_container.spacing;
-	uint32 x_size = outer_bounds.x - inner_bounds.x;
 	for (size_t i = 0; i < n_children; i++) {
 		UIElement *child = slice_get(element->vertical_container.children, i).ptr;
 		Vector2u child_inner_bounds = vec2u(inner_bounds.x, inner_bounds.y + y_offset);
 		Vector2u child_outer_bounds = vec2u(outer_bounds.x, outer_bounds.y - element->vertical_container.spacing);
-		child->max_size.x = x_size;
 		ui_element_calculate_position(child, child_outer_bounds, child_inner_bounds);
 
 		y_offset += child->size.y + element->vertical_container.spacing;
@@ -51,7 +49,10 @@ void ui_vertical_container_destroy(UIVerticalContainer *container) {
 void ui_vertical_container_add_child(UIElement *element, UIElement *child) {
 	LS_ASSERT(element->type == UI_ELEMENT_TYPE_VERTICAL_CONTAINER);
 	// TODO: Store the previous layout mode and restore it after the child is removed.
-	child->layout.mode = UI_LAYOUT_MODE_CONTAINER;
+	UILayout child_layout = { 0 };
+	child_layout.mode = UI_LAYOUT_MODE_CONTAINER;
+	child_layout.container_size = vec2u(0, 0);
+	ui_element_set_layout(child, child_layout);
 	slice_append(element->vertical_container.children, SLICE_VAL(ptr, child));
 }
 
@@ -81,13 +82,23 @@ void ui_vertical_container_calculate_size(UIElement *element, Vector2u outer_bou
 		total_height += size.y + element->vertical_container.spacing;
 	}
 
-	// If max size is set, use it
-	if (element->max_size.x > 0) {
-		max_width = element->max_size.x;
+	// TODO: Add container layout settings
+	if (element->layout.mode == UI_LAYOUT_MODE_CONTAINER) {
+		if (element->layout.container_size.x > 0) {
+			max_width = element->layout.container_size.x;
+		}
+
+		if (element->layout.container_size.y > 0) {
+			total_height = element->layout.container_size.y;
+		}
 	}
 
-	if (element->max_size.y > 0) {
-		total_height = element->max_size.y;
+	for (size_t i = 0; i < slice_get_size(element->vertical_container.children); i++) {
+		UIElement *child = slice_get(element->vertical_container.children, i).ptr;
+		UILayout child_layout = { 0 };
+		child_layout.mode = UI_LAYOUT_MODE_CONTAINER;
+		child_layout.container_size = vec2u(max_width, 0);
+		ui_element_set_layout(child, child_layout);
 	}
 
 	element->size = vec2u(max_width, total_height);

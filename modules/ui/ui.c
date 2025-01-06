@@ -51,6 +51,8 @@ typedef struct {
 	uint32 vert_count;
 
 	Slice *elements;
+
+	InputManager *input_manager;
 } UIRenderer;
 
 static UIRenderer ui_renderer;
@@ -113,6 +115,8 @@ void ui_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
 	ui_renderer.vbo_size = 0;
 	ui_renderer.ibo_size = 0;
 	ui_renderer.vert_count = 0;
+	ui_renderer.n_textures = 0;
+	ui_renderer.input_manager = core_get_input_manager(core);
 
 	ui_renderer.renderer = renderer;
 	ui_renderer.window = window;
@@ -338,4 +342,8 @@ void ui_draw_rect(const Texture *texture, Color color, uint32 radius, Vector2u p
 	};
 
 	ui_draw(texture, color, vertices, tcoords, indices, 4, 6, radius, size);
+}
+
+InputManager *ui_get_input_manager() {
+	return ui_renderer.input_manager;
 }

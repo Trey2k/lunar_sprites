@@ -12,6 +12,9 @@ void ui_draw_element(UIElement *element) {
 		case UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER:
 			ui_horizontal_container_draw(element);
 			break;
+		case UI_ELEMENT_TYPE_BUTTON:
+			ui_button_draw(element);
+			break;
 		default:
 			ls_log_fatal("Unknown element type: %d\n", element->type);
 			break;
@@ -29,6 +32,9 @@ void ui_element_destroy(UIElement *element) {
 		case UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER:
 			ui_horizontal_container_destroy(&element->horizontal_container);
 			break;
+		case UI_ELEMENT_TYPE_BUTTON:
+			ui_button_destroy(&element->button);
+			break;
 		default:
 			ls_log_fatal("Unknown element type: %d\n", element->type);
 			break;
@@ -36,7 +42,17 @@ void ui_element_destroy(UIElement *element) {
 }
 
 void ui_element_set_layout(UIElement *element, UILayout layout) {
-	element->layout = layout;
+	switch (element->type) {
+		case UI_ELEMENT_TYPE_BUTTON:
+			ui_button_set_layout(element, layout);
+			break;
+		case UI_ELEMENT_TYPE_LABEL:
+			ui_label_set_layout(element, layout);
+			break;
+		default:
+			element->layout = layout;
+			break;
+	}
 }
 
 Vector2u ui_element_get_size(const UIElement *element) {
@@ -99,11 +115,17 @@ static void ui_element_calculate_anchors(UIElement *element, Vector2u outer_boun
 
 	if (layout.anchors & UI_ANCHOR_CENTER) {
 		if (!(layout.anchors & UI_ANCHOR_LEFT) && !(layout.anchors & UI_ANCHOR_RIGHT)) {
-			element->position.x = ((outer_bounds.x + inner_bounds.x) / 2) - (element->size.x / 2);
+			element->position.x = 0;
+			if (((outer_bounds.x + inner_bounds.x) / 2) > (element->size.x / 2)) {
+				element->position.x = ((outer_bounds.x + inner_bounds.x) / 2) - (element->size.x / 2);
+			}
 		}
 
 		if (!(layout.anchors & UI_ANCHOR_TOP) && !(layout.anchors & UI_ANCHOR_BOTTOM)) {
-			element->position.y = ((outer_bounds.y + inner_bounds.y) / 2) - (element->size.y / 2);
+			element->position.y = 0;
+			if (((outer_bounds.y + inner_bounds.y) / 2) > (element->size.y / 2)) {
+				element->position.y = ((outer_bounds.y + inner_bounds.y) / 2) - (element->size.y / 2);
+			}
 		}
 	}
 }
@@ -139,6 +161,9 @@ void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Ve
 		case UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER: {
 			ui_horizontal_container_calculate_size(element, outer_bounds, inner_bounds);
 		} break;
+		case UI_ELEMENT_TYPE_BUTTON: {
+			ui_button_calculate_size(element, outer_bounds, inner_bounds);
+		} break;
 		default:
 			ls_log_fatal("Unknown element type: %d\n", element->type);
 			return;
@@ -157,6 +182,9 @@ void ui_element_handle_event(UIElement *element, Event *event) {
 			break;
 		case UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER:
 			ui_horizontal_container_handle_event(element, event);
+			break;
+		case UI_ELEMENT_TYPE_BUTTON:
+			ui_button_handle_event(element, event);
 			break;
 		default:
 			ls_log_fatal("Unknown element type: %d\n", element->type);

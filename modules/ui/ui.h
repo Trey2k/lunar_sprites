@@ -2,6 +2,7 @@
 #define UI_H
 
 #include "core/core.h"
+#include "core/input/input_manager.h"
 #include "renderer/renderer.h"
 
 #include "elements.h"
@@ -14,6 +15,8 @@ void ui_draw_rect(const Texture *texture, Color color, uint32 radius, Vector2u p
 
 Vector2u ui_draw_text(const UIElementTheme *theme, String text, Vector2u position);
 Vector2u ui_get_text_size(const UIElementTheme *theme, String text);
+
+InputManager *ui_get_input_manager();
 
 // Adds an element to the UI.
 // The UI will take ownership of the element and free it when it is removed.

@@ -41,6 +41,7 @@ typedef struct {
 	union {
 		Vector2u position;
 		uint32 anchors;
+		Vector2u container_size;
 	};
 } UILayout;
 
@@ -87,5 +88,21 @@ LS_EXPORT UIElement *ui_horizontal_container_create(uint32 spacing, UIAllignment
 LS_EXPORT void ui_horizontal_container_add_child(UIElement *element, UIElement *child);
 // Removes a child from the HorizontalContainer.
 LS_EXPORT void ui_horizontal_container_remove_child(UIElement *element, UIElement *child);
+
+typedef void (*UIElementOnClickCallback)(UIElement *element, void *user_data);
+
+// Button
+// A button is a UI element that can be clicked.
+LS_EXPORT UIElement *ui_button_create(const Font *font, String text, UIElementOnClickCallback on_click, void *user_data);
+// Sets the default theme of the button. The theme is copied.
+LS_EXPORT void ui_button_set_theme(UIElement *element, const UIElementTheme *theme);
+// Sets the theme of the button when it is hovered over. The theme is copied.
+LS_EXPORT void ui_button_set_hover_theme(UIElement *element, const UIElementTheme *theme);
+// Sets the theme of the button when it is clicked. The theme is copied.
+LS_EXPORT void ui_button_set_click_theme(UIElement *element, const UIElementTheme *theme);
+// Sets the theme of the button when it is disabled. The theme is copied.
+LS_EXPORT void ui_button_set_disabled_theme(UIElement *element, const UIElementTheme *theme);
+// Sets the enabled state of the button.
+LS_EXPORT void ui_button_set_enabled(UIElement *element, bool enabled);
 
 #endif // UI_ELEMENTS_H
