@@ -28,7 +28,7 @@ Perma links:
 
 
 ## libspng
-Used to parse PNG texture data in the png module.
+ibspng (simple png) is a library for reading and writing png files. used by the png modules.
 
 - Upstream: https://github.com/randy408/libspng
 - Version: 0.7.4 (fb768002d4288590083a476af628e51c3f1d47cd)
@@ -42,7 +42,7 @@ Files extracted from upstream source:
 
 
 ## miniz
-A lightweight replacment for zlib.
+A lightweight replacment for zlib. Used by libspng.
 
 - Upstream: https://github.com/richgel999/miniz
 - Version: 3.0.2 (293d4db1b7d0ffee9756d035b9ac6f7431ef8492)
@@ -55,7 +55,7 @@ Files extracted from upstream source:
 - `miniz.h`
 
 ## lua
-The Lua programming language.
+The Lua programming language. Used by the lua module.
 
 - Upstream: https://github.com/lua/lua
 - Version: 5.4.6 (6443185167c77adcc8552a3fee7edab7895db1a9)
@@ -68,7 +68,7 @@ Files extracted from upstream source:
 - `*.h`
 
 ## RFont
-A lightweight TrueType font rendering library.
+A lightweight TrueType font rendering library. Used by the font modules.
 
 - Upstream: https://github.com/ColleagueRiley/RFont
 - Version: b3bbf4571b1855ae21adf2e85b391766481d775b
@@ -78,3 +78,29 @@ A lightweight TrueType font rendering library.
 Files extracted from upstream source:
 - `LICENSE`
 - `RFont.h`
+
+## miniaudio
+An audio playback and capture library. Used by the audio module.
+
+- Upstream: https://github.com/ColleagueRiley/RFont
+- Version: 0.11.21 (4a5b74bef029b3592c54b6048650ee5f972c1a48)
+- License: Public Domain or MIT No Attribution
+- Required: No
+
+Files extracted from upstream source:
+- `LICENSE`
+- `miniaudio.h`
+
+## dr_libs
+Public domain, single file audio decoding libraries. Used by the audio module.
+
+- Upstream: https://github.com/mackron/dr_libs
+- Version: 660795b2834aebb2217c9849d668b6e4bd4ef810
+- License: Public Domain or MIT No Attribution
+- Required: No
+
+Files extracted from upstream source:
+- `LICENSE`
+- `dr_flac.h`
+- `dr_mp3.h`
+- `dr_wav.h`

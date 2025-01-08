@@ -3,8 +3,9 @@ import api_builder
 
 
 def can_build(env, platform):
-    # Bit of a hack
-    env.api_headers = []
+    # TODO: This is a hack to make sure the audio module is built before the dynamic_modules module.
+    # Should add a way to force build position in the future.
+    env.module_add_dependencies("dynamic_modules", ["audio"], True)
     return True
 
 
@@ -23,7 +24,10 @@ def configure(env):
 
     env_vars.Update(env)
 
-    env.api_headers += [
+
+    pre_headers = env.api_headers
+    
+    env.api_headers = [
         'core/version_info.gen.h',
         'core/version.h',
         'core/types/typedefs.h',
@@ -64,3 +68,5 @@ def configure(env):
     
         'modules/dynamic_modules/dynamic_modules.h',
         ]
+    
+    env.api_headers += pre_headers

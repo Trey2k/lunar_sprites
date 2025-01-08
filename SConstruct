@@ -219,6 +219,9 @@ for path in module_search_paths:
         env_base.Prepend(CPPPATH=[path, os.path.dirname(path)])
     modules_detected.update(modules)
 
+# Used by the dynamic_modules module to determine which headers to scan for API functions.
+env_base.api_headers = []
+
 for name, path in modules_detected.items():
     sys.path.insert(0, path)
     import config

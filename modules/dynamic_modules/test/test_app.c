@@ -26,6 +26,9 @@ typedef struct {
 	UIElement *vertical_container;
 	UIElement *horizontal_container;
 
+	Sound *chirp_sound;
+	Sound *fox_sound;
+
 	Font *font;
 
 	char *fps_text;
@@ -52,6 +55,9 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 	test_application->renderer = renderer;
 	test_application->should_stop = false;
 
+	test_application->chirp_sound = sound_create("chirp_test.wav");
+	test_application->fox_sound = sound_create("quick_fox.wav");
+
 	const WindowConfig ROOT_WINDOW_CONFIG = {
 		.position = vec2u(0, 0),
 		.size = vec2u(1200, 800),
@@ -72,6 +78,7 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 
 static void on_button_click(UIElement *element, void *user_data) {
 	TestApplication *test_application = (TestApplication *)user_data;
+	sound_play(test_application->fox_sound);
 	ls_printf("Button clicked!\n");
 }
 
@@ -146,6 +153,9 @@ void test_app_deinit(void *user_data) {
 
 	ls_free(test_application->fps_text);
 
+	sound_destroy(test_application->chirp_sound);
+	sound_destroy(test_application->fox_sound);
+
 	ls_free(test_application);
 }
 
@@ -181,6 +191,7 @@ void test_app_update(float64 delta_time, void *user_data) {
 	sprite_draw(test_application->sprite);
 
 	if (test_application->timer > 30.0) {
+		sound_play(test_application->chirp_sound);
 		ls_printf("FPS: %f\n", 1.0 / delta_time);
 		ls_free(test_application->fps_text);
 		test_application->fps_text = ls_str_format("FPS: %f", 1.0 / delta_time);

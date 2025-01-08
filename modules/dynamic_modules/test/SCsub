@@ -44,3 +44,5 @@ else:
 test_env.Install("#bin", "test_app.dynamic_module")
 test_env.Install("#bin", "#misc/resources/moon.png")
 test_env.Install("#bin", "#misc/resources/default.ttf")
+test_env.Install("#bin", "#misc/resources/quick_fox.wav")
+test_env.Install("#bin", "#misc/resources/chirp_test.wav")
