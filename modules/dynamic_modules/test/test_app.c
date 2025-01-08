@@ -79,6 +79,8 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 static void on_button_click(UIElement *element, void *user_data) {
 	TestApplication *test_application = (TestApplication *)user_data;
 	sound_play(test_application->fox_sound);
+
+	sound_play(test_application->chirp_sound);
 	ls_printf("Button clicked!\n");
 }
 
