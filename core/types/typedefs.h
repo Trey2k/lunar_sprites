@@ -12,10 +12,14 @@ typedef unsigned long long uint64;
 typedef float float32;
 typedef double float64;
 
+#if !defined(WEB_ENABLED)
 typedef enum {
 	false = 0,
 	true = !false
 } bool;
+#else
+#include <stdbool.h>
+#endif
 
 typedef void *LSFile;
 

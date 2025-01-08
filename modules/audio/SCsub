@@ -18,6 +18,10 @@ env_audio.Prepend(CPPPATH=[thirdparty_dir + "miniaudio"])
 if env["audio_support_mp3"] or env["audio_support_flac"] or env["audio_support_wav"]:
     env_audio.Prepend(CPPPATH=[thirdparty_dir + "dr_libs"])
 
+if env["platform"] == "web":
+    # Remove all -std=c* or -ansi flags
+    env_audio["CCFLAGS"] = [flag for flag in env_audio["CCFLAGS"] if not flag.startswith("-std=")]
+    env_audio["CCFLAGS"] = [flag for flag in env_audio["CCFLAGS"] if not flag.startswith("-ansi")]
 
 
 

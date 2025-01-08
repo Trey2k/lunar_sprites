@@ -44,7 +44,7 @@ for ext in sys_env["JS_EXTERNS"]:
     sys_env["ENV"]["EMCC_CLOSURE_ARGS"] += " --externs " + ext.abspath
 
 build = []
-build_targets = ["#bin/lunar_sprites${PROGSUFFIX}.js", "#bin/lunar_sprites${PROGSUFFIX}.wasm", "#bin/lunar_sprites${PROGSUFFIX}.worker.js"]
+build_targets = ["#bin/lunar_sprites${PROGSUFFIX}.js", "#bin/lunar_sprites${PROGSUFFIX}.wasm"]
 
 if env["dlink_enabled"]:
     # Reset libraries, The main runtime will only link emscripten libraries.
@@ -91,6 +91,5 @@ js_wrapped = env.Textfile("#bin/lunar_sprites", [env.File(f) for f in wrap_list]
 
 # 0 - unwrapped js file (use wrapped one instead)
 # 1 - wasm file
-# 2 - worker js file
 # 3 - wasm side (when dlink_enabled is true)
-env.CreateTemplateZip(js_wrapped, build[1], build[2], build[3] if len(build) > 3 else None)
+env.CreateTemplateZip(js_wrapped, build[1], build[2] if len(build) > 2 else None)

@@ -16,14 +16,14 @@
 static bool root_window_created = false;
 static int32 sub_window_count = 0;
 
-static int keydown_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData);
-static int keyup_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData);
+static bool keydown_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData);
+static bool keyup_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData);
 
-static int mousedown_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
-static int mouseup_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
-static int mousemove_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
-static int mouseenter_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
-static int mouseleave_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
+static bool mousedown_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
+static bool mouseup_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
+static bool mousemove_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
+static bool mouseenter_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
+static bool mouseleave_callback(int eventType, const EmscriptenMouseEvent *e, void *userData);
 
 static void register_callbacks(PlatformWindow *window);
 
@@ -267,7 +267,7 @@ static void register_callbacks(PlatformWindow *window) {
 	emscripten_set_mouseleave_callback(window->canvas_id, window, true, mouseleave_callback);
 }
 
-static int keydown_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData) {
+static bool keydown_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
@@ -280,7 +280,7 @@ static int keydown_callback(int eventType, const EmscriptenKeyboardEvent *e, voi
 	return 0;
 }
 
-static int keyup_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData) {
+static bool keyup_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
@@ -293,7 +293,7 @@ static int keyup_callback(int eventType, const EmscriptenKeyboardEvent *e, void 
 	return 0;
 }
 
-static int mousedown_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
+static bool mousedown_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
@@ -307,7 +307,7 @@ static int mousedown_callback(int eventType, const EmscriptenMouseEvent *e, void
 	return 0;
 }
 
-static int mouseup_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
+static bool mouseup_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
@@ -320,7 +320,7 @@ static int mouseup_callback(int eventType, const EmscriptenMouseEvent *e, void *
 	return 0;
 }
 
-static int mousemove_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
+static bool mousemove_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
@@ -332,7 +332,7 @@ static int mousemove_callback(int eventType, const EmscriptenMouseEvent *e, void
 	return 0;
 }
 
-static int mouseenter_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
+static bool mouseenter_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));
@@ -344,7 +344,7 @@ static int mouseenter_callback(int eventType, const EmscriptenMouseEvent *e, voi
 	return 0;
 }
 
-static int mouseleave_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
+static bool mouseleave_callback(int eventType, const EmscriptenMouseEvent *e, void *userData) {
 	PlatformWindow *window = userData;
 
 	WebWindowEvent *web_event = ls_malloc(sizeof(WebWindowEvent));

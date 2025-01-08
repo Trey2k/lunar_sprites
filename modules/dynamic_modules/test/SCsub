@@ -35,7 +35,9 @@ if env["platform"] == "web":
     test_env.add_shared_library("#bin/libtest_app.wasm", sources)
     env.static_files.append("test_app.dynamic_module")
     env.static_files.append("moon.png")
-    env.static_files.append("moon.png")
+    env.static_files.append("default.ttf")
+    env.static_files.append("quick_fox.wav")
+    env.static_files.append("chirp_test.wav")
 else:
     if env["platform"] == "windows":
         test_env['SHLIBSUFFIX'] = test_env['SHLIBSUFFIX'].replace(".so", ".dll")

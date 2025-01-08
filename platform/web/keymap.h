@@ -1,10 +1,10 @@
 #ifndef WEB_KEYMAP_H
 #define WEB_KEYMAP_H
 
+#include <emscripten/html5.h>
+
 #include "core/input/keycodes.h"
 #include "core/types/typedefs.h"
-
-#include <emscripten/html5.h>
 
 void keymap_init();
 void keymap_deinit();
