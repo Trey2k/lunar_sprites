@@ -207,8 +207,8 @@ void font_renderer_render_text(Texture *atlas, float32 *vertices, float32 *tcoor
 _FORCE_INLINE_ Texture *font_renderer_create_atlas(uint32 atlas_width, uint32 atlas_height) {
 	LS_ASSERT(font_renderer);
 
-	uint8 *atlas_data = ls_calloc(atlas_width * atlas_height, sizeof(uint8));
-	Texture *atlas = texture_create(atlas_width, atlas_height, TEXTURE_FORMAT_R, atlas_data);
+	uint8 *atlas_data = ls_calloc(atlas_width * atlas_height * 4, sizeof(uint8));
+	Texture *atlas = texture_create(atlas_width, atlas_height, TEXTURE_FORMAT_RGBA, atlas_data);
 	ls_free(atlas_data);
 	LS_ASSERT(atlas);
 
@@ -219,7 +219,19 @@ _FORCE_INLINE_ void font_renderer_bitmap_to_atlas(Texture *atlas, uint8 *bitmap,
 	LS_ASSERT(font_renderer);
 	LS_ASSERT(atlas);
 
-	texture_add_sub_texture(atlas, TEXTURE_FORMAT_R, bitmap, x, y, width, height);
+	// WebGL does not support rgba swizzling, so we need to uncompressed the bitmap data.
+
+	uint8 *uncompressed_bitmap = ls_malloc(width * height * 4 * sizeof(uint8));
+	for (size_t i = 0; i < width * height; i++) {
+		uncompressed_bitmap[i * 4] = 255;
+		uncompressed_bitmap[i * 4 + 1] = 255;
+		uncompressed_bitmap[i * 4 + 2] = 255;
+		uncompressed_bitmap[i * 4 + 3] = bitmap[i];
+	}
+
+	texture_add_sub_texture(atlas, TEXTURE_FORMAT_RGBA, uncompressed_bitmap, x, y, width, height);
+
+	ls_free(uncompressed_bitmap);
 }
 
 _FORCE_INLINE_ void font_renderer_free_atlas(Texture *atlas) {

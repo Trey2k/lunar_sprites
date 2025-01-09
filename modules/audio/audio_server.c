@@ -1,5 +1,6 @@
 #include "audio_server.h"
 
+#include "core/core.h"
 #include "internal/audio_buffer.h"
 #include "internal/audio_server.h"
 
@@ -39,6 +40,11 @@ static void on_log(void *p_user_data, uint32 level, String message);
 static void on_send_audio_data(ma_device *device, void *output, const void *input, uint32 frame_count);
 static void mix_audio_frames(float32 *frames_out, const float *frames_in, uint32 frame_count, AudioBuffer *buffer);
 
+static void audio_server_start_device();
+#if defined(WEB_ENABLED)
+static void audio_server_event_handler(Event *event, void *user_data);
+#endif // WEB_ENABLED
+
 void audio_server_init(LSCore *p_core) {
 	ma_context_config ctx_config = ma_context_config_init();
 	ma_log_callback_init(on_log, NULL);
@@ -67,22 +73,12 @@ void audio_server_init(LSCore *p_core) {
 		return;
 	}
 
-	result = ma_device_start(&AUDIO.Server.device);
-	if (result != MA_SUCCESS) {
-		ls_log(LOG_LEVEL_ERROR, "Failed to start audio device\n");
-		ma_device_uninit(&AUDIO.Server.device);
-		ma_context_uninit(&AUDIO.Server.context);
-		return;
-	}
-
-	ls_log(LOG_LEVEL_INFO, "Audio Server initialized successfully\n");
-	ls_log(LOG_LEVEL_INFO, "Audio Server backend:		miniaudio / %s\n", ma_get_backend_name(AUDIO.Server.context.backend));
-	ls_log(LOG_LEVEL_INFO, "Audio Server format:		%s -> %s\n", ma_get_format_name(AUDIO.Server.device.playback.format), ma_get_format_name(AUDIO.Server.device.playback.internalFormat));
-	ls_log(LOG_LEVEL_INFO, "Audio Server channels:		%d -> %d\n", AUDIO.Server.device.playback.channels, AUDIO.Server.device.playback.internalChannels);
-	ls_log(LOG_LEVEL_INFO, "Audio Server sample rate:	%d -> %d\n", AUDIO.Server.device.sampleRate, AUDIO.Server.device.playback.internalSampleRate);
-	ls_log(LOG_LEVEL_INFO, "Audio Server period size:	%d\n", AUDIO.Server.device.playback.internalPeriodSizeInFrames * AUDIO.Server.device.playback.internalPeriods);
-
-	AUDIO.Server.is_ready = true;
+// We must wait to start the device until we get user input on the web
+#if !defined(WEB_ENABLED)
+	audio_server_start_device();
+#else
+	event_manager_add_handler(core_get_event_manager(p_core), audio_server_event_handler, NULL);
+#endif // !WEB_ENABLED
 }
 
 void audio_server_deinit() {
@@ -143,6 +139,25 @@ ma_device audio_server_get_device() {
 }
 
 // Static functions
+
+static void audio_server_start_device() {
+	ma_result result = ma_device_start(&AUDIO.Server.device);
+	if (result != MA_SUCCESS) {
+		ls_log(LOG_LEVEL_ERROR, "Failed to start audio device\n");
+		ma_device_uninit(&AUDIO.Server.device);
+		ma_context_uninit(&AUDIO.Server.context);
+		return;
+	}
+
+	ls_log(LOG_LEVEL_INFO, "Audio Server initialized successfully\n");
+	ls_log(LOG_LEVEL_INFO, "Audio Server backend:		miniaudio / %s\n", ma_get_backend_name(AUDIO.Server.context.backend));
+	ls_log(LOG_LEVEL_INFO, "Audio Server format:		%s -> %s\n", ma_get_format_name(AUDIO.Server.device.playback.format), ma_get_format_name(AUDIO.Server.device.playback.internalFormat));
+	ls_log(LOG_LEVEL_INFO, "Audio Server channels:		%d -> %d\n", AUDIO.Server.device.playback.channels, AUDIO.Server.device.playback.internalChannels);
+	ls_log(LOG_LEVEL_INFO, "Audio Server sample rate:	%d -> %d\n", AUDIO.Server.device.sampleRate, AUDIO.Server.device.playback.internalSampleRate);
+	ls_log(LOG_LEVEL_INFO, "Audio Server period size:	%d\n", AUDIO.Server.device.playback.internalPeriodSizeInFrames * AUDIO.Server.device.playback.internalPeriods);
+
+	AUDIO.Server.is_ready = true;
+}
 
 static void on_log(void *p_user_data, uint32 level, String message) {
 	switch (level) {
@@ -386,4 +401,16 @@ static void mix_audio_frames(float32 *frames_out, const float *frames_in, uint32
 	}
 }
 
-//
+#if defined(WEB_ENABLED)
+static void audio_server_event_handler(Event *event, void *user_data) {
+	if (AUDIO.Server.is_ready) {
+		return;
+	}
+
+	if (event->type == EVENT_KEY) {
+		audio_server_start_device();
+	} else if (event->type == EVENT_MOUSE && event->mouse.type == EVENT_MOUSE_PRESSED) {
+		audio_server_start_device();
+	}
+}
+#endif // WEB_ENABLED

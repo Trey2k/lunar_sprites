@@ -14,6 +14,8 @@ static inline GLenum texture_format_to_gl(TextureFormat format) {
 			return GL_RG;
 		case TEXTURE_FORMAT_R:
 			return GL_RED;
+		case TEXTURE_FORMAT_A:
+			return GL_ALPHA;
 		default:
 			LS_ASSERT_MSG(false, "Unknown texture format: %d", format);
 			return 0;
@@ -30,6 +32,8 @@ static inline GLenum texture_format_to_internal_gl(TextureFormat format) {
 			return GL_RG8;
 		case TEXTURE_FORMAT_R:
 			return GL_R8;
+		case TEXTURE_FORMAT_A:
+			return GL_ALPHA;
 		default:
 			LS_ASSERT_MSG(false, "Unknown texture format: %d", format);
 			return 0;
@@ -50,11 +54,6 @@ uint32 opengl_create_texture(uint32 width, uint32 height, TextureFormat format, 
 	GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 	GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 	GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-
-	if (format == TEXTURE_FORMAT_R) {
-		static GLint swizzleRgbaParams[4] = { GL_ONE, GL_ONE, GL_ONE, GL_RED };
-		GL_CALL(glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleRgbaParams));
-	}
 
 	opengl_bind_texture(0, 0);
 

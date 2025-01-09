@@ -14,5 +14,9 @@
 // Threading model: Default: [0] COINIT_MULTITHREADED: COM calls objects on any thread (free threading)
 #define MA_COINIT_VALUE 2 // [2] COINIT_APARTMENTTHREADED: Each object has its own thread (apartment model)
 
+#if defined(WEB_ENABLED)
+#define MA_ENABLE_WEBAUDIO
+#endif
+
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>

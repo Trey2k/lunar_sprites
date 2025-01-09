@@ -15,6 +15,7 @@ LS_EXPORT void texture_manager_register_parser(String extension, TextureParseFun
 typedef enum {
 	TEXTURE_FORMAT_NONE = 0,
 	TEXTURE_FORMAT_R,
+	TEXTURE_FORMAT_A,
 	TEXTURE_FORMAT_RG,
 	TEXTURE_FORMAT_RGB,
 	TEXTURE_FORMAT_RGBA,
