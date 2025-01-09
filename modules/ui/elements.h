@@ -39,7 +39,7 @@ typedef enum {
 typedef struct {
 	UILayoutMode mode;
 	union {
-		Vector2u position;
+		Vector2 position;
 		uint32 anchors;
 		Vector2u container_size;
 	};
@@ -51,7 +51,7 @@ LS_EXPORT void ui_element_destroy(UIElement *element);
 // Elements recalculate their size when drawn.
 LS_EXPORT Vector2u ui_element_get_size(const UIElement *element);
 // Returns the position of the element, relative to the top-left corner of its bounds.
-LS_EXPORT Vector2u ui_element_get_position(const UIElement *element);
+LS_EXPORT Vector2 ui_element_get_position(const UIElement *element);
 // Set the minimum size of the element.
 LS_EXPORT void ui_element_set_min_size(UIElement *element, Vector2u min_size);
 // Get the minimum size of the element.

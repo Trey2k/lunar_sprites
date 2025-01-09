@@ -5,10 +5,8 @@
 #include "core/memory.h"
 #include "core/types/color.h"
 
-#include "renderer/buffers.h"
-#include "renderer/shader.h"
+#include "renderer/batch_renderer.h"
 #include "renderer/texture.h"
-#include "renderer/vertex_array.h"
 #include "renderer/window.h"
 
 #include "main/lunar_sprites.h"
@@ -34,41 +32,20 @@ void font_destroy(Font *font) {
 	ls_free(font);
 }
 
-#define FONT_BATCH_VBO_LAYOUT_COUNT 3
-static const BufferElement FONT_BATCH_VBO_LAYOUT[] = {
-	{ SHADER_DATA_TYPE_FLOAT2, "pos", false },
-	{ SHADER_DATA_TYPE_FLOAT2, "tex_coords", false },
-	{ SHADER_DATA_TYPE_FLOAT4, "color", false },
-};
-#define FONT_BATCH_VBO_ROW_COUNT (2 + 2 + 1 + 4)
-#define FONT_BATCH_VBO_ROW_SIZE (FONT_BATCH_VBO_ROW_COUNT * sizeof(float32))
-
-#define FONT_BATCH_VBO_MAX_SIZE 1024 * FONT_BATCH_VBO_ROW_SIZE
-
 extern const char *const FONT_SHADER_SOURCE;
 
 typedef struct {
-	int32 z_index;
-
 	Color font_color;
 
-	float32 vbo_data[FONT_BATCH_VBO_MAX_SIZE];
-	size_t vbo_size;
-
-	VertexBuffer *vbo;
-	VertexArray *vao;
-
-	Texture *atlas;
-	Shader *shader;
+	Slice32 *indices;
+	BatchVertex *batch_vertices;
+	size_t batch_vertices_size;
 
 	FontRenderTextCallback callback;
 	void *user_data;
-
 } FontRenderer;
 
 static FontRenderer *font_renderer = NULL;
-
-static void font_renderer_flush();
 
 static void event_handler(Event *event, void *user_data) {
 	if (event->type != EVENT_WINDOW) {
@@ -82,10 +59,6 @@ static void event_handler(Event *event, void *user_data) {
 	}
 }
 
-static void font_on_update(float64 delta_time) {
-	font_renderer_flush();
-}
-
 void font_renderer_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
 	font_renderer = ls_malloc(sizeof(FontRenderer));
 
@@ -94,23 +67,13 @@ void font_renderer_init(Renderer *renderer, LSCore *core, const LSWindow *window
 
 	Vector2u size = window_get_size(window);
 	RFont_init(size.x, size.y);
-	font_renderer->z_index = 0;
-	font_renderer->vbo_size = 0;
 	font_renderer->font_color = COLOR_WHITE;
-	font_renderer->atlas = NULL;
 	font_renderer->callback = NULL;
 	font_renderer->user_data = NULL;
 
-	font_renderer->shader = renderer_create_shader(renderer, FONT_SHADER_SOURCE, ls_str_length(FONT_SHADER_SOURCE));
-
-	BufferLayout *vbo_layout = buffer_layout_create(FONT_BATCH_VBO_LAYOUT, FONT_BATCH_VBO_LAYOUT_COUNT);
-	font_renderer->vbo = renderer_create_vertex_buffer(renderer, NULL, FONT_BATCH_VBO_MAX_SIZE, BUFFER_USAGE_DYNAMIC);
-	vertex_buffer_set_layout(font_renderer->vbo, vbo_layout);
-
-	font_renderer->vao = renderer_create_vertex_array(renderer);
-
-	// Called at the end of the frame so we can accumulate all the text to render during update.
-	ls_register_update_callback(font_on_update, true);
+	font_renderer->indices = slice32_create(128);
+	font_renderer->batch_vertices = ls_malloc(128 * sizeof(BatchVertex));
+	font_renderer->batch_vertices_size = 128;
 }
 
 void font_renderer_deinit() {
@@ -118,28 +81,12 @@ void font_renderer_deinit() {
 	RFont_close();
 }
 
-void font_set_render_color(Color color) {
+Vector2u font_draw_text(const Font *font, uint32 font_size, Color font_color, String text, Vector2 position) {
 	LS_ASSERT(font_renderer);
 
-	font_renderer->font_color = color;
-}
+	font_renderer->font_color = font_color;
 
-Vector2u font_draw_text(const Font *font, uint32 font_size, String text, float32 x, float32 y) {
-	LS_ASSERT(font_renderer);
-
-	RFont_area size = RFont_draw_text(font->font, text, x, y, font_size);
-	return vec2u(size.w, size.h);
-}
-
-Vector2u font_draw_text_callback(const Font *font, uint32 font_size, String text, float32 x, float32 y, FontRenderTextCallback callback, void *user_data) {
-	LS_ASSERT(font_renderer);
-
-	font_renderer->callback = callback;
-	font_renderer->user_data = user_data;
-	RFont_area size = RFont_draw_text(font->font, text, x, y, font_size);
-	font_renderer->callback = NULL;
-	font_renderer->user_data = NULL;
-
+	RFont_area size = RFont_draw_text(font->font, text, position.x, position.y, font_size);
 	return vec2u(size.w, size.h);
 }
 
@@ -150,29 +97,6 @@ Vector2u font_get_text_size(const Font *font, uint32 font_size, String text) {
 	return vec2u(size.w, size.h);
 }
 
-static void font_renderer_flush() {
-	if (font_renderer->vbo_size == 0) {
-		return;
-	}
-	LS_ASSERT(font_renderer->atlas);
-
-	vertex_array_bind(font_renderer->vao);
-	vertex_buffer_set_sub_data(font_renderer->vbo, font_renderer->vbo_data, font_renderer->vbo_size * sizeof(float32), 0);
-
-	const VertexBuffer *buffers[1] = { font_renderer->vbo };
-	vertex_array_set_vertex_buffers(font_renderer->vao, buffers, 1);
-
-	texture_bind(font_renderer->atlas, 0);
-	shader_bind(font_renderer->shader);
-
-	vertex_array_draw(font_renderer->vao);
-
-	texture_unbind(font_renderer->atlas);
-	shader_unbind(font_renderer->shader);
-
-	font_renderer->vbo_size = 0;
-}
-
 void font_renderer_render_text(Texture *atlas, float32 *vertices, float32 *tcoords, size_t nverts) {
 	LS_ASSERT(font_renderer);
 
@@ -181,27 +105,24 @@ void font_renderer_render_text(Texture *atlas, float32 *vertices, float32 *tcoor
 		return;
 	}
 
-	size_t current_vbo_size = font_renderer->vbo_size * sizeof(float32);
-	size_t draw_size = nverts * FONT_BATCH_VBO_ROW_SIZE;
-	if (draw_size + current_vbo_size > FONT_BATCH_VBO_MAX_SIZE ||
-			atlas != font_renderer->atlas) {
-		font_renderer_flush();
+	slice32_clear(font_renderer->indices);
+	if (font_renderer->batch_vertices_size < nverts) {
+		font_renderer->batch_vertices = ls_realloc(font_renderer->batch_vertices, nverts * sizeof(BatchVertex));
+		font_renderer->batch_vertices_size = nverts;
 	}
-
-	font_renderer->atlas = atlas;
 
 	for (size_t i = 0; i < nverts; i++) {
-		font_renderer->vbo_data[font_renderer->vbo_size++] = vertices[i * 3];
-		font_renderer->vbo_data[font_renderer->vbo_size++] = vertices[i * 3 + 1];
+		BatchVertex *vertex = &font_renderer->batch_vertices[i];
+		vertex->pos = vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
+		vertex->tex_coords = vec2(tcoords[i * 2], tcoords[i * 2 + 1]);
+		vertex->color = font_renderer->font_color;
+		vertex->element_size = vec2(0.0f, 0.0f);
+		vertex->radius = 0.0f;
 
-		font_renderer->vbo_data[font_renderer->vbo_size++] = tcoords[i * 2];
-		font_renderer->vbo_data[font_renderer->vbo_size++] = tcoords[i * 2 + 1];
-
-		font_renderer->vbo_data[font_renderer->vbo_size++] = font_renderer->font_color.r;
-		font_renderer->vbo_data[font_renderer->vbo_size++] = font_renderer->font_color.g;
-		font_renderer->vbo_data[font_renderer->vbo_size++] = font_renderer->font_color.b;
-		font_renderer->vbo_data[font_renderer->vbo_size++] = font_renderer->font_color.a;
+		slice32_append(font_renderer->indices, SLICE_VAL32(u32, (uint32)i));
 	}
+
+	batch_renderer_draw(atlas, font_renderer->batch_vertices, slice32_get_data(font_renderer->indices), nverts, nverts);
 }
 
 _FORCE_INLINE_ Texture *font_renderer_create_atlas(uint32 atlas_width, uint32 atlas_height) {

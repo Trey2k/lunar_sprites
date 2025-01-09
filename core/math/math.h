@@ -23,6 +23,8 @@ LS_EXPORT float32 math_cosf(float32 x);
 LS_EXPORT float32 math_pow(float32 base, int32 exponent);
 LS_EXPORT int32 math_factorial(int32 n);
 
+LS_EXPORT float32 math_sqrtf(float32 x);
+
 LS_EXPORT float32 math_deg_to_rad(float32 degrees);
 LS_EXPORT float32 math_rad_to_deg(float32 radians);
 

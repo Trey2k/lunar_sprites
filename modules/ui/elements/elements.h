@@ -25,7 +25,7 @@ struct UIElement {
 		UIButton button;
 	};
 
-	Vector2u position;
+	Vector2 position;
 	Vector2u size;
 
 	Vector2u min_size;

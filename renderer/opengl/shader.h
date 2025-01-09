@@ -16,6 +16,8 @@ void opengl_shader_set_uniform_float(const OpenGLShader *shader, String name, fl
 void opengl_shader_set_uniform_vec2(const OpenGLShader *shader, String name, Vector2 value);
 void opengl_shader_set_uniform_vec3(const OpenGLShader *shader, String name, Vector3 value);
 void opengl_shader_set_uniform_mat4(const OpenGLShader *shader, String name, Matrix4 value);
+void opengl_shader_set_uniform_intv(const OpenGLShader *shader, String name, const int32 *value, size_t count);
+void opengl_shader_set_uniform_floatv(const OpenGLShader *shader, String name, const float32 *value, size_t count);
 
 int32 opengl_shader_get_uniform_location(const OpenGLShader *shader, String name);
 uint32 opengl_shader_get_attrib_location(const OpenGLShader *shader, String name);

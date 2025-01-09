@@ -1,27 +1,27 @@
 #LS opengl_vertex
 #version 300 es
 
-layout (location = 0) in vec2 position;
+layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 tex_coord;
-layout (location = 2) in float tex_id;
-layout (location = 3) in vec4 in_color;
+layout (location = 2) in vec4 in_color;
+layout (location = 3) in vec2 element_size;
 layout (location = 4) in float radius;
-layout (location = 5) in vec2 element_size;
+layout (location = 5) in float tex_id;
 
 out vec2 frag_tex_coord;
 out vec4 frag_color;
+out vec2 frag_element_size;
 out float frag_radius;
 out float frag_tex_id;
-out vec2 frag_element_size;
 
 void main() {
     frag_color = in_color;
-    frag_radius = radius;
     frag_tex_coord = tex_coord;
-    frag_tex_id = tex_id;
     frag_element_size = element_size;
+    frag_radius = radius;
+    frag_tex_id = tex_id;
 
-    gl_Position = vec4(position, 0.0, 1.0);
+    gl_Position = vec4(position, 1.0);
 }
 
 #LS opengl_fragment
@@ -31,10 +31,10 @@ precision mediump float;
 
 out vec4 frag_color_out;
 in vec4 frag_color;
-in float frag_radius;
-in float frag_tex_id;
 in vec2 frag_tex_coord;
 in vec2 frag_element_size;
+in float frag_radius;
+in float frag_tex_id;
 
 uniform sampler2D u_textures[16];
 uniform vec2 u_resolution;

@@ -14,7 +14,7 @@ LS_EXPORT Sprite *renderer_create_sprite_texture(const Renderer *renderer, Textu
 LS_EXPORT void sprite_destroy(Sprite *sprite);
 
 // Draws a sprite to the screen.
-LS_EXPORT void sprite_draw(const Sprite *sprite);
+LS_EXPORT void sprite_draw(Sprite *sprite);
 
 // Sets the position of the sprite.
 LS_EXPORT void sprite_set_position(Sprite *sprite, Vector2 position);

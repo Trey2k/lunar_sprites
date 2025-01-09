@@ -30,25 +30,21 @@ struct Sprite {
 	Matrix4 transform;
 
 	Texture *texture;
+	BatchVertex vertices[SPRITE_VERTICIES_COUNT];
 
 	const Renderer *renderer;
 
 	Vector2i viewport_size;
 };
 
-static float32 *spriate_get_transformed_vertices(const Sprite *sprite) {
-	float32 *vertices = ls_malloc(sizeof(float32) * SPRITE_VERTICIES_COUNT * 3);
-
+static void spriate_transform_vertices(Sprite *sprite) {
 	for (size_t i = 0; i < SPRITE_VERTICIES_COUNT; i++) {
-		Vector3 vertex = vec3(SPRITE_VERTICIES[i * 3], SPRITE_VERTICIES[i * 3 + 1], SPRITE_VERTICIES[i * 3 + 2]);
-		vertex = mat4_multiply_vec3(sprite->transform, vertex);
-
-		vertices[i * 3] = vertex.x;
-		vertices[i * 3 + 1] = vertex.y;
-		vertices[i * 3 + 2] = vertex.z;
+		sprite->vertices[i].pos = mat4_multiply_vec3(sprite->transform, vec3(SPRITE_VERTICIES[i * 3], SPRITE_VERTICIES[i * 3 + 1], SPRITE_VERTICIES[i * 3 + 2]));
+		sprite->vertices[i].tex_coords = vec2(SPRITE_TEX_COORDS[i * 2], SPRITE_TEX_COORDS[i * 2 + 1]);
+		sprite->vertices[i].color = COLOR_WHITE;
+		sprite->vertices[i].element_size = vec2(sprite->size.x, sprite->size.y);
+		sprite->vertices[i].radius = 0.0f;
 	}
-
-	return vertices;
 }
 
 Sprite *renderer_create_sprite(const Renderer *renderer, String image_path, Vector2 position, Vector2 scale, float32 rotation) {
@@ -87,8 +83,9 @@ void sprite_destroy(Sprite *sprite) {
 	ls_free(sprite);
 }
 
-void sprite_draw(const Sprite *sprite) {
-	batch_renderer_draw(NULL, sprite->texture, spriate_get_transformed_vertices(sprite), SPRITE_TEX_COORDS, SPRITE_INDECIES, COLOR_WHITE, SPRITE_VERTICIES_COUNT, SPRITE_INDECIES_COUNT);
+void sprite_draw(Sprite *sprite) {
+	spriate_transform_vertices(sprite);
+	batch_renderer_draw(sprite->texture, sprite->vertices, SPRITE_INDECIES, SPRITE_VERTICIES_COUNT, SPRITE_INDECIES_COUNT);
 }
 
 void sprite_set_position(Sprite *sprite, Vector2 position) {

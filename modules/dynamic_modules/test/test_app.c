@@ -61,7 +61,7 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 	const WindowConfig ROOT_WINDOW_CONFIG = {
 		.position = vec2u(0, 0),
 		.size = vec2u(1200, 800),
-		.min_size = vec2u(1200, 800),
+		.min_size = vec2u(0, 0),
 		.title = "Lunar Sprites Test Application",
 		.fullscreen = false,
 		.hidden = false,
@@ -71,7 +71,7 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 	test_application->root_window = renderer_create_window(renderer, ROOT_WINDOW_CONFIG);
 	test_application->input_manager = core_get_input_manager(core);
 
-	test_application->fps_text = ls_str_format("FPS: %f", 0.0);
+	test_application->fps_text = ls_str_format("FPS: %f", 60.0);
 
 	return test_application->root_window;
 }
@@ -187,14 +187,14 @@ void test_app_update(float64 delta_time, void *user_data) {
 		camera_move(test_application->camera, vec3(0.01, 0.0, 0.0));
 	}
 
+	font_draw_text(test_application->font, 24, COLOR_WHITE, test_application->fps_text, vec2(10, 10));
+
 	test_application->timer += delta_time;
 	check_input(test_application);
 
 	sprite_draw(test_application->sprite);
 
-	if (test_application->timer > 30.0) {
-		sound_play(test_application->chirp_sound);
-		ls_printf("FPS: %f\n", 1.0 / delta_time);
+	if (test_application->timer > 0.25) {
 		ls_free(test_application->fps_text);
 		test_application->fps_text = ls_str_format("FPS: %f", 1.0 / delta_time);
 		test_application->timer = 0.0;

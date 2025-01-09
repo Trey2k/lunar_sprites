@@ -67,6 +67,9 @@ void opengl_vertex_array_unbind(const OpenGLVertexArray *vertex_array) {
 void opengl_vertex_array_set_vertex_buffers(OpenGLVertexArray *vertex_array, const VertexBuffer **vertex_buffers, size_t count) {
 	vertex_array->vertex_buffer_count = 0;
 	opengl_vertex_array_bind(vertex_array);
+
+	uint32 index = 0;
+
 	for (uint32 i = 0; i < count; i++) {
 		const VertexBuffer *vertex_buffer = vertex_buffers[i];
 		LS_ASSERT(vertex_buffer);
@@ -78,7 +81,6 @@ void opengl_vertex_array_set_vertex_buffers(OpenGLVertexArray *vertex_array, con
 		vertex_array->vertex_buffer_count += vertex_buffer_get_count(vertex_buffer);
 		LS_ASSERT(element_count > 0);
 
-		uint32 index = 0;
 		for (uint32 j = 0; j < element_count; j++) {
 			const BufferElement *element = &elements[j];
 			GL_CALL(glEnableVertexAttribArray(index));

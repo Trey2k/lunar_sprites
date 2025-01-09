@@ -30,6 +30,10 @@ LS_EXPORT void shader_set_uniform_vec2(const Shader *shader, String name, Vector
 LS_EXPORT void shader_set_uniform_vec3(const Shader *shader, String name, Vector3 value);
 // Sets a uniform in the shader. The shader must be bound before calling this function.
 LS_EXPORT void shader_set_uniform_mat4(const Shader *shader, String name, Matrix4 value);
+// Sets a uniform in the shader. The shader must be bound before calling this function.
+LS_EXPORT void shader_set_uniform_intv(const Shader *shader, String name, const int32 *value, size_t count);
+// Sets a uniform in the shader. The shader must be bound before calling this function.
+LS_EXPORT void shader_set_uniform_floatv(const Shader *shader, String name, const float32 *value, size_t count);
 
 // Returns the location of a uniform in the shader. The shader must be bound before calling this function.
 LS_EXPORT int32 shader_get_uniform_location(const Shader *shader, String name);

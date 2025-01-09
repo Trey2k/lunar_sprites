@@ -17,10 +17,7 @@ typedef void (*FontRenderTextCallback)(const Texture *atlas, float32 *verts, flo
 LS_EXPORT Font *font_create(String font_path);
 LS_EXPORT void font_destroy(Font *font);
 
-LS_EXPORT void font_set_render_color(Color color);
-
-LS_EXPORT Vector2u font_draw_text(const Font *font, uint32 font_size, String text, float32 x, float32 y);
-LS_EXPORT Vector2u font_draw_text_callback(const Font *font, uint32 font_size, String text, float32 x, float32 y, FontRenderTextCallback callback, void *user_data);
+LS_EXPORT Vector2u font_draw_text(const Font *font, uint32 font_size, Color font_color, String text, Vector2 position);
 LS_EXPORT Vector2u font_get_text_size(const Font *font, uint32 font_size, String text);
 
 #endif // FONT_H

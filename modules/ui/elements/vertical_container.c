@@ -118,7 +118,7 @@ void ui_vertical_container_draw(UIElement *element) {
 	UIVerticalContainer *vertical_container = &element->vertical_container;
 	switch (vertical_container->alignment) {
 		case UI_ALIGNMENT_BEGIN: {
-			Vector2u child_position = element->position;
+			Vector2 child_position = element->position;
 			child_position.y += vertical_container->spacing;
 
 			for (size_t i = 0; i < slice_get_size(vertical_container->children); i++) {
@@ -135,12 +135,9 @@ void ui_vertical_container_draw(UIElement *element) {
 				total_height += child->size.y + vertical_container->spacing;
 			}
 
-			uint32 y_offset = 0;
-			if (element->size.y > total_height) {
-				y_offset = (element->size.y - total_height) / 2;
-			}
+			int32 y_offset = ((int32)element->size.y - (int32)total_height) / 2;
 
-			Vector2u child_position = element->position;
+			Vector2 child_position = element->position;
 			child_position.y += y_offset;
 
 			for (size_t i = 0; i < slice_get_size(vertical_container->children); i++) {
@@ -157,12 +154,9 @@ void ui_vertical_container_draw(UIElement *element) {
 				total_height += child->size.y + vertical_container->spacing;
 			}
 
-			uint32 y_offset = 0;
-			if (element->size.y > total_height) {
-				y_offset = element->size.y - total_height;
-			}
+			int32 y_offset = (int32)element->size.y - (int32)total_height;
 
-			Vector2u child_position = element->position;
+			Vector2 child_position = element->position;
 			child_position.y += y_offset;
 
 			for (size_t i = 0; i < slice_get_size(vertical_container->children); i++) {

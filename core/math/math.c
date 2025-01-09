@@ -49,6 +49,16 @@ int32 math_factorial(int32 n) {
 	return result;
 }
 
+float32 math_sqrtf(float32 x) {
+	float32 result = x;
+	float32 xhalf = 0.5f * x;
+	int32 i = *(int32 *)&result;
+	i = 0x5f3759df - (i >> 1);
+	result = *(float32 *)&i;
+	result = result * (1.5f - xhalf * result * result);
+	return 1.0f / result;
+}
+
 float32 math_deg_to_rad(float32 degrees) {
 	return degrees * (PI / 180.0f);
 }

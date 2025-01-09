@@ -59,7 +59,7 @@ Vector2u ui_element_get_size(const UIElement *element) {
 	return element->size;
 }
 
-Vector2u ui_element_get_position(const UIElement *element) {
+Vector2 ui_element_get_position(const UIElement *element) {
 	return element->position;
 }
 
@@ -115,17 +115,11 @@ static void ui_element_calculate_anchors(UIElement *element, Vector2u outer_boun
 
 	if (layout.anchors & UI_ANCHOR_CENTER) {
 		if (!(layout.anchors & UI_ANCHOR_LEFT) && !(layout.anchors & UI_ANCHOR_RIGHT)) {
-			element->position.x = 0;
-			if (((outer_bounds.x + inner_bounds.x) / 2) > (element->size.x / 2)) {
-				element->position.x = ((outer_bounds.x + inner_bounds.x) / 2) - (element->size.x / 2);
-			}
+			element->position.x = ((float32)(outer_bounds.x + inner_bounds.x) / 2) - ((float32)element->size.x / 2);
 		}
 
 		if (!(layout.anchors & UI_ANCHOR_TOP) && !(layout.anchors & UI_ANCHOR_BOTTOM)) {
-			element->position.y = 0;
-			if (((outer_bounds.y + inner_bounds.y) / 2) > (element->size.y / 2)) {
-				element->position.y = ((outer_bounds.y + inner_bounds.y) / 2) - (element->size.y / 2);
-			}
+			element->position.y = ((float32)(outer_bounds.y + inner_bounds.y) / 2) - ((float32)element->size.y / 2);
 		}
 	}
 }

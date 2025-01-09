@@ -112,6 +112,14 @@ void opengl_shader_set_uniform_mat4(const OpenGLShader *shader, String name, Mat
 	GL_CALL(glUniformMatrix4fv(glGetUniformLocation(shader->program, name), 1, GL_FALSE, &value.mat[0]));
 }
 
+void opengl_shader_set_uniform_intv(const OpenGLShader *shader, String name, const int32 *value, size_t count) {
+	GL_CALL(glUniform1iv(glGetUniformLocation(shader->program, name), count, value));
+}
+
+void opengl_shader_set_uniform_floatv(const OpenGLShader *shader, String name, const float32 *value, size_t count) {
+	GL_CALL(glUniform1fv(glGetUniformLocation(shader->program, name), count, value));
+}
+
 int32 opengl_shader_get_uniform_location(const OpenGLShader *shader, String name) {
 	return GL_CALL(glGetUniformLocation(shader->program, name));
 }

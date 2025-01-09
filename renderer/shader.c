@@ -204,7 +204,7 @@ void shader_set_uniform_int(const Shader *shader, String name, int32 value) {
 	SHADER_CALL(shader, set_uniform_int, name, value);
 }
 
-void shader_set_uniform_float(const Shader *shader, String name, float value) {
+void shader_set_uniform_float(const Shader *shader, String name, float32 value) {
 	SHADER_CALL(shader, set_uniform_float, name, value);
 }
 
@@ -218,6 +218,14 @@ void shader_set_uniform_vec3(const Shader *shader, String name, Vector3 value) {
 
 void shader_set_uniform_mat4(const Shader *shader, String name, Matrix4 value) {
 	SHADER_CALL(shader, set_uniform_mat4, name, value);
+}
+
+void shader_set_uniform_intv(const Shader *shader, String name, const int32 *value, size_t count) {
+	SHADER_CALL(shader, set_uniform_intv, name, value, count);
+}
+
+void shader_set_uniform_floatv(const Shader *shader, String name, const float32 *value, size_t count) {
+	SHADER_CALL(shader, set_uniform_floatv, name, value, count);
 }
 
 int32 shader_get_uniform_location(const Shader *shader, String name) {

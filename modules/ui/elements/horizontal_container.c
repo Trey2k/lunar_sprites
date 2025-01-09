@@ -5,7 +5,7 @@ static void ui_horizontal_container_child_size(UIElement *element, Vector2u oute
 	LS_ASSERT(element->type == UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER);
 
 	size_t n_children = slice_get_size(element->horizontal_container.children);
-	uint32 x_offset = element->horizontal_container.spacing;
+	int32 x_offset = element->horizontal_container.spacing;
 
 	for (size_t i = 0; i < n_children; i++) {
 		UIElement *child = slice_get(element->horizontal_container.children, i).ptr;
@@ -116,7 +116,7 @@ void ui_horizontal_container_draw(UIElement *element) {
 	UIHorizontalContainer *container = &element->horizontal_container;
 	switch (container->alignment) {
 		case UI_ALIGNMENT_BEGIN: {
-			Vector2u child_position = element->position;
+			Vector2 child_position = element->position;
 			child_position.x += container->spacing;
 
 			for (size_t i = 0; i < slice_get_size(container->children); i++) {
@@ -133,12 +133,9 @@ void ui_horizontal_container_draw(UIElement *element) {
 				total_width += child->size.x + container->spacing;
 			}
 
-			uint32 x_offset = 0;
-			if (element->size.x > total_width) {
-				x_offset = (element->size.x - total_width) / 2;
-			}
+			int32 x_offset = ((int32)element->size.x - (int32)total_width) / 2;
 
-			Vector2u child_position = element->position;
+			Vector2 child_position = element->position;
 			child_position.x += x_offset;
 
 			for (size_t i = 0; i < slice_get_size(container->children); i++) {
@@ -155,12 +152,9 @@ void ui_horizontal_container_draw(UIElement *element) {
 				total_width += child->size.x + container->spacing;
 			}
 
-			uint32 x_offset = 0;
-			if (element->size.x > total_width) {
-				x_offset = element->size.x - total_width;
-			}
+			int32 x_offset = (int32)element->size.x - (int32)total_width;
 
-			Vector2u child_position = element->position;
+			Vector2 child_position = element->position;
 			child_position.x += x_offset;
 
 			for (size_t i = 0; i < slice_get_size(container->children); i++) {

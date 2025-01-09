@@ -109,9 +109,7 @@ void ls_main_loop() {
 		callback(main.delta_time);
 	}
 
-	batch_renderer_begin_frame();
 	main.application_interface.update(main.delta_time, main.application_interface.user_data);
-	batch_renderer_end_frame();
 
 	n_callbacks = slice_get_size(main.eof_update_callbacks);
 	for (size_t i = 0; i < n_callbacks; i++) {
@@ -120,6 +118,7 @@ void ls_main_loop() {
 		callback(main.delta_time);
 	}
 
+	batch_renderer_end_frame();
 	if (main.root_window) {
 		window_make_current(main.root_window);
 		window_swap_buffers(main.root_window);

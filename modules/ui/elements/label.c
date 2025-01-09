@@ -1,11 +1,14 @@
 #include "label.h"
+#include "elements.h"
+#include "modules/ui/elements.h"
+#include "modules/ui/ui.h"
 
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
-#include "elements.h"
+
+#include "renderer/batch_renderer.h"
+
 #include "modules/font/font.h"
-#include "modules/ui/elements.h"
-#include "modules/ui/ui.h"
 
 UIElement *ui_label_create(const Font *font, String text, UITextWrapMode wrap_mode) {
 	UIElement *element = (UIElement *)ls_malloc(sizeof(UIElement));
@@ -57,32 +60,26 @@ static void label_draw_lines(UIElement *label_elm, String text) {
 	uint32 font_size = label->theme->font_size;
 	uint32 total_text_height = n_lines * font_size;
 	for (size_t i = 0; i < n_lines; i++) {
-		Vector2u rendor_pos = label_elm->position;
+		Vector2 rendor_pos = label_elm->position;
 		// center the text vertically
-		rendor_pos.y += (label_elm->size.y / 2) - (total_text_height / 2);
+		rendor_pos.y += ((float32)label_elm->size.y / 2) - ((float32)total_text_height / 2);
 		rendor_pos.y += i * label->theme->font_size;
 
 		uint32 line_width = slice32_get(label->render_lines_width, i).u32;
 
 		switch (label->theme->text_alignment) {
 			case UI_TEXT_ALIGN_CENTER: {
-				rendor_pos.x = label_elm->position.x;
-				if (line_width < label_elm->size.x) {
-					rendor_pos.x += (label_elm->size.x / 2) - (line_width / 2);
-				}
+				rendor_pos.x = label_elm->position.x + ((float32)label_elm->size.x / 2) - ((float32)line_width / 2);
 			} break;
 			case UI_TEXT_ALIGN_RIGHT: {
-				rendor_pos.x = label_elm->position.x;
-				if (line_width < label_elm->size.x) {
-					rendor_pos.x += label_elm->size.x - line_width;
-				}
+				rendor_pos.x = label_elm->position.x + label_elm->size.x - line_width;
 			} break;
 			case UI_TEXT_ALIGN_LEFT:
 			default:
 				break;
 		};
 		char *line = slice_get(label->render_lines, i).ptr;
-		Vector2u line_size = ui_draw_text(label->theme, line, rendor_pos);
+		Vector2u line_size = font_draw_text(label->theme->font, font_size, label->theme->font_color, line, rendor_pos);
 		rendor_pos.y += line_size.y;
 	}
 }
@@ -93,16 +90,10 @@ void ui_draw_label(UIElement *label_elm) {
 	Vector2u label_size = label_elm->size;
 
 	if (label->theme->background_color.a > 0) {
-		// Add some padding to the used space
-		Vector2u bg_space = vec2u_sub(label_size,
-				vec2u(label->theme->border_size * 2, label->theme->border_size * 2));
-
 		if (label->theme->border_size > 0) {
-			ui_draw_rect(label->theme->texture, label->theme->border_color, label->theme->radius, label_elm->position, label_size);
-			Vector2u bg_position = vec2u(label_elm->position.x + label->theme->border_size, label_elm->position.y + label->theme->border_size);
-			ui_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, bg_position, bg_space);
+			batch_renderer_draw_rect_outline(label->theme->texture, label->theme->background_color, label->theme->border_color, label->theme->radius, label_elm->position, label_size, label->theme->border_size);
 		} else {
-			ui_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, label_elm->position, label_size);
+			batch_renderer_draw_rect(label->theme->texture, label->theme->background_color, label->theme->radius, label_elm->position, label_size);
 		}
 	}
 
@@ -120,7 +111,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 	UIElementTheme *theme = label_elm->label.theme;
 
 	size_t text_len = ls_str_length(label_elm->label.text);
-	Vector2u text_size = ui_get_text_size(label_elm->label.theme, label_elm->label.text);
+	Vector2u text_size = font_get_text_size(theme->font, theme->font_size, label_elm->label.text);
 
 	uint32 used_y = 0;
 	uint32 max_x = 0;
@@ -134,7 +125,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 				for (size_t i = 0; i < text_len; i++) {
 					if (l_text[text_len - i] == ' ') {
 						l_text[text_len - i] = '\0';
-						Vector2u line_size = ui_get_text_size(theme, l_text);
+						Vector2u line_size = font_get_text_size(theme->font, theme->font_size, l_text);
 						l_text[text_len - i] = ' ';
 						if (line_size.x < max_size.x) {
 							char *new_line = ls_malloc(text_len - i);
@@ -159,7 +150,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 					if (l_text[text_len - i] == ' ') {
 						char old_c = l_text[text_len - i];
 						l_text[text_len - i] = '\0';
-						Vector2u line_size = ui_get_text_size(theme, l_text);
+						Vector2u line_size = font_get_text_size(theme->font, theme->font_size, l_text);
 						l_text[text_len - i] = old_c;
 						if (line_size.x < max_size.x) {
 							char *new_line = ls_malloc(text_len - i);
@@ -177,12 +168,13 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 						}
 					}
 				}
+				failed = true;
 			} break;
 			default: {
 				failed = true;
 			} break;
 		};
-		text_size = ui_get_text_size(theme, l_text);
+		text_size = font_get_text_size(theme->font, theme->font_size, l_text);
 		if (text_size.y + used_y > max_size.y) {
 			break;
 		}
@@ -240,7 +232,7 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 	slice_clear(label_elm->label.render_lines);
 	slice32_clear(label_elm->label.render_lines_width);
 
-	Vector2u text_size = ui_get_text_size(theme, label_elm->label.text);
+	Vector2u text_size = font_get_text_size(theme->font, theme->font_size, label_elm->label.text);
 	if (text_size.x > max_size.x && label_elm->label.wrap_mode != UI_TEXT_WRAP_NONE) {
 		// Text does not fit on one line, split it up
 		text_size = ui_label_split_lines(label_elm, max_size);
