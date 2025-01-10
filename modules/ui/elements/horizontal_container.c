@@ -93,10 +93,15 @@ void ui_horizontal_container_calculate_size(UIElement *element, Vector2u outer_b
 
 	for (size_t i = 0; i < slice_get_size(element->horizontal_container.children); i++) {
 		UIElement *child = slice_get(element->horizontal_container.children, i).ptr;
-		UILayout child_layout = { 0 };
-		child_layout.mode = UI_LAYOUT_MODE_CONTAINER;
-		child_layout.container_size = vec2u(0, max_height);
-		ui_element_set_layout(child, child_layout);
+		UILayout child_layout = ui_element_get_layout(child);
+		Vector2u container_size = vec2u(0, max_height);
+		if (!vec2u_equals(container_size, child_layout.container_size)) {
+			child_layout.container_size = container_size;
+			ui_element_set_layout(child, child_layout);
+
+			// Recalculate the position and size of the child now that the container size is known.
+			ui_element_calculate_position(child, outer_bounds, inner_bounds);
+		}
 	}
 
 	element->size = vec2u(total_width, max_height);

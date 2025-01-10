@@ -55,6 +55,10 @@ void ui_element_set_layout(UIElement *element, UILayout layout) {
 	}
 }
 
+UILayout ui_element_get_layout(const UIElement *element) {
+	return element->layout;
+}
+
 Vector2u ui_element_get_size(const UIElement *element) {
 	return element->size;
 }

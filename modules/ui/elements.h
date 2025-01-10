@@ -62,6 +62,8 @@ LS_EXPORT void ui_element_set_max_size(UIElement *element, Vector2u max_size);
 LS_EXPORT Vector2u ui_element_get_max_size(const UIElement *element);
 // Sets the layout of the element.
 LS_EXPORT void ui_element_set_layout(UIElement *element, UILayout layout);
+// Gets the layout of the element.
+LS_EXPORT UILayout ui_element_get_layout(const UIElement *element);
 // Calculates the minimum size and position of the element based on the outer and inner bounds and anchor points.
 LS_EXPORT void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds);
 
