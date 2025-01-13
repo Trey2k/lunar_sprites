@@ -57,7 +57,10 @@ void core_destroy(LSCore *core) {
 	event_manager_destroy(core->event_manager);
 	core->event_manager = NULL;
 
+// TODO: Fix seg fault when destroying flag manager on Windows
+#if !defined(WINDOWS_ENABLED)
 	flag_manager_destroy(core->flag_manager);
+#endif // !LS_WINDOWS
 	core->flag_manager = NULL;
 }
 

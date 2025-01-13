@@ -39,6 +39,7 @@ LS_EXPORT void window_set_size(LSWindow *window, Vector2u size);
 LS_EXPORT Vector2u window_get_size(const LSWindow *window);
 
 LS_EXPORT void window_make_current(const LSWindow *window);
+LS_EXPORT void window_detach(const LSWindow *window);
 LS_EXPORT void window_swap_buffers(const LSWindow *window);
 
 LS_EXPORT void window_set_fullscreen(LSWindow *window, bool fullscreen);

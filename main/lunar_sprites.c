@@ -2,6 +2,7 @@
 
 #include "core/core.h"
 
+#include "core/os/thread.h"
 #include "core/types/slice.h"
 #include "renderer/batch_renderer.h"
 #include "renderer/renderer.h"
@@ -13,6 +14,9 @@ struct Main {
 	FlagManager *flag_manager;
 	LSCore *core;
 	Renderer *renderer;
+
+	LSMutex *render_mutex;
+	LSThread *render_thread;
 
 	const LSWindow *root_window;
 
@@ -35,6 +39,7 @@ struct Main {
 static struct Main main;
 
 static void check_path();
+static void ls_render_loop(void *data);
 
 void ls_main_init(int32 argc, char *argv[]) {
 	main.should_stop = false;
@@ -88,6 +93,51 @@ void ls_main_init(int32 argc, char *argv[]) {
 	ls_log(LOG_LEVEL_INFO, "Initialization level application done.\n");
 
 	main.application_interface.start(main.application_interface.user_data);
+
+	// Make sure the render context is detached from the main thread.
+	window_detach(main.root_window);
+
+	// Start render thread, at this point all rendering should be done in the render loop.
+	main.render_mutex = os_mutex_create();
+	main.render_thread = os_thread_create(ls_render_loop, NULL);
+}
+
+static void ls_render_loop(void *data) {
+	ls_log(LOG_LEVEL_INFO, "Starting render loop.\n");
+	window_make_current(main.root_window);
+
+	while (!main.should_stop) {
+		os_mutex_lock(main.render_mutex);
+
+		renderer_clear(main.renderer);
+		size_t n_callbacks = slice_get_size(main.update_callbacks);
+		for (size_t i = 0; i < n_callbacks; i++) {
+			OnUpdateCallback callback = slice_get(main.update_callbacks, i).ptr;
+			LS_ASSERT(callback);
+			callback(main.delta_time);
+		}
+
+		main.application_interface.update(main.delta_time, main.application_interface.user_data);
+
+		n_callbacks = slice_get_size(main.eof_update_callbacks);
+		for (size_t i = 0; i < n_callbacks; i++) {
+			OnUpdateCallback callback = slice_get(main.eof_update_callbacks, i).ptr;
+			LS_ASSERT(callback);
+			callback(main.delta_time);
+		}
+
+		batch_renderer_end_frame();
+
+		if (main.root_window) {
+			window_make_current(main.root_window);
+			window_swap_buffers(main.root_window);
+		}
+
+		os_mutex_unlock(main.render_mutex);
+	}
+
+	// Make sure to hand the render context back to the main thread.
+	window_detach(main.root_window);
 }
 
 void ls_main_loop() {
@@ -100,32 +150,18 @@ void ls_main_loop() {
 	if (main.root_window) {
 		window_poll(main.root_window);
 	}
-
-	renderer_clear(main.renderer);
-	size_t n_callbacks = slice_get_size(main.update_callbacks);
-	for (size_t i = 0; i < n_callbacks; i++) {
-		OnUpdateCallback callback = slice_get(main.update_callbacks, i).ptr;
-		LS_ASSERT(callback);
-		callback(main.delta_time);
-	}
-
-	main.application_interface.update(main.delta_time, main.application_interface.user_data);
-
-	n_callbacks = slice_get_size(main.eof_update_callbacks);
-	for (size_t i = 0; i < n_callbacks; i++) {
-		OnUpdateCallback callback = slice_get(main.eof_update_callbacks, i).ptr;
-		LS_ASSERT(callback);
-		callback(main.delta_time);
-	}
-
-	batch_renderer_end_frame();
-	if (main.root_window) {
-		window_make_current(main.root_window);
-		window_swap_buffers(main.root_window);
-	}
 }
 
 int32 ls_main_deinit() {
+	main.should_stop = true;
+	// Wait for render thread to finish first.
+	os_thread_join(main.render_thread);
+	// Make the current context the main thread.
+	window_make_current(main.root_window);
+
+	os_mutex_destroy(main.render_mutex);
+	os_thread_destroy(main.render_thread);
+
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_APPLICATION);
 	main.application_interface.deinit(main.application_interface.user_data);
 	batch_renderer_deinit();

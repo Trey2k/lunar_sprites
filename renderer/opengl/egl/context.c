@@ -81,6 +81,12 @@ void egl_context_make_current(const LSEGLContext *context) {
 	}
 }
 
+void egl_context_detach(const LSEGLContext *context) {
+	LS_ASSERT(context);
+
+	egl_context_make_current(NULL);
+}
+
 void egl_context_swap_buffers(const LSEGLContext *context) {
 	LS_ASSERT(context);
 

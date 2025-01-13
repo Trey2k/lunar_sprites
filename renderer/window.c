@@ -120,6 +120,13 @@ void window_make_current(const LSWindow *window) {
 	renderer_context_make_current(window->renderer, window->context);
 }
 
+void window_detach(const LSWindow *window) {
+	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
+
+	renderer_context_detach(window->renderer, window->context);
+}
+
 void window_swap_buffers(const LSWindow *window) {
 	LS_ASSERT(window);
 	LS_ASSERT(window->platform_window);

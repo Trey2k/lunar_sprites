@@ -72,6 +72,22 @@ void renderer_context_make_current(Renderer *renderer, const Context *context) {
 	};
 }
 
+void renderer_context_detach(Renderer *renderer, const Context *context) {
+	LS_ASSERT(context);
+
+	switch (context->backend) {
+#if defined(OPENGL_ENABLED)
+		case RENDERER_BACKEND_OPENGL: {
+			opengl_context_detach(context->opengl_context);
+			renderer_set_active_window(renderer, NULL);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown renderer backend: %d\n", context->backend);
+	};
+}
+
 void renderer_context_swap_buffers(const Context *context) {
 	LS_ASSERT(context);
 

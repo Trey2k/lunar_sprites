@@ -1,7 +1,7 @@
 #ifndef WINDOWS_OS_H
 #define WINDOWS_OS_H
 
-#include "core/os.h"
+#include "core/os/os.h"
 #include "platform/os.h"
 
 #include <windows.h>

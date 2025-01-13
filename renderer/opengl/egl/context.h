@@ -15,6 +15,7 @@ LSEGLContext *egl_context_create(const LSWindow *window);
 void egl_context_destroy(LSEGLContext *context);
 
 void egl_context_make_current(const LSEGLContext *context);
+void egl_context_detach(const LSEGLContext *context);
 void egl_context_swap_buffers(const LSEGLContext *context);
 
 #endif // EGL_CONTEXT_H

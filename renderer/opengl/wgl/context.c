@@ -117,6 +117,12 @@ void wgl_context_make_current(const LSWGLContext *context) {
 	wglMakeCurrent(context->device_context, context->opengl_context);
 }
 
+void wgl_context_detach(const LSWGLContext *context) {
+	LS_ASSERT(context);
+
+	wglMakeCurrent(NULL, NULL);
+}
+
 void wgl_context_swap_buffers(const LSWGLContext *context) {
 	LS_ASSERT(context);
 

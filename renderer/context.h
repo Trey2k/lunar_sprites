@@ -10,6 +10,7 @@ Context *renderer_context_create(const Renderer *renderer, const LSWindow *windo
 void renderer_context_destroy(Context *context);
 
 void renderer_context_make_current(Renderer *renderer, const Context *context);
+void renderer_context_detach(Renderer *renderer, const Context *context);
 void renderer_context_swap_buffers(const Context *context);
 
 #endif // CONTEXT_H

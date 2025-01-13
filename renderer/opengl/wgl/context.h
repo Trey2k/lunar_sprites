@@ -19,6 +19,7 @@ LSWGLContext *wgl_context_create(const OpenGLRenderer *renderer, const LSWindow 
 void wgl_context_destroy(LSWGLContext *context);
 
 void wgl_context_make_current(const LSWGLContext *context);
+void wgl_context_detach(const LSWGLContext *context);
 void wgl_context_swap_buffers(const LSWGLContext *context);
 
 #endif // WGL_CONTEXT_H
