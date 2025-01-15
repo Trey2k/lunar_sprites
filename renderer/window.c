@@ -69,6 +69,14 @@ LSNativeWindow window_get_native_window(const LSWindow *window) {
 	return platform_window_get_native_window(window->platform_window);
 }
 
+void window_update(const LSWindow *window) {
+	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
+
+	Vector2u size = platform_window_get_size(window->platform_window);
+	renderer_context_resize(window->context, size);
+}
+
 void window_poll(const LSWindow *window) {
 	LS_ASSERT(window);
 	LS_ASSERT(window->platform_window);

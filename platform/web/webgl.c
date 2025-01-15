@@ -24,11 +24,3 @@ void webgl_init_canvas(PlatformWindow *window) {
 void webgl_deinit_canvas(PlatformWindow *window) {
 	emscripten_webgl_destroy_context(window->webgl_context);
 }
-
-void webgl_make_current(const PlatformWindow *window) {
-	emscripten_webgl_make_context_current(window->webgl_context);
-}
-
-void webgl_swap_buffers(const PlatformWindow *window) {
-	emscripten_webgl_make_context_current(window->webgl_context);
-}

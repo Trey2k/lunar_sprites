@@ -78,7 +78,7 @@ void ui_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
 	ui_renderer.batch_vertices_size = 128;
 
 	// Called before the main frame for now, might change later.
-	ls_register_update_callback(ui_on_update, true);
+	ls_register_update_callback(ui_on_update);
 	event_manager_add_handler(core_get_event_manager(core), ui_event_handler, NULL);
 }
 

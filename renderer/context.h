@@ -13,4 +13,6 @@ void renderer_context_make_current(Renderer *renderer, const Context *context);
 void renderer_context_detach(Renderer *renderer, const Context *context);
 void renderer_context_swap_buffers(const Context *context);
 
+void renderer_context_resize(const Context *context, Vector2u size);
+
 #endif // CONTEXT_H

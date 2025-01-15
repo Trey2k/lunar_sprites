@@ -102,3 +102,18 @@ void renderer_context_swap_buffers(const Context *context) {
 			ls_log_fatal("Unknown renderer backend: %d\n", context->backend);
 	};
 }
+
+void renderer_context_resize(const Context *context, Vector2u size) {
+	LS_ASSERT(context);
+
+	switch (context->backend) {
+#if defined(OPENGL_ENABLED)
+		case RENDERER_BACKEND_OPENGL: {
+			opengl_context_resize(context->opengl_context, size);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown renderer backend: %d\n", context->backend);
+	};
+}
