@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -47,7 +47,7 @@ jobs:
           bash ./scripts/clang_format.sh changed.txt
 
       - name: Spell checks via codespell
-        uses: codespell-project/actions-codespell@v1
+        uses: codespell-project/actions-codespell@v2.1
         with:
           skip: "./thirdparty,*.desktop,*.gen.*,*.po,*.pot,*.rc"
           ignore_words_list: "curvelinear,doubleclick,expct,findn,gird,hel,inout,lod,nd,numer,ot,te,vai,thirdparty"
