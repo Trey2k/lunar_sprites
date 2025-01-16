@@ -84,6 +84,36 @@ void x11_window_set_min_size(X11Window *window, Vector2u size) {
 	XFree(hints);
 }
 
+Vector2u x11_window_get_min_size(const X11Window *window) {
+	LS_ASSERT(window);
+
+	XSizeHints hints;
+	long supplied;
+	XGetWMNormalHints(window->display, window->window, &hints, &supplied);
+
+	return vec2u(hints.min_width, hints.min_height);
+}
+
+Vector2u x11_window_get_max_size(const X11Window *window) {
+	LS_ASSERT(window);
+
+	XSizeHints hints;
+	long supplied;
+	XGetWMNormalHints(window->display, window->window, &hints, &supplied);
+
+	return vec2u(hints.max_width, hints.max_height);
+}
+
+void x11_window_set_max_size(X11Window *window, Vector2u size) {
+	XSizeHints *hints = XAllocSizeHints();
+	hints->flags = PMaxSize;
+	hints->max_width = size.x;
+	hints->max_height = size.y;
+
+	XSetWMNormalHints(window->display, window->window, hints);
+	XFree(hints);
+}
+
 void x11_window_set_size(X11Window *window, Vector2u size) {
 	XResizeWindow(window->display, window->window, size.x, size.y);
 }

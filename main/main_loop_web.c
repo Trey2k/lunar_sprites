@@ -14,12 +14,12 @@ typedef struct {
 	float64 delta_time;
 	uint64 last_frame_time;
 
-	const LSWindow *root_window;
+	LSWindow *root_window;
 } MainLoop;
 
 static MainLoop main_loop;
 
-void ls_main_loop_init(LSCore *core, Renderer *renderer, const LSWindow *root_window) {
+void ls_main_loop_init(LSCore *core, Renderer *renderer, LSWindow *root_window) {
 	main_loop.root_window = root_window;
 	main_loop.renderer = renderer;
 	main_loop.core = core;
@@ -31,8 +31,6 @@ void ls_main_loop_deinit() {
 
 void ls_main_loop() {
 	core_poll(main_loop.core);
-
-	window_update(main_loop.root_window);
 
 	uint64 current_time = os_get_time();
 	main_loop.delta_time = (current_time - main_loop.last_frame_time) / 1000000.0;

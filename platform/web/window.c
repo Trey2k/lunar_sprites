@@ -228,6 +228,28 @@ void platform_window_set_min_size(PlatformWindow *window, Vector2u size) {
 	LS_ASSERT_MSG(false, "%s", "Not implemented");
 }
 
+Vector2u platform_window_get_min_size(const PlatformWindow *window) {
+	LS_ASSERT(window);
+
+	LS_ASSERT_MSG(false, "%s", "Not implemented");
+
+	return vec2u(0, 0);
+}
+
+void platform_window_set_max_size(PlatformWindow *window, Vector2u size) {
+	LS_ASSERT(window);
+
+	LS_ASSERT_MSG(false, "%s", "Not implemented");
+}
+
+Vector2u platform_window_get_max_size(const PlatformWindow *window) {
+	LS_ASSERT(window);
+
+	LS_ASSERT_MSG(false, "%s", "Not implemented");
+
+	return vec2u(0, 0);
+}
+
 void platform_window_set_size(PlatformWindow *window, Vector2u size) {
 	LS_ASSERT(window);
 

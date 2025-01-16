@@ -95,5 +95,4 @@ static void core_check_flags(const LSCore *core) {
 	} else {
 		ls_log_fatal("Invalid log level `%s`.\n", core->log_level->str);
 	}
-	ls_free(core->log_level->str);
 }

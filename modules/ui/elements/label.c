@@ -118,9 +118,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 	uint32 max_x = 0;
 
 	char *l_text = label_elm->label.text;
-	int i = 0;
 	while (text_size.x > max_size.x) {
-		ls_log(LOG_LEVEL_INFO, "Text does not fit on one line, splitting it up %d.\n", ++i);
 		bool failed = false;
 		switch (label_elm->label.wrap_mode) {
 			case UI_TEXT_WRAP_WORD: {
@@ -131,8 +129,8 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 						Vector2u line_size = font_get_text_size(theme->font, theme->font_size, l_text);
 						l_text[text_len - i] = ' ';
 						if (line_size.x < max_size.x) {
-							char *new_line = ls_malloc(text_len - i);
-							ls_str_copy_to(new_line, l_text, text_len - i);
+							char *new_line = ls_malloc((text_len - i) + 1);
+							ls_str_copy_to(new_line, l_text, (text_len - i) + 1);
 							new_line[text_len - i] = '\0';
 							slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
 							slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, line_size.x));
@@ -155,9 +153,8 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 					Vector2u line_size = font_get_text_size(theme->font, theme->font_size, l_text);
 					l_text[text_len - i] = old_c;
 					if (line_size.x < max_size.x) {
-						char *new_line = ls_malloc(text_len - i);
-						ls_str_copy_to(new_line, l_text, text_len - i);
-						new_line[text_len - i] = '\0';
+						char *new_line = ls_malloc((text_len - i) + 1);
+						ls_str_copy_to(new_line, l_text, (text_len - i) + 1);
 						slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
 						slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, line_size.x));
 						l_text += (text_len - i);
