@@ -43,7 +43,7 @@ LSEGLContext *egl_context_create(const LSWindow *window) {
 
 	if (!version) {
 		ls_log(LOG_LEVEL_WARNING, "Failed to load OpenGl.\n");
-		return false;
+		return NULL;
 	}
 
 	ls_log(LOG_LEVEL_INFO, "Loaded OpenGL version %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));

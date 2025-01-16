@@ -61,6 +61,10 @@ LSWGLContext *wgl_context_create(const OpenGLRenderer *renderer, const LSWindow 
 		slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_CORE_PROFILE_BIT_ARB));
 	}
 
+	if (wgl_has_extension(device_context, "WGL_EXT_swap_control")) {
+		wglSwapIntervalEXT(0);
+	}
+
 	slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_FLAGS_ARB));
 	slice32_append(attributes, SLICE_VAL32(i32, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB));
 	slice32_append(attributes, SLICE_VAL32(i32, 0));
