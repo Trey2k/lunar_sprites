@@ -10,6 +10,7 @@ struct PlatformWindow {
 
 	Vector2u size;
 	Vector2u min_size;
+	Vector2u max_size;
 	String title;
 
 	bool fullscreen;

@@ -29,7 +29,7 @@ static UIRenderer ui_renderer;
 static void ui_on_update(float64 delta_time) {
 	size_t n_elements = slice_get_size(ui_renderer.elements);
 	Vector2u inner_bounds = vec2u(0, 0);
-	Vector2u outer_bounds = window_get_size(ui_renderer.window);
+	Vector2u outer_bounds = renderer_get_viewport_size(ui_renderer.renderer);
 	for (size_t i = 0; i < n_elements; i++) {
 		UIElement *element = slice_get(ui_renderer.elements, i).ptr;
 		// Root elements bounds are the window size.

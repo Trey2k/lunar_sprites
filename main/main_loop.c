@@ -16,14 +16,14 @@ typedef struct {
 	float64 delta_time;
 	uint64 last_frame_time;
 
-	const LSWindow *root_window;
+	LSWindow *root_window;
 } MainLoop;
 
 static MainLoop main_loop;
 
 static void ls_render_loop(void *data);
 
-void ls_main_loop_init(LSCore *core, Renderer *renderer, const LSWindow *root_window) {
+void ls_main_loop_init(LSCore *core, Renderer *renderer, LSWindow *root_window) {
 	main_loop.root_window = root_window;
 	main_loop.renderer = renderer;
 	main_loop.core = core;
@@ -51,8 +51,6 @@ static void ls_render_loop(void *data) {
 
 	while (!ls_should_stop()) {
 		os_mutex_lock(main_loop.render_mutex);
-
-		window_update(main_loop.root_window);
 
 		uint64 current_time = os_get_time();
 		main_loop.delta_time = (current_time - main_loop.last_frame_time) / 1000000.0;

@@ -69,14 +69,6 @@ LSNativeWindow window_get_native_window(const LSWindow *window) {
 	return platform_window_get_native_window(window->platform_window);
 }
 
-void window_update(const LSWindow *window) {
-	LS_ASSERT(window);
-	LS_ASSERT(window->platform_window);
-
-	Vector2u size = platform_window_get_size(window->platform_window);
-	renderer_context_resize(window->context, size);
-}
-
 void window_poll(const LSWindow *window) {
 	LS_ASSERT(window);
 	LS_ASSERT(window->platform_window);
@@ -107,6 +99,27 @@ void window_set_min_size(LSWindow *window, Vector2u size) {
 	platform_window_set_min_size(window->platform_window, size);
 }
 
+Vector2u window_get_min_size(const LSWindow *window) {
+	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
+
+	return platform_window_get_min_size(window->platform_window);
+}
+
+void window_set_max_size(LSWindow *window, Vector2u size) {
+	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
+
+	platform_window_set_max_size(window->platform_window, size);
+}
+
+Vector2u window_get_max_size(const LSWindow *window) {
+	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
+
+	return platform_window_get_max_size(window->platform_window);
+}
+
 void window_set_size(LSWindow *window, Vector2u size) {
 	LS_ASSERT(window);
 	LS_ASSERT(window->platform_window);
@@ -126,6 +139,7 @@ void window_make_current(const LSWindow *window) {
 	LS_ASSERT(window->platform_window);
 
 	renderer_context_make_current(window->renderer, window->context);
+	renderer_set_active_window(window->renderer, window);
 }
 
 void window_detach(const LSWindow *window) {
@@ -133,6 +147,7 @@ void window_detach(const LSWindow *window) {
 	LS_ASSERT(window->platform_window);
 
 	renderer_context_detach(window->renderer, window->context);
+	renderer_set_active_window(window->renderer, NULL);
 }
 
 void window_swap_buffers(const LSWindow *window) {

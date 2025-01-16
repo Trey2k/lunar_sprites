@@ -15,7 +15,7 @@ struct Main {
 	LSCore *core;
 	Renderer *renderer;
 
-	const LSWindow *root_window;
+	LSWindow *root_window;
 
 	ApplicationInterface application_interface;
 

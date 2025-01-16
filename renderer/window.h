@@ -17,6 +17,7 @@ typedef struct {
 	Vector2u position;
 	Vector2u size;
 	Vector2u min_size;
+	Vector2u max_size;
 
 	String title;
 
@@ -31,11 +32,13 @@ LS_EXPORT void window_destroy(LSWindow *window);
 
 LS_EXPORT LSNativeWindow window_get_native_window(const LSWindow *window);
 
-LS_EXPORT void window_update(const LSWindow *window);
 LS_EXPORT void window_poll(const LSWindow *window);
 
 LS_EXPORT void window_set_title(LSWindow *window, const char *title);
 LS_EXPORT void window_set_min_size(LSWindow *window, Vector2u size);
+LS_EXPORT Vector2u window_get_min_size(const LSWindow *window);
+LS_EXPORT void window_set_max_size(LSWindow *window, Vector2u size);
+LS_EXPORT Vector2u window_get_max_size(const LSWindow *window);
 LS_EXPORT void window_set_size(LSWindow *window, Vector2u size);
 LS_EXPORT Vector2u window_get_size(const LSWindow *window);
 
