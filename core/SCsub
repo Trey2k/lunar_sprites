@@ -24,6 +24,7 @@ SConscript("math/SCsub")
 SConscript("events/SCsub")
 SConscript("input/SCsub")
 SConscript("os/SCsub")
+SConscript("object/SCsub")
 
 lib = env.add_library("core", env.core_sources)
 env.Prepend(LIBS=[lib])

@@ -8,6 +8,7 @@
 #include "core/types/hashtable.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"
+#include "core/types/variant.h"
 /* --------------------------------- */
 
 /* --------------MANAGERS-------------- */
