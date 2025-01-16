@@ -51,7 +51,7 @@ jobs:
             artifact-name: web-wasm32-release
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: (Windows) Install mingw64
         if: ${{ startsWith(matrix.opts.cache-name, 'windows-') }}
@@ -123,7 +123,7 @@ jobs:
         run: |
           cp platform/web/serve.py out/
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.opts.artifact-name }}
           path: out/*
@@ -156,7 +156,7 @@ jobs:
             artifact-name: windows-amd64-release-mingw
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Load .scons_cache directory
         uses: actions/cache@v3
@@ -204,7 +204,7 @@ jobs:
           cp bin/*.txt out/
           cp bin/*.json out/
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.opts.artifact-name }}
           path: out/*

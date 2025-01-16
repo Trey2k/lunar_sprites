@@ -43,7 +43,7 @@ LSEGLContext *egl_context_create(const LSWindow *window) {
 
 	if (!version) {
 		ls_log(LOG_LEVEL_WARNING, "Failed to load OpenGl.\n");
-		return false;
+		return NULL;
 	}
 
 	ls_log(LOG_LEVEL_INFO, "Loaded OpenGL version %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
@@ -69,16 +69,22 @@ void egl_context_destroy(LSEGLContext *context) {
 }
 
 void egl_context_make_current(const LSEGLContext *context) {
+	EGLDisplay egl_display = egl_get_display();
+
 	if (!context) {
-		eglMakeCurrent(NULL, NULL, NULL, NULL);
+		eglMakeCurrent(egl_display, NULL, NULL, NULL);
 		return;
 	}
-
-	EGLDisplay egl_display = egl_get_display();
 
 	if (!eglMakeCurrent(egl_display, context->egl_surface, context->egl_surface, context->egl_context)) {
 		ls_log_fatal("Failed to make EGL context current (eglError: 0x%X)\n", eglGetError());
 	}
+}
+
+void egl_context_detach(const LSEGLContext *context) {
+	LS_ASSERT(context);
+
+	egl_context_make_current(NULL);
 }
 
 void egl_context_swap_buffers(const LSEGLContext *context) {

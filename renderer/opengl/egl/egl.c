@@ -69,6 +69,8 @@ bool egl_init(const OS *os) {
 		return false;
 	}
 
+	eglSwapInterval(egl_display, 0);
+
 	ls_log(LOG_LEVEL_INFO, "Loaded EGL version %d.%d on reload.\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
 	return true;

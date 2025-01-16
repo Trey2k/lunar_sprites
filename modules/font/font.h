@@ -9,7 +9,7 @@
 
 typedef struct Font Font;
 
-void font_renderer_init(Renderer *renderer, LSCore *core, const LSWindow *window);
+void font_renderer_init(const Renderer *renderer);
 void font_renderer_deinit();
 
 typedef void (*FontRenderTextCallback)(const Texture *atlas, float32 *verts, float32 *tcoords, size_t nverts, void *user_data);

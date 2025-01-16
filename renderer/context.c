@@ -19,7 +19,7 @@ struct Context {
 	};
 };
 
-Context *renderer_context_create(const Renderer *renderer, const LSWindow *window) {
+Context *renderer_context_create(const Renderer *renderer, LSWindow *window) {
 	Context *context = ls_malloc(sizeof(Context));
 	context->backend = renderer_get_backend(renderer);
 	context->window = window;
@@ -63,7 +63,23 @@ void renderer_context_make_current(Renderer *renderer, const Context *context) {
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
 			opengl_context_make_current(context->opengl_context);
-			renderer_set_active_window(renderer, opengl_context_get_window(context->opengl_context));
+			renderer_set_active_context(renderer, context);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown renderer backend: %d\n", context->backend);
+	};
+}
+
+void renderer_context_detach(Renderer *renderer, const Context *context) {
+	LS_ASSERT(context);
+
+	switch (context->backend) {
+#if defined(OPENGL_ENABLED)
+		case RENDERER_BACKEND_OPENGL: {
+			opengl_context_detach(context->opengl_context);
+			renderer_set_active_context(renderer, NULL);
 		} break;
 #endif
 
@@ -84,5 +100,36 @@ void renderer_context_swap_buffers(const Context *context) {
 
 		default:
 			ls_log_fatal("Unknown renderer backend: %d\n", context->backend);
+	};
+}
+
+void renderer_context_resize(const Context *context, Vector2u size) {
+	LS_ASSERT(context);
+
+	switch (context->backend) {
+#if defined(OPENGL_ENABLED)
+		case RENDERER_BACKEND_OPENGL: {
+			opengl_context_resize(context->opengl_context, size);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown renderer backend: %d\n", context->backend);
+	};
+}
+
+Vector2u renderer_context_get_size(const Context *context) {
+	LS_ASSERT(context);
+
+	switch (context->backend) {
+#if defined(OPENGL_ENABLED)
+		case RENDERER_BACKEND_OPENGL: {
+			return opengl_context_get_size(context->opengl_context);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown renderer backend: %d\n", context->backend);
+			return vec2u(0, 0);
 	};
 }

@@ -13,12 +13,14 @@ typedef enum {
 } RendererBackend;
 
 typedef struct Renderer Renderer;
+typedef struct Context Context;
 
 Renderer *renderer_create(LSCore *core);
 void renderer_start(Renderer *renderer);
 void renderer_destroy(Renderer *renderer);
 
 void renderer_set_active_window(Renderer *renderer, const LSWindow *window);
+void renderer_set_active_context(Renderer *renderer, const Context *context);
 
 LSCore *renderer_get_core(const Renderer *renderer);
 

@@ -1,7 +1,7 @@
 #include "core/config.h"
 #include "core/debug.h"
 #include "core/log.h"
-#include "core/os.h"
+#include "core/os/os.h"
 #include "core/types/hashtable.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"

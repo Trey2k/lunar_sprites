@@ -49,7 +49,7 @@ ApplicationInterface register_application() {
 	return application_interface;
 }
 
-const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data) {
+LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data) {
 	TestApplication *test_application = user_data;
 	test_application->core = core;
 	test_application->renderer = renderer;
@@ -62,6 +62,7 @@ const LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data)
 		.position = vec2u(0, 0),
 		.size = vec2u(1200, 800),
 		.min_size = vec2u(0, 0),
+		.max_size = vec2u(0, 0),
 		.title = "Lunar Sprites Test Application",
 		.fullscreen = false,
 		.hidden = false,
@@ -141,7 +142,7 @@ void test_app_start(void *user_data) {
 	ui_add_element(test_application->horizontal_container);
 
 	test_application->sprite = renderer_create_sprite(test_application->renderer, "moon.png", vec2(0, 0), vec2(0.25, 0.25), 0.0);
-	Vector2u viewport_size = window_get_size(test_application->root_window);
+	Vector2u viewport_size = renderer_get_viewport_size(test_application->renderer);
 	test_application->camera = camera_create(math_deg_to_rad(100), (float32)viewport_size.y / (float32)viewport_size.x, 0.1, 100.0);
 	camera_set_active(test_application->camera);
 }

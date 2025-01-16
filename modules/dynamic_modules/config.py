@@ -47,7 +47,8 @@ def configure(env):
         'core/input/input_manager.h',
         'core/events/events.h',
         'core/events/event_manager.h',
-        'core/os.h',
+        'core/os/os.h',
+        'core/os/thread.h',
         'core/config.h',
         'core/core.h',
         

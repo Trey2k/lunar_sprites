@@ -100,9 +100,8 @@ void ls_str_copy_to(char *buffer, String string, size_t buffer_size) {
 	LS_ASSERT(string);
 	LS_ASSERT(buffer);
 
-	size_t length = ls_str_length(string);
 	strncpy(buffer, string, buffer_size);
-	buffer[length] = '\0';
+	buffer[buffer_size - 1] = '\0';
 }
 
 char *ls_str_concat(String a, ...) {

@@ -22,10 +22,14 @@ void platform_window_poll(PlatformWindow *window);
 
 void platform_window_set_title(PlatformWindow *window, String title);
 void platform_window_set_min_size(PlatformWindow *window, Vector2u size);
+Vector2u platform_window_get_min_size(const PlatformWindow *window);
+void platform_window_set_max_size(PlatformWindow *window, Vector2u size);
+Vector2u platform_window_get_max_size(const PlatformWindow *window);
 void platform_window_set_size(PlatformWindow *window, Vector2u size);
 Vector2u platform_window_get_size(const PlatformWindow *window);
 
 void platform_window_set_fullscreen(PlatformWindow *window, bool fullscreen);
+void platform_window_set_resizable(PlatformWindow *window, bool resizable);
 
 void platform_window_show(PlatformWindow *window);
 void platform_window_hide(PlatformWindow *window);

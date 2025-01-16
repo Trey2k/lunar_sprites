@@ -1,5 +1,7 @@
 #include "renderer/renderer.h"
 
+#include "renderer.h"
+#include "renderer/context.h"
 #include "renderer/renderer_interface.h"
 #include "renderer/texture.h"
 #include "renderer/window.h"
@@ -17,6 +19,8 @@ struct Renderer {
 
 	const LSWindow *active_window;
 
+	const Context *active_context;
+
 	FlagValue *backend_flag;
 	RendererBackend backend;
 	union {
@@ -31,6 +35,9 @@ static void check_flags(Renderer *renderer);
 Renderer *renderer_create(LSCore *core) {
 	Renderer *renderer = ls_malloc(sizeof(Renderer));
 	renderer->core = core;
+
+	renderer->active_window = NULL;
+	renderer->active_context = NULL;
 
 	renderer->backend_flag = flag_manager_register(core_get_flag_manager(core),
 			"renderer-backend", FLAG_TYPE_STRING, FLAG_VAL(str, "OPENGL"),
@@ -95,14 +102,27 @@ void renderer_set_clear_color(const Renderer *renderer, float32 r, float32 g, fl
 
 void renderer_clear(const Renderer *renderer) {
 	renderer->interface.clear();
+
+	Vector2u viewport_size = window_get_size(renderer->active_window);
+	if (!vec2u_equals(viewport_size, renderer_context_get_size(renderer->active_context))) {
+		renderer_context_resize(renderer->active_context, viewport_size);
+	}
 }
 
 void renderer_set_active_window(Renderer *renderer, const LSWindow *window) {
 	renderer->active_window = window;
 }
 
+void renderer_set_active_context(Renderer *renderer, const Context *context) {
+	renderer->active_context = context;
+}
+
 Vector2u renderer_get_viewport_size(const Renderer *renderer) {
-	return window_get_size(renderer->active_window);
+	if (!renderer->active_context) {
+		return vec2u(0, 0);
+	}
+
+	return renderer_context_get_size(renderer->active_context);
 }
 
 static void check_flags(Renderer *renderer) {

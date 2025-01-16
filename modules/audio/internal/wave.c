@@ -1,5 +1,5 @@
 #include "wave.h"
-#include "core/os.h"
+#include "core/os/os.h"
 
 #if defined(AUDIO_SUPPORT_WAV)
 #include <dr_wav.h>

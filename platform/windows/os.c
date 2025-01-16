@@ -6,6 +6,8 @@
 
 #include "core/core.h"
 
+#include "main/main_loop.h"
+
 #include <stdio.h>
 
 static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param, int64 l_param);
@@ -145,6 +147,13 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 			MINMAXINFO *min_max_info = (MINMAXINFO *)l_param;
 			min_max_info->ptMinTrackSize.x = window->min_size.x;
 			min_max_info->ptMinTrackSize.y = window->min_size.y;
+			if (window->max_size.x != 0) {
+				min_max_info->ptMaxTrackSize.x = window->max_size.x;
+			}
+
+			if (window->max_size.y != 0) {
+				min_max_info->ptMaxTrackSize.y = window->max_size.y;
+			}
 			return 0;
 		} break;
 	};

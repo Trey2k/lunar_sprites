@@ -144,6 +144,49 @@ void platform_window_set_min_size(PlatformWindow *window, Vector2u size) {
 	};
 }
 
+Vector2u platform_window_get_min_size(const PlatformWindow *window) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			return x11_window_get_min_size(window->x11_window);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+			return vec2u(0, 0);
+	};
+}
+
+void platform_window_set_max_size(PlatformWindow *window, Vector2u size) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			x11_window_set_max_size(window->x11_window, size);
+			break;
+		} break;
+
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+	};
+}
+
+Vector2u platform_window_get_max_size(const PlatformWindow *window) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			return x11_window_get_max_size(window->x11_window);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+			return vec2u(0, 0);
+	};
+}
+
 void platform_window_set_size(PlatformWindow *window, Vector2u size) {
 	switch (window->display_server) {
 #if defined(X11_ENABLED)

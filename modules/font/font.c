@@ -35,11 +35,14 @@ void font_destroy(Font *font) {
 extern const char *const FONT_SHADER_SOURCE;
 
 typedef struct {
+	const Renderer *renderer;
 	Color font_color;
 
 	Slice32 *indices;
 	BatchVertex *batch_vertices;
 	size_t batch_vertices_size;
+
+	Vector2u viewport_size;
 
 	FontRenderTextCallback callback;
 	void *user_data;
@@ -47,26 +50,11 @@ typedef struct {
 
 static FontRenderer *font_renderer = NULL;
 
-static void event_handler(Event *event, void *user_data) {
-	if (event->type != EVENT_WINDOW) {
-		return;
-	}
-
-	EventWindow window_event = event->window;
-
-	if (window_event.type == EVENT_WINDOW_RESIZE) {
-		RFont_update_framebuffer(window_event.size.x, window_event.size.y);
-	}
-}
-
-void font_renderer_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
+void font_renderer_init(const Renderer *renderer) {
 	font_renderer = ls_malloc(sizeof(FontRenderer));
 
-	EventManager *event_manager = core_get_event_manager(core);
-	event_manager_add_handler(event_manager, event_handler, NULL);
-
-	Vector2u size = window_get_size(window);
-	RFont_init(size.x, size.y);
+	font_renderer->viewport_size = renderer_get_viewport_size(renderer);
+	RFont_init(font_renderer->viewport_size.x, font_renderer->viewport_size.y);
 	font_renderer->font_color = COLOR_WHITE;
 	font_renderer->callback = NULL;
 	font_renderer->user_data = NULL;
@@ -74,6 +62,7 @@ void font_renderer_init(Renderer *renderer, LSCore *core, const LSWindow *window
 	font_renderer->indices = slice32_create(128);
 	font_renderer->batch_vertices = ls_malloc(128 * sizeof(BatchVertex));
 	font_renderer->batch_vertices_size = 128;
+	font_renderer->renderer = renderer;
 }
 
 void font_renderer_deinit() {
@@ -83,6 +72,12 @@ void font_renderer_deinit() {
 
 Vector2u font_draw_text(const Font *font, uint32 font_size, Color font_color, String text, Vector2 position) {
 	LS_ASSERT(font_renderer);
+
+	Vector2u viewport_size = renderer_get_viewport_size(font_renderer->renderer);
+	if (font_renderer->viewport_size.x != viewport_size.x || font_renderer->viewport_size.y != viewport_size.y) {
+		font_renderer->viewport_size = viewport_size;
+		RFont_update_framebuffer(viewport_size.x, viewport_size.y);
+	}
 
 	font_renderer->font_color = font_color;
 

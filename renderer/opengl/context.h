@@ -6,11 +6,16 @@
 
 typedef struct OpenGLContext OpenGLContext;
 
-OpenGLContext *opengl_context_create(const OpenGLRenderer *renderer, const LSWindow *window);
+OpenGLContext *opengl_context_create(const OpenGLRenderer *renderer, LSWindow *window);
 void opengl_context_destroy(OpenGLContext *context);
 
 void opengl_context_make_current(const OpenGLContext *context);
-void opengl_context_swap_buffers(const OpenGLContext *context);
+void opengl_context_detach(const OpenGLContext *context);
+void opengl_context_swap_buffers(OpenGLContext *context);
+
+void opengl_context_resize(OpenGLContext *context, Vector2u size);
+
+Vector2u opengl_context_get_size(const OpenGLContext *context);
 
 const LSWindow *opengl_context_get_window(const OpenGLContext *context);
 

@@ -12,6 +12,7 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 	window->title = config.title;
 	window->size = config.size;
 	window->min_size = config.min_size;
+	window->max_size = config.max_size;
 	window->hidden = true;
 	window->fullscreen = false;
 	window->parent = parent;
@@ -114,6 +115,18 @@ void platform_window_set_min_size(PlatformWindow *window, Vector2u size) {
 	window->min_size = size;
 }
 
+Vector2u platform_window_get_min_size(const PlatformWindow *window) {
+	return window->min_size;
+}
+
+void platform_window_set_max_size(PlatformWindow *window, Vector2u size) {
+	window->max_size = size;
+}
+
+Vector2u platform_window_get_max_size(const PlatformWindow *window) {
+	return window->max_size;
+}
+
 void platform_window_set_size(PlatformWindow *window, Vector2u size) {
 	RECT rect;
 	GetWindowRect(window->window, &rect);
@@ -122,7 +135,10 @@ void platform_window_set_size(PlatformWindow *window, Vector2u size) {
 }
 
 Vector2u platform_window_get_size(const PlatformWindow *window) {
-	return window->size;
+	RECT rect;
+	GetWindowRect(window->window, &rect);
+	// sub window dimensions
+	return vec2u(rect.right - rect.left - 16, rect.bottom - rect.top - 39);
 }
 
 bool platform_window_is_visible(const PlatformWindow *window) {

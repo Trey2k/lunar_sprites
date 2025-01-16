@@ -36,6 +36,9 @@ void x11_window_poll(X11Window *window);
 
 void x11_window_set_title(X11Window *window, String title);
 void x11_window_set_min_size(X11Window *window, Vector2u size);
+Vector2u x11_window_get_min_size(const X11Window *window);
+void x11_window_set_max_size(X11Window *window, Vector2u size);
+Vector2u x11_window_get_max_size(const X11Window *window);
 void x11_window_set_size(X11Window *window, Vector2u size);
 Vector2u x11_window_get_size(const X11Window *window);
 

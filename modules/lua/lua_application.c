@@ -10,7 +10,7 @@
 
 #define PROJECT_FILE_NAME "project.lua"
 
-static const LSWindow *lua_app_init(LSCore *core, Renderer *renderer, void *user_data) {
+static LSWindow *lua_app_init(LSCore *core, Renderer *renderer, void *user_data) {
 	lua_State *L = (lua_State *)user_data;
 
 	lua_pushcfunction(L, ls_lua_error_handler);

@@ -2,11 +2,21 @@
 
 Import("env")
 
-env.main_sources = []
+env.main_sources = [
+	"lunar_sprites.c",
+]
+
+if env["platform"] == "web":
+	env.main_sources += [
+		"main_loop_web.c",
+	]
+else:
+	env.main_sources += [
+		"main_loop.c",
+	]
 
 env_main = env.Clone()
 
-env_main.add_source_files(env.main_sources, "*.c")
 
 if env["tests"]:
 	env_main.Append(CPPDEFINES = ["TESTS_ENABLED"])

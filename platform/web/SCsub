@@ -22,6 +22,7 @@ web_files = [
     "os.c",
     "js_methods.c",
     'main.c',
+    'thread.c',
 ]
 
 if env["use_opengl"]:

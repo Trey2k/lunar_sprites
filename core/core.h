@@ -24,7 +24,8 @@
 #include "core/math/matrix.h"
 #include "core/math/vector.h"
 #include "core/memory.h"
-#include "core/os.h"
+#include "core/os/os.h"
+#include "core/os/thread.h"
 #include "core/version.h"
 /* -------------------------------------- */
 
