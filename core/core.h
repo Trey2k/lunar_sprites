@@ -4,11 +4,14 @@
 #include "core/api.h"
 
 /* --------------TYPES-------------- */
+#include "core/object/object.h"
+#include "core/resource/resource.h"
 #include "core/types/color.h"
 #include "core/types/hashtable.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"
 #include "core/types/variant.h"
+
 /* --------------------------------- */
 
 /* --------------MANAGERS-------------- */

@@ -3,8 +3,10 @@
 #include "renderer.h"
 #include "renderer/context.h"
 #include "renderer/renderer_interface.h"
+#include "renderer/sprite.h"
 #include "renderer/texture.h"
 #include "renderer/window.h"
+
 
 #include "core/core.h"
 
@@ -44,6 +46,7 @@ Renderer *renderer_create(LSCore *core) {
 			"The renderer backend to use. Valid values are NONE and OPENGL.");
 
 	texture_manager_init();
+	register_sprite_object();
 
 	return renderer;
 }

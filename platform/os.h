@@ -28,7 +28,7 @@ char *platform_path_get_filename(String path);
 char *platform_path_get_extension(String path);
 char *platform_path_to_absolute(String path);
 
-Slice *platform_list_directory(String path);
+Slice64 *platform_list_directory(String path);
 char *platform_read_file(String path, size_t *size);
 bool platform_write_file(String path, const void *data, size_t size);
 

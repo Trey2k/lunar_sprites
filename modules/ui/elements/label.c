@@ -30,7 +30,7 @@ UIElement *ui_label_create(const Font *font, String text, UITextWrapMode wrap_mo
 
 	element->label.wrap_mode = wrap_mode;
 
-	element->label.render_lines = slice_create(16, true);
+	element->label.render_lines = slice64_create(16, true);
 	element->label.render_lines_width = slice32_create(16);
 
 	element->label.theme->font = font;
@@ -46,7 +46,7 @@ UIElement *ui_label_create(const Font *font, String text, UITextWrapMode wrap_mo
 
 void ui_label_destroy(UILabel *label) {
 	ls_free(label->text);
-	slice_destroy(label->render_lines);
+	slice64_destroy(label->render_lines);
 }
 
 void ui_label_set_theme(UIElement *element, const UIElementTheme *theme) {
@@ -57,7 +57,7 @@ void ui_label_set_theme(UIElement *element, const UIElementTheme *theme) {
 
 static void label_draw_lines(UIElement *label_elm, String text) {
 	UILabel *label = &label_elm->label;
-	size_t n_lines = slice_get_size(label->render_lines);
+	size_t n_lines = slice64_get_size(label->render_lines);
 	uint32 font_size = label->theme->font_size;
 	uint32 total_text_height = n_lines * font_size;
 	for (size_t i = 0; i < n_lines; i++) {
@@ -79,7 +79,7 @@ static void label_draw_lines(UIElement *label_elm, String text) {
 			default:
 				break;
 		};
-		char *line = slice_get(label->render_lines, i).ptr;
+		char *line = slice64_get(label->render_lines, i).ptr;
 		Vector2u line_size = font_draw_text(label->theme->font, font_size, label->theme->font_color, line, rendor_pos);
 		rendor_pos.y += line_size.y;
 	}
@@ -132,7 +132,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 							char *new_line = ls_malloc((text_len - i) + 1);
 							ls_str_copy_to(new_line, l_text, (text_len - i) + 1);
 							new_line[text_len - i] = '\0';
-							slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+							slice64_append(label_elm->label.render_lines, SLICE_VAL64(ptr, new_line));
 							slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, line_size.x));
 							l_text += (text_len - i) + 1;
 							text_len -= i;
@@ -155,7 +155,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 					if (line_size.x < max_size.x) {
 						char *new_line = ls_malloc((text_len - i) + 1);
 						ls_str_copy_to(new_line, l_text, (text_len - i) + 1);
-						slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+						slice64_append(label_elm->label.render_lines, SLICE_VAL64(ptr, new_line));
 						slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, line_size.x));
 						l_text += (text_len - i);
 						text_len -= i;
@@ -179,7 +179,7 @@ static Vector2u ui_label_split_lines(UIElement *label_elm, Vector2u max_size) {
 
 		if (failed || text_size.x < max_size.x) {
 			char *new_line = ls_str_copy(l_text);
-			slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+			slice64_append(label_elm->label.render_lines, SLICE_VAL64(ptr, new_line));
 			slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
 			used_y += text_size.y;
 			if (text_size.x > max_x) {
@@ -227,7 +227,7 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 		max_size.y = label_elm->min_size.y;
 	}
 
-	slice_clear(label_elm->label.render_lines);
+	slice64_clear(label_elm->label.render_lines);
 	slice32_clear(label_elm->label.render_lines_width);
 
 	Vector2u text_size = font_get_text_size(theme->font, theme->font_size, label_elm->label.text);
@@ -239,7 +239,7 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 		// Text fits on one line
 		char *new_line = ls_str_copy(label_elm->label.text);
 		LS_ASSERT(new_line);
-		slice_append(label_elm->label.render_lines, SLICE_VAL(ptr, new_line));
+		slice64_append(label_elm->label.render_lines, SLICE_VAL64(ptr, new_line));
 		slice32_append(label_elm->label.render_lines_width, SLICE_VAL32(u32, text_size.x));
 		label_elm->size = vec2u_add(text_size, vec2u(label_elm->label.padding, label_elm->label.padding));
 	}

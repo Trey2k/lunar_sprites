@@ -22,10 +22,10 @@ void write_config(String path, const Hashtable *config) {
 		return;
 	}
 
-	Slice *keys = hashtable_get_keys(config);
+	Slice64 *keys = hashtable_get_keys(config);
 
-	for (size_t i = 0; i < slice_get_size(keys); i++) {
-		String key = slice_get(keys, i).str;
+	for (size_t i = 0; i < slice64_get_size(keys); i++) {
+		String key = slice64_get(keys, i).str;
 		String value = hashtable_get(config, HASH_KEY(str, key)).str;
 
 		char *line = ls_str_format("%s: %s\n", key, value);
@@ -34,7 +34,7 @@ void write_config(String path, const Hashtable *config) {
 	}
 
 	os_close_file(file);
-	slice_destroy(keys);
+	slice64_destroy(keys);
 }
 
 Hashtable *read_config(String path) {

@@ -15,7 +15,7 @@ typedef struct {
 	const Renderer *renderer;
 	const LSWindow *window;
 
-	Slice *elements;
+	Slice64 *elements;
 
 	Slice32 *indices;
 	BatchVertex *batch_vertices;
@@ -27,11 +27,11 @@ typedef struct {
 static UIRenderer ui_renderer;
 
 static void ui_on_update(float64 delta_time) {
-	size_t n_elements = slice_get_size(ui_renderer.elements);
+	size_t n_elements = slice64_get_size(ui_renderer.elements);
 	Vector2u inner_bounds = vec2u(0, 0);
 	Vector2u outer_bounds = renderer_get_viewport_size(ui_renderer.renderer);
 	for (size_t i = 0; i < n_elements; i++) {
-		UIElement *element = slice_get(ui_renderer.elements, i).ptr;
+		UIElement *element = slice64_get(ui_renderer.elements, i).ptr;
 		// Root elements bounds are the window size.
 
 		// Updated element size and position
@@ -42,8 +42,8 @@ static void ui_on_update(float64 delta_time) {
 
 static void ui_mouse_event_handler(Event *event) {
 	Vector2u mouse_pos = event->mouse.position;
-	for (size_t i = 0; i < slice_get_size(ui_renderer.elements); i++) {
-		UIElement *element = slice_get(ui_renderer.elements, i).ptr;
+	for (size_t i = 0; i < slice64_get_size(ui_renderer.elements); i++) {
+		UIElement *element = slice64_get(ui_renderer.elements, i).ptr;
 		if (mouse_pos.x >= element->position.x && mouse_pos.x <= element->position.x + element->size.x &&
 				mouse_pos.y >= element->position.y && mouse_pos.y <= element->position.y + element->size.y) {
 			ui_element_handle_event(element, event);
@@ -72,7 +72,7 @@ void ui_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
 	ui_renderer.input_manager = core_get_input_manager(core);
 	ui_renderer.renderer = renderer;
 	ui_renderer.window = window;
-	ui_renderer.elements = slice_create(16, false);
+	ui_renderer.elements = slice64_create(16, false);
 	ui_renderer.indices = slice32_create(128);
 	ui_renderer.batch_vertices = ls_malloc(128 * sizeof(BatchVertex));
 	ui_renderer.batch_vertices_size = 128;
@@ -83,24 +83,24 @@ void ui_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
 }
 
 void ui_deinit() {
-	for (size_t i = 0; i < slice_get_size(ui_renderer.elements); i++) {
-		UIElement *element = slice_get(ui_renderer.elements, i).ptr;
+	for (size_t i = 0; i < slice64_get_size(ui_renderer.elements); i++) {
+		UIElement *element = slice64_get(ui_renderer.elements, i).ptr;
 		ui_element_destroy(element);
 	}
 
-	slice_destroy(ui_renderer.elements);
+	slice64_destroy(ui_renderer.elements);
 }
 
 void ui_add_element(UIElement *element) {
-	slice_append(ui_renderer.elements, SLICE_VAL(ptr, (void *)element));
+	slice64_append(ui_renderer.elements, SLICE_VAL64(ptr, (void *)element));
 }
 
 void ui_remove_element(const UIElement *element) {
-	size_t n_elements = slice_get_size(ui_renderer.elements);
+	size_t n_elements = slice64_get_size(ui_renderer.elements);
 	for (size_t i = 0; i < n_elements; i++) {
-		UIElement *elm = slice_get(ui_renderer.elements, i).ptr;
+		UIElement *elm = slice64_get(ui_renderer.elements, i).ptr;
 		if (elm == element) {
-			slice_remove(ui_renderer.elements, i);
+			slice64_remove(ui_renderer.elements, i);
 			ui_element_destroy(elm);
 			break;
 		}

@@ -61,13 +61,12 @@ static int lua_renderer_new_window(lua_State *L) {
 }
 
 static int lua_renderer_new_sprite(lua_State *L) {
-	Renderer *renderer = lua_check_renderer(L, 1);
-	String path = luaL_checkstring(L, 2);
-	Vector2 position = lua_check_vector2(L, 3);
-	Vector2 scale = lua_check_vector2(L, 4);
-	float32 rotation = luaL_checknumber(L, 5);
+	String path = luaL_checkstring(L, 1);
+	Vector2i position = lua_check_vector2i(L, 2);
+	Vector2 scale = lua_check_vector2(L, 3);
+	float32 rotation = luaL_checknumber(L, 4);
 
-	Sprite *sprite = renderer_create_sprite(renderer, path, position, scale, rotation);
+	Sprite *sprite = sprite_create(path, position, scale, rotation);
 
 	lua_push_sprite(L, sprite);
 

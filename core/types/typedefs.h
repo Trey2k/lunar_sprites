@@ -12,6 +12,8 @@ typedef unsigned long long uint64;
 typedef float float32;
 typedef double float64;
 
+typedef struct Variant Variant;
+
 #if !defined(WEB_ENABLED)
 typedef enum {
 	false = 0,

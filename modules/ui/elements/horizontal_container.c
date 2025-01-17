@@ -4,11 +4,11 @@
 static void ui_horizontal_container_child_size(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds) {
 	LS_ASSERT(element->type == UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER);
 
-	size_t n_children = slice_get_size(element->horizontal_container.children);
+	size_t n_children = slice64_get_size(element->horizontal_container.children);
 	int32 x_offset = element->horizontal_container.spacing;
 
 	for (size_t i = 0; i < n_children; i++) {
-		UIElement *child = slice_get(element->horizontal_container.children, i).ptr;
+		UIElement *child = slice64_get(element->horizontal_container.children, i).ptr;
 		Vector2u child_inner_bounds = vec2u(inner_bounds.x + x_offset, inner_bounds.y);
 		Vector2u child_outer_bounds = vec2u(outer_bounds.x - element->horizontal_container.spacing, outer_bounds.y);
 		ui_element_calculate_position(child, child_outer_bounds, child_inner_bounds);
@@ -21,7 +21,7 @@ UIElement *ui_horizontal_container_create(uint32 spacing, UIAllignment alignment
 	UIElement *element = (UIElement *)ls_malloc(sizeof(UIElement));
 	element->type = UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER;
 	element->horizontal_container.spacing = spacing;
-	element->horizontal_container.children = slice_create(16, false);
+	element->horizontal_container.children = slice64_create(16, false);
 	element->horizontal_container.alignment = alignment;
 
 	element->size = vec2u(0, 0);
@@ -36,12 +36,12 @@ UIElement *ui_horizontal_container_create(uint32 spacing, UIAllignment alignment
 }
 
 void ui_horizontal_container_destroy(UIHorizontalContainer *container) {
-	for (size_t i = 0; i < slice_get_size(container->children); i++) {
-		UIElement *child = slice_get(container->children, i).ptr;
+	for (size_t i = 0; i < slice64_get_size(container->children); i++) {
+		UIElement *child = slice64_get(container->children, i).ptr;
 		ui_element_destroy(child);
 	}
 
-	slice_destroy(container->children);
+	slice64_destroy(container->children);
 }
 
 void ui_horizontal_container_add_child(UIElement *element, UIElement *child) {
@@ -51,14 +51,14 @@ void ui_horizontal_container_add_child(UIElement *element, UIElement *child) {
 	child_layout.container_size = vec2u(0, 0);
 	ui_element_set_layout(child, child_layout);
 
-	slice_append(element->horizontal_container.children, SLICE_VAL(ptr, child));
+	slice64_append(element->horizontal_container.children, SLICE_VAL64(ptr, child));
 }
 
 void ui_horizontal_container_remove_child(UIElement *element, UIElement *child) {
 	LS_ASSERT(element->type == UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER);
-	for (size_t i = 0; i < slice_get_size(element->horizontal_container.children); i++) {
-		if (slice_get(element->horizontal_container.children, i).ptr == child) {
-			slice_remove(element->horizontal_container.children, i);
+	for (size_t i = 0; i < slice64_get_size(element->horizontal_container.children); i++) {
+		if (slice64_get(element->horizontal_container.children, i).ptr == child) {
+			slice64_remove(element->horizontal_container.children, i);
 			break;
 		}
 	}
@@ -71,8 +71,8 @@ void ui_horizontal_container_calculate_size(UIElement *element, Vector2u outer_b
 
 	uint32 max_height = 0;
 	uint32 total_width = 0;
-	for (size_t i = 0; i < slice_get_size(element->horizontal_container.children); i++) {
-		UIElement *child = slice_get(element->horizontal_container.children, i).ptr;
+	for (size_t i = 0; i < slice64_get_size(element->horizontal_container.children); i++) {
+		UIElement *child = slice64_get(element->horizontal_container.children, i).ptr;
 		Vector2u size = ui_element_get_size(child);
 		if (size.y > max_height) {
 			max_height = size.y;
@@ -91,8 +91,8 @@ void ui_horizontal_container_calculate_size(UIElement *element, Vector2u outer_b
 		}
 	}
 
-	for (size_t i = 0; i < slice_get_size(element->horizontal_container.children); i++) {
-		UIElement *child = slice_get(element->horizontal_container.children, i).ptr;
+	for (size_t i = 0; i < slice64_get_size(element->horizontal_container.children); i++) {
+		UIElement *child = slice64_get(element->horizontal_container.children, i).ptr;
 		UILayout child_layout = ui_element_get_layout(child);
 		Vector2u container_size = vec2u(0, max_height);
 		if (!vec2u_equals(container_size, child_layout.container_size)) {
@@ -124,8 +124,8 @@ void ui_horizontal_container_draw(UIElement *element) {
 			Vector2 child_position = element->position;
 			child_position.x += container->spacing;
 
-			for (size_t i = 0; i < slice_get_size(container->children); i++) {
-				UIElement *child = slice_get(container->children, i).ptr;
+			for (size_t i = 0; i < slice64_get_size(container->children); i++) {
+				UIElement *child = slice64_get(container->children, i).ptr;
 				child->position = child_position;
 				ui_draw_element(child);
 				child_position.x += child->size.x + container->spacing;
@@ -133,8 +133,8 @@ void ui_horizontal_container_draw(UIElement *element) {
 		} break;
 		case UI_ALIGNMENT_CENTER: {
 			uint32 total_width = 0;
-			for (size_t i = 0; i < slice_get_size(container->children); i++) {
-				UIElement *child = slice_get(container->children, i).ptr;
+			for (size_t i = 0; i < slice64_get_size(container->children); i++) {
+				UIElement *child = slice64_get(container->children, i).ptr;
 				total_width += child->size.x + container->spacing;
 			}
 
@@ -143,8 +143,8 @@ void ui_horizontal_container_draw(UIElement *element) {
 			Vector2 child_position = element->position;
 			child_position.x += x_offset;
 
-			for (size_t i = 0; i < slice_get_size(container->children); i++) {
-				UIElement *child = slice_get(container->children, i).ptr;
+			for (size_t i = 0; i < slice64_get_size(container->children); i++) {
+				UIElement *child = slice64_get(container->children, i).ptr;
 				child->position = child_position;
 				ui_draw_element(child);
 				child_position.x += child->size.x + container->spacing;
@@ -152,8 +152,8 @@ void ui_horizontal_container_draw(UIElement *element) {
 		} break;
 		case UI_ALIGNMENT_END: {
 			uint32 total_width = 0;
-			for (size_t i = 0; i < slice_get_size(container->children); i++) {
-				UIElement *child = slice_get(container->children, i).ptr;
+			for (size_t i = 0; i < slice64_get_size(container->children); i++) {
+				UIElement *child = slice64_get(container->children, i).ptr;
 				total_width += child->size.x + container->spacing;
 			}
 
@@ -162,8 +162,8 @@ void ui_horizontal_container_draw(UIElement *element) {
 			Vector2 child_position = element->position;
 			child_position.x += x_offset;
 
-			for (size_t i = 0; i < slice_get_size(container->children); i++) {
-				UIElement *child = slice_get(container->children, i).ptr;
+			for (size_t i = 0; i < slice64_get_size(container->children); i++) {
+				UIElement *child = slice64_get(container->children, i).ptr;
 				child->position = child_position;
 				ui_draw_element(child);
 				child_position.x += child->size.x + container->spacing;
@@ -180,8 +180,8 @@ static void ui_horizontal_container_handle_mouse_event(UIElement *element, Event
 
 	Vector2u mouse_pos = event->mouse.position;
 
-	for (size_t i = 0; i < slice_get_size(element->horizontal_container.children); i++) {
-		UIElement *child = slice_get(element->horizontal_container.children, i).ptr;
+	for (size_t i = 0; i < slice64_get_size(element->horizontal_container.children); i++) {
+		UIElement *child = slice64_get(element->horizontal_container.children, i).ptr;
 		if (mouse_pos.x >= child->position.x && mouse_pos.x <= child->position.x + child->size.x &&
 				mouse_pos.y >= child->position.y && mouse_pos.y <= child->position.y + child->size.y) {
 			ui_element_handle_event(child, event);

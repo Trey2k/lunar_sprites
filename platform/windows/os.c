@@ -282,8 +282,8 @@ char *platform_path_to_absolute(String path) {
 	return absolute_path;
 }
 
-Slice *platform_list_directory(String path) {
-	Slice *files = slice_create(16, true);
+Slice64 *platform_list_directory(String path) {
+	Slice64 *files = slice64_create(16, true);
 	char *search_path = platform_path_add(path, "*");
 	WIN32_FIND_DATA find_data;
 	HANDLE find_handle = FindFirstFile(search_path, &find_data);
@@ -297,7 +297,7 @@ Slice *platform_list_directory(String path) {
 			continue;
 		}
 
-		slice_append(files, SLICE_VAL(str, ls_str_copy(find_data.cFileName)));
+		slice64_append(files, SLICE_VAL64(str, ls_str_copy(find_data.cFileName)));
 	} while (FindNextFile(find_handle, &find_data));
 
 	FindClose(find_handle);

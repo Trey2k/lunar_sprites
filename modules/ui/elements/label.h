@@ -10,7 +10,7 @@ typedef struct {
 	char *text;
 	uint32 padding;
 
-	Slice *render_lines;
+	Slice64 *render_lines;
 	Slice32 *render_lines_width;
 	UITextWrapMode wrap_mode;
 

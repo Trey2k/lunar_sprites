@@ -19,7 +19,7 @@ struct Main {
 
 	ApplicationInterface application_interface;
 
-	Slice *update_callbacks;
+	Slice64 *update_callbacks;
 
 	FlagValue *path;
 
@@ -38,7 +38,7 @@ void ls_main_init(int32 argc, char *argv[]) {
 	main.flag_manager = flag_manager_create();
 	main.path = flag_manager_register(main.flag_manager, "path", FLAG_TYPE_STRING, FLAG_VAL(str, "./"), "Path to the game directory.");
 
-	main.update_callbacks = slice_create(16, false);
+	main.update_callbacks = slice64_create(16, false);
 
 	// Lazy parse early flags.
 	flag_manager_parse(main.flag_manager, argc, argv, true);
@@ -85,9 +85,9 @@ void ls_main_init(int32 argc, char *argv[]) {
 void ls_update(float64 delta_time) {
 	main.application_interface.update(delta_time, main.application_interface.user_data);
 
-	size_t n_callbacks = slice_get_size(main.update_callbacks);
+	size_t n_callbacks = slice64_get_size(main.update_callbacks);
 	for (size_t i = 0; i < n_callbacks; i++) {
-		OnUpdateCallback callback = slice_get(main.update_callbacks, i).ptr;
+		OnUpdateCallback callback = slice64_get(main.update_callbacks, i).ptr;
 		LS_ASSERT(callback);
 		callback(delta_time);
 	}
@@ -108,7 +108,7 @@ int32 ls_main_deinit() {
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
 
 	core_destroy(main.core);
-	slice_destroy(main.update_callbacks);
+	slice64_destroy(main.update_callbacks);
 
 	return main.exit_code;
 }
@@ -130,7 +130,7 @@ void ls_set_application_interface(ApplicationInterface application_interface) {
 }
 
 void ls_register_update_callback(OnUpdateCallback callback) {
-	slice_append(main.update_callbacks, SLICE_VAL(ptr, callback));
+	slice64_append(main.update_callbacks, SLICE_VAL64(ptr, callback));
 }
 
 void ls_exit(int32 exit_code) {

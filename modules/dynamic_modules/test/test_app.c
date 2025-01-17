@@ -12,7 +12,7 @@ typedef struct {
 
 	bool should_stop;
 
-	Sprite *sprite;
+	Object *sprite;
 	Camera *camera;
 
 	float64 timer;
@@ -141,7 +141,13 @@ void test_app_start(void *user_data) {
 
 	ui_add_element(test_application->horizontal_container);
 
-	test_application->sprite = renderer_create_sprite(test_application->renderer, "moon.png", vec2(0, 0), vec2(0.25, 0.25), 0.0);
+	test_application->sprite = object_create("Sprite");
+	Resource *texture = resource_create("moon.png");
+	object_set_property(test_application->sprite, "position", VARIANT_VECTOR2(vec2(0, 0)));
+	object_set_property(test_application->sprite, "scale", VARIANT_VECTOR2(vec2(0.5, 0.5)));
+	object_set_property(test_application->sprite, "rotation", VARIANT_FLOAT(0.0));
+	object_set_property(test_application->sprite, "texture", VARIANT_RESOURCE(texture));
+
 	Vector2u viewport_size = renderer_get_viewport_size(test_application->renderer);
 	test_application->camera = camera_create(math_deg_to_rad(100), (float32)viewport_size.y / (float32)viewport_size.x, 0.1, 100.0);
 	camera_set_active(test_application->camera);
@@ -150,7 +156,7 @@ void test_app_start(void *user_data) {
 void test_app_deinit(void *user_data) {
 	TestApplication *test_application = user_data;
 
-	sprite_destroy(test_application->sprite);
+	object_destroy(test_application->sprite);
 	camera_destroy(test_application->camera);
 	font_destroy(test_application->font);
 
@@ -165,12 +171,12 @@ void test_app_deinit(void *user_data) {
 void test_app_update(float64 delta_time, void *user_data) {
 	TestApplication *test_application = user_data;
 
-	float32 rotation = sprite_get_rotation(test_application->sprite);
-	rotation += 0.01 * delta_time;
-	if (rotation >= PI * 2) {
-		rotation = 0.0;
+	Variant rotation = object_get_property(test_application->sprite, "rotation");
+	rotation.FLOAT += 0.01 * delta_time;
+	if (rotation.FLOAT >= PI * 2) {
+		rotation.FLOAT = 0.0;
 	}
-	sprite_set_rotation(test_application->sprite, rotation);
+	object_set_property(test_application->sprite, "rotation", rotation);
 
 	if (input_is_key_pressed(test_application->input_manager, LS_KEY_W)) {
 		camera_move(test_application->camera, vec3(0.0, 0.01, 0.0));
@@ -193,7 +199,7 @@ void test_app_update(float64 delta_time, void *user_data) {
 	test_application->timer += delta_time;
 	check_input(test_application);
 
-	sprite_draw(test_application->sprite);
+	object_draw(test_application->sprite, delta_time);
 
 	if (test_application->timer > 0.25) {
 		ls_free(test_application->fps_text);

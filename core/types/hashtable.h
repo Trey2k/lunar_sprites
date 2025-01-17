@@ -60,6 +60,6 @@ LS_EXPORT int32 hashtable_get_collisions(const Hashtable *table);
 // Returns a slice of the keys in the hash table.
 // The slice should be destroyed by the caller.
 // The slize will contain HashtableKey references.
-LS_EXPORT Slice *hashtable_get_keys(const Hashtable *table);
+LS_EXPORT Slice64 *hashtable_get_keys(const Hashtable *table);
 
 #endif // HASHTABLE_H

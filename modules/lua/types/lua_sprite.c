@@ -25,13 +25,10 @@ static int lua_sprite_index(lua_State *L) {
 	}
 
 	if (ls_str_equals(key, "position")) {
-		lua_push_vector2(L, sprite_get_position(sprite));
+		lua_push_vector2i(L, sprite_get_position(sprite));
 		return 1;
 	} else if (ls_str_equals(key, "rotation")) {
 		lua_pushnumber(L, sprite_get_rotation(sprite));
-		return 1;
-	} else if (ls_str_equals(key, "scale")) {
-		lua_push_vector2(L, sprite_get_scale(sprite));
 		return 1;
 	}
 
@@ -43,14 +40,14 @@ static int lua_sprite_newindex(lua_State *L) {
 	String key = luaL_checkstring(L, 2);
 
 	if (ls_str_equals(key, "position")) {
-		Vector2 position = lua_check_vector2(L, 3);
+		Vector2i position = lua_check_vector2i(L, 3);
 		sprite_set_position(sprite, position);
 	} else if (ls_str_equals(key, "rotation")) {
 		float32 rotation = luaL_checknumber(L, 3);
 		sprite_set_rotation(sprite, rotation);
 	} else if (ls_str_equals(key, "scale")) {
 		Vector2 scale = lua_check_vector2(L, 3);
-		sprite_set_scale(sprite, scale);
+		sprite_scale(sprite, scale);
 	}
 
 	return 0;

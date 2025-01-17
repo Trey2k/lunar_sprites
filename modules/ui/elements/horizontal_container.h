@@ -8,7 +8,7 @@
 
 typedef struct {
 	uint32 spacing;
-	Slice *children;
+	Slice64 *children;
 	UIAllignment alignment;
 } UIHorizontalContainer;
 

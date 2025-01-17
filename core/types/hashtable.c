@@ -57,8 +57,11 @@ static void hashtable_resize(Hashtable *hashtable, size_t new_capacity) {
 
 	for (size_t i = 0; i < old_capacity; i++) {
 		HashtableEntry *entry = &old_entries[i];
-		if (entry->value.ptr) {
-			hashtable_set(hashtable, entry->key, entry->value);
+		while (entry) {
+			if (entry->value.ptr) {
+				hashtable_set(hashtable, entry->key, entry->value);
+			}
+			entry = entry->next;
 		}
 	}
 
@@ -279,16 +282,16 @@ int32 hashtable_get_collisions(const Hashtable *hashtable) {
 	return hashtable->collision_count;
 }
 
-Slice *hashtable_get_keys(const Hashtable *table) {
+Slice64 *hashtable_get_keys(const Hashtable *table) {
 	LS_ASSERT(table);
 
-	Slice *slice = slice_create(table->size, false);
+	Slice64 *slice = slice64_create(table->size, false);
 
 	for (size_t i = 0; i < table->capacity; i++) {
 		HashtableEntry *entry = &table->entries[i];
 		while (entry) {
 			if (entry->key.u32) {
-				slice_append(slice, SLICE_VAL(ptr, &entry->key));
+				slice64_append(slice, SLICE_VAL64(ptr, &entry->key));
 			}
 			entry = entry->next;
 		}

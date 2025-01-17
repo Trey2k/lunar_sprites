@@ -25,12 +25,12 @@ typedef void (*LSApiInitFunc)(LSAPIInterface *p_interface);
 typedef struct {
 	FlagValue *dump_api;
 	FlagValue *dump_api_file;
-	Slice *interfaces;
+	Slice64 *interfaces;
 } DynamicModules;
 
 static DynamicModules dynamic_modules;
 
-static void load_modules(Slice *interfaces, String path, int32 depth);
+static void load_modules(Slice64 *interfaces, String path, int32 depth);
 
 void dynamic_modules_init(LSCore *core) {
 	api_interface_init();
@@ -40,7 +40,7 @@ void dynamic_modules_init(LSCore *core) {
 	dynamic_modules.dump_api = flag_manager_register(flag_manager, "dump-api", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Extract the native API header file.");
 	dynamic_modules.dump_api_file = flag_manager_register(flag_manager, "api-file", FLAG_TYPE_STRING, FLAG_VAL(str, "ls_api.h"), "If dump-api is true, extract the native API to this file.");
 
-	dynamic_modules.interfaces = slice_create(16, true);
+	dynamic_modules.interfaces = slice64_create(16, true);
 
 	char *dir = os_get_working_directory();
 	load_modules(dynamic_modules.interfaces, dir, 16);
@@ -86,7 +86,7 @@ void dynamic_modules_start() {
 }
 
 void dynamic_modules_deinit() {
-	slice_destroy(dynamic_modules.interfaces);
+	slice64_destroy(dynamic_modules.interfaces);
 }
 
 static DynamicModuleInterface *load_dynamic_module(String file_path) {
@@ -140,43 +140,43 @@ static DynamicModuleInterface *load_dynamic_module(String file_path) {
 	return interface_ptr;
 }
 
-static void load_modules(Slice *interfaces, String path, int32 depth) {
+static void load_modules(Slice64 *interfaces, String path, int32 depth) {
 	if (depth <= 0) {
 		LS_ASSERT_MSG(false, "%s", "Maximum module search depth reached.\n");
 		return;
 	}
 
-	Slice *files = os_list_directory(path);
-	for (size_t i = 0; i < slice_get_size(files); i++) {
-		String file = slice_get(files, i).str;
+	Slice64 *files = os_list_directory(path);
+	for (size_t i = 0; i < slice64_get_size(files); i++) {
+		String file = slice64_get(files, i).str;
 		if (os_path_is_directory(file)) {
 			load_modules(interfaces, file, depth - 1);
 			continue;
 		}
 
-		char *ext = os_path_get_extension(slice_get(files, i).str);
+		char *ext = os_path_get_extension(slice64_get(files, i).str);
 		if (ext && ls_str_equals(ext, DYNAMIC_MODULE_CONFIG_EXTENSION)) {
 			DynamicModuleInterface *interface = load_dynamic_module(file);
 			if (interface) {
-				slice_append(interfaces, SLICE_VAL(ptr, interface));
+				slice64_append(interfaces, SLICE_VAL64(ptr, interface));
 			}
 		}
 		continue;
 	}
 
-	slice_destroy(files);
+	slice64_destroy(files);
 }
 
 void initialize_dynamic_modules(ModuleInitializationLevel p_level, void *p_arg) {
-	for (size_t i = 0; i < slice_get_size(dynamic_modules.interfaces); i++) {
-		DynamicModuleInterface *interface = slice_get(dynamic_modules.interfaces, i).ptr;
+	for (size_t i = 0; i < slice64_get_size(dynamic_modules.interfaces); i++) {
+		DynamicModuleInterface *interface = slice64_get(dynamic_modules.interfaces, i).ptr;
 		interface->init(p_level, p_arg);
 	}
 }
 
 void uninitialize_dynamic_modules(ModuleInitializationLevel p_level) {
-	for (size_t i = 0; i < slice_get_size(dynamic_modules.interfaces); i++) {
-		DynamicModuleInterface *interface = slice_get(dynamic_modules.interfaces, i).ptr;
+	for (size_t i = 0; i < slice64_get_size(dynamic_modules.interfaces); i++) {
+		DynamicModuleInterface *interface = slice64_get(dynamic_modules.interfaces, i).ptr;
 		interface->deinit(p_level);
 	}
 }

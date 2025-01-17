@@ -1,11 +1,12 @@
 #include "core/types/slice.h"
+#include "core/types/variant.h"
+
+#include "core/object/object.h"
 
 #include "core/debug.h"
 
-#include <stdlib.h>
-
 struct Slice {
-	SliceValue *data;
+	Variant *data;
 	size_t size;
 	size_t capacity;
 
@@ -14,7 +15,7 @@ struct Slice {
 
 Slice *slice_create(size_t inital_size, bool should_free) {
 	Slice *slice = ls_malloc(sizeof(Slice));
-	slice->data = ls_malloc(sizeof(SliceValue) * inital_size);
+	slice->data = ls_malloc(sizeof(Variant) * inital_size);
 	slice->should_free = should_free;
 	slice->size = 0;
 	slice->capacity = inital_size;
@@ -27,7 +28,18 @@ void slice_destroy(Slice *slice) {
 
 	if (slice->should_free) {
 		for (size_t i = 0; i < slice->size; i++) {
-			ls_free(slice->data[i].ptr);
+			switch (slice->data[i].type) {
+				case VARIANT_TYPE_OBJECT: {
+					object_destroy(slice->data[i].OBJECT);
+				} break;
+
+				case VARIANT_TYPE_RESOURCE: {
+					resource_destroy(slice->data[i].RESOURCE);
+				} break;
+
+				default:
+					break;
+			}
 		}
 	}
 
@@ -35,15 +47,15 @@ void slice_destroy(Slice *slice) {
 	ls_free(slice);
 }
 
-void slice_append(Slice *slice, SliceValue element) {
+void slice_append(Slice *slice, Variant data) {
 	LS_ASSERT(slice);
 
 	if (slice->size == slice->capacity) {
 		slice->capacity *= 2;
-		slice->data = ls_realloc(slice->data, sizeof(SliceValue) * slice->capacity);
+		slice->data = ls_realloc(slice->data, sizeof(Variant) * slice->capacity);
 	}
 
-	slice->data[slice->size++] = element;
+	slice->data[slice->size++] = data;
 }
 
 void slice_append_slice(Slice *slice, const Slice *other) {
@@ -55,13 +67,13 @@ void slice_append_slice(Slice *slice, const Slice *other) {
 	}
 }
 
-void slice_insert(Slice *slice, size_t index, SliceValue data) {
+void slice_insert(Slice *slice, size_t index, Variant data) {
 	LS_ASSERT(slice);
 	LS_ASSERT(index <= slice->size);
 
 	if (slice->size == slice->capacity) {
 		slice->capacity *= 2;
-		slice->data = ls_realloc(slice->data, sizeof(SliceValue) * slice->capacity);
+		slice->data = ls_realloc(slice->data, sizeof(Variant) * slice->capacity);
 	}
 
 	for (size_t i = slice->size; i > index; i--) {
@@ -77,7 +89,18 @@ void slice_remove(Slice *slice, size_t index) {
 	LS_ASSERT(index < slice->size);
 
 	if (slice->should_free) {
-		ls_free(slice->data[index].ptr);
+		switch (slice->data[index].type) {
+			case VARIANT_TYPE_OBJECT: {
+				object_destroy(slice->data[index].OBJECT);
+			} break;
+
+			case VARIANT_TYPE_RESOURCE: {
+				resource_destroy(slice->data[index].RESOURCE);
+			} break;
+
+			default:
+				break;
+		}
 	}
 
 	for (size_t i = index; i < slice->size - 1; i++) {
@@ -88,6 +111,213 @@ void slice_remove(Slice *slice, size_t index) {
 }
 
 void slice_remove_range(Slice *slice, size_t index, size_t count) {
+	LS_ASSERT(slice);
+	LS_ASSERT(index < slice->size);
+	LS_ASSERT(index + count <= slice->size);
+
+	if (slice->should_free) {
+		for (size_t i = index; i < index + count; i++) {
+			switch (slice->data[i].type) {
+				case VARIANT_TYPE_OBJECT: {
+					object_destroy(slice->data[i].OBJECT);
+				} break;
+
+				case VARIANT_TYPE_RESOURCE: {
+					resource_destroy(slice->data[i].RESOURCE);
+				} break;
+
+				default:
+					break;
+			}
+		}
+	}
+
+	for (size_t i = index; i < slice->size - count; i++) {
+		slice->data[i] = slice->data[i + count];
+	}
+
+	slice->size -= count;
+}
+
+void slice_clear(Slice *slice) {
+	LS_ASSERT(slice);
+
+	if (slice->should_free) {
+		for (size_t i = 0; i < slice->size; i++) {
+			switch (slice->data[i].type) {
+				case VARIANT_TYPE_OBJECT: {
+					object_destroy(slice->data[i].OBJECT);
+				} break;
+
+				case VARIANT_TYPE_RESOURCE: {
+					resource_destroy(slice->data[i].RESOURCE);
+				} break;
+
+				default:
+					break;
+			}
+		}
+	}
+
+	slice->size = 0;
+}
+
+void slice_sort(Slice *slice, SliceCompareFunc compare_func) {
+	LS_ASSERT(slice);
+	LS_ASSERT(compare_func);
+
+	for (size_t i = 0; i < slice->size; i++) {
+		for (size_t j = i + 1; j < slice->size; j++) {
+			if (compare_func(slice->data[i], slice->data[j])) {
+				Variant temp = slice->data[i];
+				slice->data[i] = slice->data[j];
+				slice->data[j] = temp;
+			}
+		}
+	}
+}
+
+const void *slice_get_data(const Slice *slice) {
+	LS_ASSERT(slice);
+
+	return slice->data;
+}
+
+Variant slice_get(const Slice *slice, size_t index) {
+	LS_ASSERT(slice);
+	LS_ASSERT(index < slice->size);
+
+	return slice->data[index];
+}
+
+Variant slice_get_last(const Slice *slice) {
+	LS_ASSERT(slice);
+	LS_ASSERT(slice->size > 0);
+
+	return slice->data[slice->size - 1];
+}
+
+Variant slice_get_first(const Slice *slice) {
+	LS_ASSERT(slice);
+	LS_ASSERT(slice->size > 0);
+
+	return slice->data[0];
+}
+
+bool slice_is_empty(const Slice *slice) {
+	LS_ASSERT(slice);
+
+	return slice->size == 0;
+}
+
+bool slice_contains(const Slice *slice, Variant data) {
+	LS_ASSERT(slice);
+
+	for (size_t i = 0; i < slice->size; i++) {
+		if (variant_equals(slice->data[i], data)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+size_t slice_get_size(const Slice *slice) {
+	LS_ASSERT(slice);
+
+	return slice->size;
+}
+
+size_t slice_get_capacity(const Slice *slice) {
+	LS_ASSERT(slice);
+
+	return slice->capacity;
+}
+
+struct Slice64 {
+	SliceValue64 *data;
+	size_t size;
+	size_t capacity;
+
+	bool should_free;
+};
+
+Slice64 *slice64_create(size_t inital_size, bool should_free) {
+	Slice64 *slice = ls_malloc(sizeof(Slice64));
+	slice->data = ls_malloc(sizeof(SliceValue64) * inital_size);
+	slice->should_free = should_free;
+	slice->size = 0;
+	slice->capacity = inital_size;
+
+	return slice;
+}
+
+void slice64_destroy(Slice64 *slice) {
+	LS_ASSERT(slice);
+
+	if (slice->should_free) {
+		for (size_t i = 0; i < slice->size; i++) {
+			ls_free(slice->data[i].ptr);
+		}
+	}
+
+	ls_free(slice->data);
+	ls_free(slice);
+}
+
+void slice64_append(Slice64 *slice, SliceValue64 element) {
+	LS_ASSERT(slice);
+
+	if (slice->size == slice->capacity) {
+		slice->capacity *= 2;
+		slice->data = ls_realloc(slice->data, sizeof(SliceValue64) * slice->capacity);
+	}
+
+	slice->data[slice->size++] = element;
+}
+
+void slice64_append_slice(Slice64 *slice, const Slice64 *other) {
+	LS_ASSERT(slice);
+	LS_ASSERT(other);
+
+	for (size_t i = 0; i < other->size; i++) {
+		slice64_append(slice, other->data[i]);
+	}
+}
+
+void slice64_insert(Slice64 *slice, size_t index, SliceValue64 data) {
+	LS_ASSERT(slice);
+	LS_ASSERT(index <= slice->size);
+
+	if (slice->size == slice->capacity) {
+		slice->capacity *= 2;
+		slice->data = ls_realloc(slice->data, sizeof(SliceValue64) * slice->capacity);
+	}
+
+	for (size_t i = slice->size; i > index; i--) {
+		slice->data[i] = slice->data[i - 1];
+	}
+
+	slice->data[index] = data;
+	slice->size++;
+}
+
+void slice64_remove(Slice64 *slice, size_t index) {
+	LS_ASSERT(slice);
+	LS_ASSERT(index < slice->size);
+
+	if (slice->should_free) {
+		ls_free(slice->data[index].ptr);
+	}
+
+	for (size_t i = index; i < slice->size - 1; i++) {
+		slice->data[i] = slice->data[i + 1];
+	}
+
+	slice->size--;
+}
+
+void slice64_remove_range(Slice64 *slice, size_t index, size_t count) {
 	LS_ASSERT(slice);
 	LS_ASSERT(index < slice->size);
 	LS_ASSERT(index + count <= slice->size);
@@ -105,7 +335,7 @@ void slice_remove_range(Slice *slice, size_t index, size_t count) {
 	slice->size -= count;
 }
 
-void slice_clear(Slice *slice) {
+void slice64_clear(Slice64 *slice) {
 	LS_ASSERT(slice);
 
 	if (slice->should_free) {
@@ -117,14 +347,14 @@ void slice_clear(Slice *slice) {
 	slice->size = 0;
 }
 
-void slice_sort(Slice *slice, SliceCompareFunc compare_func) {
+void slice64_sort(Slice64 *slice, Slice64CompareFunc compare_func) {
 	LS_ASSERT(slice);
 	LS_ASSERT(compare_func);
 
 	for (size_t i = 0; i < slice->size; i++) {
 		for (size_t j = i + 1; j < slice->size; j++) {
 			if (compare_func(slice->data[i], slice->data[j])) {
-				SliceValue temp = slice->data[i];
+				SliceValue64 temp = slice->data[i];
 				slice->data[i] = slice->data[j];
 				slice->data[j] = temp;
 			}
@@ -132,40 +362,40 @@ void slice_sort(Slice *slice, SliceCompareFunc compare_func) {
 	}
 }
 
-const void *slice_get_data(const Slice *slice) {
+const void *slice64_get_data(const Slice64 *slice) {
 	LS_ASSERT(slice);
 
 	return slice->data;
 }
 
-SliceValue slice_get(const Slice *slice, size_t index) {
+SliceValue64 slice64_get(const Slice64 *slice, size_t index) {
 	LS_ASSERT(slice);
 	LS_ASSERT(index < slice->size);
 
 	return slice->data[index];
 }
 
-SliceValue slice_get_last(const Slice *slice) {
+SliceValue64 slice64_get_last(const Slice64 *slice) {
 	LS_ASSERT(slice);
 	LS_ASSERT(slice->size > 0);
 
 	return slice->data[slice->size - 1];
 }
 
-SliceValue slice_get_first(const Slice *slice) {
+SliceValue64 slice64_get_first(const Slice64 *slice) {
 	LS_ASSERT(slice);
 	LS_ASSERT(slice->size > 0);
 
 	return slice->data[0];
 }
 
-bool slice_is_empty(const Slice *slice) {
+bool slice64_is_empty(const Slice64 *slice) {
 	LS_ASSERT(slice);
 
 	return slice->size == 0;
 }
 
-bool slice_contains(const Slice *slice, SliceValue data, SliceCompareFunc compare_func) {
+bool slice64_contains(const Slice64 *slice, SliceValue64 data, Slice64CompareFunc compare_func) {
 	LS_ASSERT(slice);
 	LS_ASSERT(compare_func);
 
@@ -178,13 +408,13 @@ bool slice_contains(const Slice *slice, SliceValue data, SliceCompareFunc compar
 	return false;
 }
 
-size_t slice_get_size(const Slice *slice) {
+size_t slice64_get_size(const Slice64 *slice) {
 	LS_ASSERT(slice);
 
 	return slice->size;
 }
 
-size_t slice_get_capacity(const Slice *slice) {
+size_t slice64_get_capacity(const Slice64 *slice) {
 	LS_ASSERT(slice);
 
 	return slice->capacity;
@@ -347,168 +577,6 @@ size_t slice32_get_size(const Slice32 *slice) {
 }
 
 size_t slice32_get_capacity(const Slice32 *slice) {
-	LS_ASSERT(slice);
-
-	return slice->capacity;
-}
-
-struct Slice128 {
-	SliceValue128 *data;
-	size_t size;
-	size_t capacity;
-};
-
-Slice128 *slice128_create(size_t inital_size) {
-	Slice128 *slice = ls_malloc(sizeof(Slice128));
-
-	slice->data = ls_malloc(sizeof(SliceValue128) * inital_size);
-	slice->size = 0;
-	slice->capacity = inital_size;
-
-	return slice;
-}
-
-void slice128_destroy(Slice128 *slice) {
-	LS_ASSERT(slice);
-
-	ls_free(slice->data);
-	ls_free(slice);
-}
-
-void slice128_append(Slice128 *slice, SliceValue128 element) {
-	LS_ASSERT(slice);
-
-	if (slice->size == slice->capacity) {
-		slice->capacity *= 2;
-		slice->data = ls_realloc(slice->data, sizeof(SliceValue128) * slice->capacity);
-	}
-
-	slice->data[slice->size++] = element;
-}
-
-void slice128_append_slice(Slice128 *slice, const Slice128 *other) {
-	LS_ASSERT(slice);
-	LS_ASSERT(other);
-
-	for (size_t i = 0; i < other->size; i++) {
-		slice128_append(slice, other->data[i]);
-	}
-}
-
-void slice128_insert(Slice128 *slice, size_t index, SliceValue128 data) {
-	LS_ASSERT(slice);
-	LS_ASSERT(index <= slice->size);
-
-	if (slice->size == slice->capacity) {
-		slice->capacity *= 2;
-		slice->data = ls_realloc(slice->data, sizeof(SliceValue128) * slice->capacity);
-	}
-
-	for (size_t i = slice->size; i > index; i--) {
-		slice->data[i] = slice->data[i - 1];
-	}
-
-	slice->data[index] = data;
-	slice->size++;
-}
-
-void slice128_remove(Slice128 *slice, size_t index) {
-	LS_ASSERT(slice);
-	LS_ASSERT(index < slice->size);
-
-	for (size_t i = index; i < slice->size - 1; i++) {
-		slice->data[i] = slice->data[i + 1];
-	}
-
-	slice->size--;
-}
-
-void slice128_remove_range(Slice128 *slice, size_t index, size_t count) {
-	LS_ASSERT(slice);
-	LS_ASSERT(index < slice->size);
-	LS_ASSERT(index + count <= slice->size);
-
-	for (size_t i = index; i < slice->size - count; i++) {
-		slice->data[i] = slice->data[i + count];
-	}
-
-	slice->size -= count;
-}
-
-void slice128_clear(Slice128 *slice) {
-	LS_ASSERT(slice);
-
-	slice->size = 0;
-}
-
-void slice128_sort(Slice128 *slice, SliceCompareFunc128 compare_func) {
-	LS_ASSERT(slice);
-	LS_ASSERT(compare_func);
-
-	for (size_t i = 0; i < slice->size; i++) {
-		for (size_t j = i + 1; j < slice->size; j++) {
-			if (compare_func(slice->data[i], slice->data[j])) {
-				SliceValue128 temp = slice->data[i];
-				slice->data[i] = slice->data[j];
-				slice->data[j] = temp;
-			}
-		}
-	}
-}
-
-const void *slice128_get_data(const Slice128 *slice) {
-	LS_ASSERT(slice);
-
-	return slice->data;
-}
-
-SliceValue128 slice128_get(const Slice128 *slice, size_t index) {
-	LS_ASSERT(slice);
-	LS_ASSERT(index < slice->size);
-
-	return slice->data[index];
-}
-
-SliceValue128 slice128_get_last(const Slice128 *slice) {
-	LS_ASSERT(slice);
-	LS_ASSERT(slice->size > 0);
-
-	return slice->data[slice->size - 1];
-}
-
-SliceValue128 slice128_get_first(const Slice128 *slice) {
-	LS_ASSERT(slice);
-	LS_ASSERT(slice->size > 0);
-
-	return slice->data[0];
-}
-
-bool slice128_is_empty(const Slice128 *slice) {
-	LS_ASSERT(slice);
-
-	return slice->size == 0;
-}
-
-bool slice128_contains(const Slice128 *slice, SliceValue128 data, SliceCompareFunc128 compare_func) {
-	LS_ASSERT(slice);
-	LS_ASSERT(compare_func);
-
-	for (size_t i = 0; i < slice->size; i++) {
-		if (compare_func(slice->data[i], data)) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-size_t slice128_get_size(const Slice128 *slice) {
-	LS_ASSERT(slice);
-
-	return slice->size;
-}
-
-size_t slice128_get_capacity(const Slice128 *slice) {
 	LS_ASSERT(slice);
 
 	return slice->capacity;

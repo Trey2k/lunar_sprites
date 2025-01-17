@@ -1,9 +1,10 @@
 #include "core/core.h"
 #include "core/events/event_manager.h"
-#include "core/events/events.h"
 #include "core/flags.h"
 #include "core/input/input_manager.h"
 #include "core/log.h"
+#include "core/object/object_db.h"
+#include "core/resource/resource_db.h"
 #include "core/types/string.h"
 
 struct LSCore {
@@ -36,6 +37,9 @@ LSCore *core_create(FlagManager *flag_manager) {
 	core->os = ls_create_os(core->input_manager);
 	LS_ASSERT(core->os);
 
+	object_db_init();
+	resource_db_init();
+
 	return core;
 }
 
@@ -48,20 +52,13 @@ void core_poll(const LSCore *core) {
 }
 
 void core_destroy(LSCore *core) {
+	object_db_deinit();
+	resource_db_deinit();
+
 	ls_destroy_os(core->os);
-	core->os = NULL;
-
 	input_manager_destroy(core->input_manager);
-	core->input_manager = NULL;
-
 	event_manager_destroy(core->event_manager);
-	core->event_manager = NULL;
-
-// TODO: Fix seg fault when destroying flag manager on Windows
-#if !defined(WINDOWS_ENABLED)
 	flag_manager_destroy(core->flag_manager);
-#endif // !LS_WINDOWS
-	core->flag_manager = NULL;
 }
 
 FlagManager *core_get_flag_manager(const LSCore *core) {

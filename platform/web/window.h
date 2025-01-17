@@ -26,7 +26,7 @@ struct PlatformWindow {
 	const PlatformOS *os;
 	const Renderer *renderer;
 
-	Slice *events;
+	Slice64 *events;
 
 	InputManager *input_manager;
 };

@@ -65,7 +65,7 @@ char *os_path_to_absolute(String path) {
 	return platform_path_to_absolute(path);
 }
 
-Slice *os_list_directory(String path) {
+Slice64 *os_list_directory(String path) {
 	return platform_list_directory(path);
 }
 

@@ -210,13 +210,13 @@ char *platform_path_to_absolute(String path) {
 	return absolute_path;
 }
 
-Slice *platform_list_directory(String path) {
+Slice64 *platform_list_directory(String path) {
 	DIR *dir = opendir(path);
 	if (!dir) {
 		return NULL;
 	}
 
-	Slice *files = slice_create(16, true);
+	Slice64 *files = slice64_create(16, true);
 
 	struct dirent *entry;
 	while ((entry = readdir(dir)) != NULL) {
@@ -227,7 +227,7 @@ Slice *platform_list_directory(String path) {
 		}
 
 		char *file_name = ls_str_copy(entry->d_name);
-		slice_append(files, SLICE_VAL(ptr, file_name));
+		slice64_append(files, SLICE_VAL64(ptr, file_name));
 	}
 	closedir(dir);
 

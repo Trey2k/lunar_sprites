@@ -49,7 +49,7 @@ def header_normal_state(last_state, line, info):
         info['macros'] += line
  
         new_state = state.Macro
-    elif line.startswith('typedef'):
+    elif line.startswith('typedef') or line.startswith('struct'):
         if last_state == state.Comment or last_state == state.MultiComment:
             info['typedefs'] += info['comment']
             info['comment'] = ""

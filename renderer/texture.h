@@ -5,8 +5,12 @@
 
 #include "renderer/renderer.h"
 
+#define TEXTURE_RESOURCE_TYPE "Texture"
+
 void texture_manager_init();
 void texture_manager_deinit();
+
+LS_EXPORT uint32 texture_manager_get_resource_type();
 
 typedef void (*TextureParseFunc)(String path, uint32 *width, uint32 *height, uint8 **data);
 
@@ -34,5 +38,8 @@ LS_EXPORT uint32 texture_get_width(const Texture *texture);
 LS_EXPORT uint32 texture_get_height(const Texture *texture);
 
 LS_EXPORT void texture_add_sub_texture(Texture *texture, TextureFormat format, const uint8 *data, float32 x, float32 y, float32 width, float32 height);
+
+LS_EXPORT Resource *texture_to_resource(const Texture *texture);
+LS_EXPORT Texture *texture_from_resource(Resource *resource);
 
 #endif // TEXTURE_H

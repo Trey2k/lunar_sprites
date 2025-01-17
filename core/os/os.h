@@ -40,7 +40,7 @@ LS_EXPORT char *os_path_to_absolute(String path);
 
 // Returns a list of files and directories in path.
 // Only the slice needs to be freed.
-LS_EXPORT Slice *os_list_directory(String path);
+LS_EXPORT Slice64 *os_list_directory(String path);
 // Reads a file into a buffer. The buffer needs to be freed.
 LS_EXPORT char *os_read_file(String path, size_t *size);
 // Writes data to a file. Returns true on success.

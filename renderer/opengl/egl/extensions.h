@@ -12,6 +12,6 @@ bool egl_has_extension(EGLDisplay egl_display, String extension);
 
 // Returns a slice of char * strings
 // Ownership of the slice is passed to the caller
-Slice *egl_get_extensions(EGLDisplay egl_display);
+Slice64 *egl_get_extensions(EGLDisplay egl_display);
 
 #endif // EGL_EXTENSIONS_H

@@ -6,10 +6,15 @@
 
 typedef struct Sprite Sprite;
 
+#define SPRITE_OBJECT_TYPE "Sprite"
+void register_sprite_object();
+
+uint32 sprite_get_object_type();
+
+// Creates a empty sprite.
+LS_EXPORT Sprite *sprite_create_empty();
 // Creates a sprite from an image file.
-LS_EXPORT Sprite *renderer_create_sprite(const Renderer *renderer, String image_path, Vector2 position, Vector2 scale, float32 rotation);
-// Creates a sprite from a Texture. The sprite will take ownership of the texture.
-LS_EXPORT Sprite *renderer_create_sprite_texture(const Renderer *renderer, Texture *texture, Vector2 position, Vector2 scale, float32 rotation);
+LS_EXPORT Sprite *sprite_create(String image_path, Vector2i position, Vector2 scale, float32 rotation);
 // Destroys a sprite.
 LS_EXPORT void sprite_destroy(Sprite *sprite);
 
@@ -17,14 +22,12 @@ LS_EXPORT void sprite_destroy(Sprite *sprite);
 LS_EXPORT void sprite_draw(Sprite *sprite);
 
 // Sets the position of the sprite.
-LS_EXPORT void sprite_set_position(Sprite *sprite, Vector2 position);
+LS_EXPORT void sprite_set_position(Sprite *sprite, Vector2i position);
 // Gets the position of the sprite.
-LS_EXPORT Vector2 sprite_get_position(const Sprite *sprite);
+LS_EXPORT Vector2i sprite_get_position(const Sprite *sprite);
 
 // Sets the scale of the sprite.
-LS_EXPORT void sprite_set_scale(Sprite *sprite, Vector2 scale);
-// Gets the scale of the sprite.
-LS_EXPORT Vector2 sprite_get_scale(const Sprite *sprite);
+LS_EXPORT void sprite_scale(Sprite *sprite, Vector2 scale);
 
 // Sets the rotation of the sprite.
 LS_EXPORT void sprite_set_rotation(Sprite *sprite, float32 rotation);
