@@ -26,6 +26,7 @@ typedef enum {
 
 	VARIANT_TYPE_OBJECT,
 	VARIANT_TYPE_RESOURCE,
+	VARIANT_TYPE_VARIANT
 } VariantType;
 
 struct Variant {
@@ -169,6 +170,9 @@ _FORCE_INLINE_ bool variant_equals(Variant a, Variant b) {
 		case VARIANT_TYPE_NIL: {
 			return true;
 		}
+
+		default:
+			return false;
 	};
 
 	return false;
@@ -200,6 +204,8 @@ _FORCE_INLINE_ String variant_type_to_string(VariantType type) {
 			return "Object";
 		case VARIANT_TYPE_RESOURCE:
 			return "Resource";
+		case VARIANT_TYPE_VARIANT:
+			return "Variant";
 		default:
 			return "Unknown";
 	};

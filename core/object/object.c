@@ -55,23 +55,11 @@ bool object_has_property(Object *object, String name) {
 }
 
 Variant object_get_property(Object *object, String name) {
-	ObjectPropertyInterface interface = object_db_type_get_property(object->type_id, name);
-	if (!interface.getter) {
-		ls_log(LOG_LEVEL_ERROR, "Object type %d does not have a property %s\n", object->type_id, name);
-		return VARIANT_NIL;
-	}
-
-	return interface.getter(object, NULL, 0);
+	return object_db_type_get_property(object->type_id, object, name);
 }
 
 void object_set_property(Object *object, String name, Variant value) {
-	ObjectPropertyInterface interface = object_db_type_get_property(object->type_id, name);
-	if (!interface.setter) {
-		ls_log(LOG_LEVEL_ERROR, "Object type %d does not have a property %s\n", object->type_id, name);
-		return;
-	}
-
-	interface.setter(object, &value, 1);
+	object_db_type_set_property(object->type_id, object, name, value);
 }
 
 bool object_has_method(Object *object, String name) {
@@ -79,13 +67,7 @@ bool object_has_method(Object *object, String name) {
 }
 
 Variant object_call_method(Object *object, String name, Variant *args, size_t n_args) {
-	ObjectMethod method = object_db_type_get_method(object->type_id, name);
-	if (!method) {
-		ls_log(LOG_LEVEL_ERROR, "Object type %d does not have a method %s\n", object->type_id, name);
-		return VARIANT_NIL;
-	}
-
-	return method(object, args, n_args);
+	return object_db_type_call_method(object->type_id, object, name, args, n_args);
 }
 
 void object_set_position(Object *object, Vector2i position) {
