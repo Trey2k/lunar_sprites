@@ -50,14 +50,14 @@ struct VertexArray {
 	};
 };
 
-VertexArray *renderer_create_vertex_array(const Renderer *renderer) {
+VertexArray *renderer_create_vertex_array() {
 	VertexArray *vertex_array = ls_malloc(sizeof(VertexArray));
-	vertex_array->backend = renderer_get_backend(renderer);
+	vertex_array->backend = renderer_get_backend();
 
 	switch (vertex_array->backend) {
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
-			vertex_array->opengl = opengl_vertex_array_create(renderer_get_opengl(renderer));
+			vertex_array->opengl = opengl_vertex_array_create(renderer_get_opengl());
 			LS_ASSERT(vertex_array->opengl);
 		} break;
 #endif

@@ -1,4 +1,5 @@
 #include "core/math/vector.h"
+#include "core/math/math.h"
 
 bool vec2_equals(Vector2 a, Vector2 b) {
 	return a.x == b.x && a.y == b.y;
@@ -109,12 +110,33 @@ Vector3 vec3_mul(Vector3 a, Vector3 b) {
 	return vec3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
+Vector3 vec3_mul_scalar(Vector3 a, float32 scalar) {
+	return vec3(a.x * scalar, a.y * scalar, a.z * scalar);
+}
+
 Vector3 vec3_div(Vector3 a, Vector3 b) {
 	return vec3(a.x / b.x, a.y / b.y, a.z / b.z);
 }
 
 Vector3 vec3_negate(Vector3 a) {
 	return vec3(-a.x, -a.y, -a.z);
+}
+
+Vector3 vec3_normalize(Vector3 v) {
+	float32 length = math_sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	if (length > 0.0f) {
+		float32 invLength = 1.0f / length;
+		return vec3(v.x * invLength, v.y * invLength, v.z * invLength);
+	}
+	return v;
+}
+
+float32 vec3_dot(Vector3 a, Vector3 b) {
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+Vector3 vec3_cross(Vector3 a, Vector3 b) {
+	return vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
 
 bool vec3i_equals(Vector3i a, Vector3i b) {

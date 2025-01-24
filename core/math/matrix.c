@@ -29,47 +29,81 @@ Matrix4 mat4_perspective(float32 fov, float32 aspect, float32 near, float32 far)
 	return result;
 }
 
-Matrix4 mat4_translate(const Vector3 translation) {
-	Matrix4 result = MAT4_IDENTITY;
+Matrix4 mat4_translate(const Matrix4 matrix, const Vector3 translation) {
+	Matrix4 translated = MAT4_IDENTITY;
 
-	result.x3 = translation.x;
-	result.y3 = translation.y;
-	result.z3 = translation.z;
+	translated.w0 = translation.x;
+	translated.w1 = translation.y;
+	translated.w2 = translation.z;
 
-	return result;
+	return mat4_multiply(matrix, translated);
 }
 
-Matrix4 mat4_rotate(float32 angle, const Vector3 axis) {
-	Matrix4 result = MAT4_IDENTITY;
+static void gram_schmidt_orthonormalize(Matrix4 *mat) {
+	Vector3 x = vec3(mat->mat[0], mat->mat[1], mat->mat[2]);
+	Vector3 y = vec3(mat->mat[4], mat->mat[5], mat->mat[6]);
+	Vector3 z = vec3(mat->mat[8], mat->mat[9], mat->mat[10]);
 
-	float32 r = angle * (PI / 180.0f);
-	float32 c = math_cosf(r);
-	float32 s = math_sinf(r);
-	float32 omc = 1.0f - c;
+	// Normalize x
+	x = vec3_normalize(x);
 
-	result.x0 = axis.x * axis.x * omc + c;
-	result.y0 = axis.x * axis.y * omc + axis.z * s;
-	result.z0 = axis.x * axis.z * omc - axis.y * s;
+	// Orthogonalize y with respect to x
+	y = vec3_sub(y, vec3_mul_scalar(x, vec3_dot(x, y)));
+	y = vec3_normalize(y);
 
-	result.x1 = axis.x * axis.y * omc - axis.z * s;
-	result.y1 = axis.y * axis.y * omc + c;
-	result.z1 = axis.y * axis.z * omc + axis.x * s;
+	// Orthogonalize z with respect to x and y
+	z = vec3_sub(z, vec3_mul_scalar(x, vec3_dot(x, z)));
+	z = vec3_sub(z, vec3_mul_scalar(y, vec3_dot(y, z)));
+	z = vec3_normalize(z);
 
-	result.x2 = axis.x * axis.z * omc + axis.y * s;
-	result.y2 = axis.y * axis.z * omc - axis.x * s;
-	result.z2 = axis.z * axis.z * omc + c;
-
-	return result;
+	// Update the matrix
+	mat->mat[0] = x.x;
+	mat->mat[1] = x.y;
+	mat->mat[2] = x.z;
+	mat->mat[4] = y.x;
+	mat->mat[5] = y.y;
+	mat->mat[6] = y.z;
+	mat->mat[8] = z.x;
+	mat->mat[9] = z.y;
+	mat->mat[10] = z.z;
 }
 
-Matrix4 mat4_scale(const Vector3 scale) {
-	Matrix4 result = MAT4_IDENTITY;
+// Angle in radians
+Matrix4 mat4_rotate(const Matrix4 matrix, float32 angle, const Vector3 axis) {
+	Matrix4 rotated = MAT4_IDENTITY;
 
-	result.x0 = scale.x;
-	result.y1 = scale.y;
-	result.z2 = scale.z;
+	Vector3 n = vec3_normalize(axis);
 
-	return result;
+	float32 c = math_cosf(angle);
+	float32 s = math_sinf(angle);
+	float32 t = 1.0f - c;
+
+	rotated.mat[0] = t * n.x * n.x + c;
+	rotated.mat[1] = t * n.x * n.y + s * n.z;
+	rotated.mat[2] = t * n.x * n.z - s * n.y;
+
+	rotated.mat[4] = t * n.x * n.y - s * n.z;
+	rotated.mat[5] = t * n.y * n.y + c;
+	rotated.mat[6] = t * n.y * n.z + s * n.x;
+
+	rotated.mat[8] = t * n.x * n.z + s * n.y;
+	rotated.mat[9] = t * n.y * n.z - s * n.x;
+	rotated.mat[10] = t * n.z * n.z + c;
+
+	rotated = mat4_multiply(matrix, rotated);
+	gram_schmidt_orthonormalize(&rotated);
+
+	return rotated;
+}
+
+Matrix4 mat4_scale(const Matrix4 matrix, const Vector3 scale) {
+	Matrix4 scaled = MAT4_IDENTITY;
+
+	scaled.x0 = scale.x;
+	scaled.y1 = scale.y;
+	scaled.z2 = scale.z;
+
+	return mat4_multiply(matrix, scaled);
 }
 
 Matrix4 mat4_multiply(const Matrix4 a, const Matrix4 b) {

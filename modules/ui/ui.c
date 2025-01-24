@@ -12,7 +12,6 @@
 #include "main/lunar_sprites.h"
 
 typedef struct {
-	const Renderer *renderer;
 	const LSWindow *window;
 
 	Slice64 *elements;
@@ -29,7 +28,7 @@ static UIRenderer ui_renderer;
 static void ui_on_update(float64 delta_time) {
 	size_t n_elements = slice64_get_size(ui_renderer.elements);
 	Vector2u inner_bounds = vec2u(0, 0);
-	Vector2u outer_bounds = renderer_get_viewport_size(ui_renderer.renderer);
+	Vector2u outer_bounds = renderer_get_viewport_size();
 	for (size_t i = 0; i < n_elements; i++) {
 		UIElement *element = slice64_get(ui_renderer.elements, i).ptr;
 		// Root elements bounds are the window size.
@@ -68,9 +67,8 @@ static void ui_event_handler(Event *event, void *user_data) {
 	}
 }
 
-void ui_init(Renderer *renderer, LSCore *core, const LSWindow *window) {
+void ui_init(LSCore *core, const LSWindow *window) {
 	ui_renderer.input_manager = core_get_input_manager(core);
-	ui_renderer.renderer = renderer;
 	ui_renderer.window = window;
 	ui_renderer.elements = slice64_create(16, false);
 	ui_renderer.indices = slice32_create(128);

@@ -4,6 +4,6 @@
 #include "core/core.h"
 #include "renderer/renderer.h"
 
-void lua_project_init(LSCore *core, Renderer *renderer);
+void lua_project_init(LSCore *core);
 
 #endif // LUA_APPLICATION_H

@@ -19,15 +19,15 @@ struct Context {
 	};
 };
 
-Context *renderer_context_create(const Renderer *renderer, LSWindow *window) {
+Context *renderer_context_create(LSWindow *window) {
 	Context *context = ls_malloc(sizeof(Context));
-	context->backend = renderer_get_backend(renderer);
+	context->backend = renderer_get_backend();
 	context->window = window;
 
 	switch (context->backend) {
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
-			context->opengl_context = opengl_context_create(renderer_get_opengl(renderer), window);
+			context->opengl_context = opengl_context_create(renderer_get_opengl(), window);
 			LS_ASSERT(context->opengl_context);
 		} break;
 #endif
@@ -56,14 +56,14 @@ void renderer_context_destroy(Context *context) {
 	ls_free(context);
 }
 
-void renderer_context_make_current(Renderer *renderer, const Context *context) {
+void renderer_context_make_current(const Context *context) {
 	LS_ASSERT(context);
 
 	switch (context->backend) {
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
 			opengl_context_make_current(context->opengl_context);
-			renderer_set_active_context(renderer, context);
+			renderer_set_active_context(context);
 		} break;
 #endif
 
@@ -72,14 +72,14 @@ void renderer_context_make_current(Renderer *renderer, const Context *context) {
 	};
 }
 
-void renderer_context_detach(Renderer *renderer, const Context *context) {
+void renderer_context_detach(const Context *context) {
 	LS_ASSERT(context);
 
 	switch (context->backend) {
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
 			opengl_context_detach(context->opengl_context);
-			renderer_set_active_context(renderer, NULL);
+			renderer_set_active_context( NULL);
 		} break;
 #endif
 

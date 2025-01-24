@@ -4,12 +4,11 @@
 #include "core/core.h"
 #include "core/types/typedefs.h"
 
-#include "renderer/renderer.h"
 #include "renderer/texture.h"
 
 typedef struct Font Font;
 
-void font_renderer_init(const Renderer *renderer);
+void font_renderer_init();
 void font_renderer_deinit();
 
 typedef void (*FontRenderTextCallback)(const Texture *atlas, float32 *verts, float32 *tcoords, size_t nverts, void *user_data);

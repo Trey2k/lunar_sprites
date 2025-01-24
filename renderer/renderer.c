@@ -3,10 +3,9 @@
 #include "renderer.h"
 #include "renderer/context.h"
 #include "renderer/renderer_interface.h"
-#include "renderer/sprite.h"
+#include "renderer/sprite_object.h"
 #include "renderer/texture.h"
 #include "renderer/window.h"
-
 
 #include "core/core.h"
 
@@ -14,7 +13,7 @@
 #include "renderer/opengl/renderer.h"
 #endif
 
-struct Renderer {
+typedef struct {
 	LSCore *core;
 
 	RendererInterface interface;
@@ -30,12 +29,14 @@ struct Renderer {
 		OpenGLRenderer *opengl;
 #endif
 	};
-};
+} Renderer;
 
-static void check_flags(Renderer *renderer);
+static Renderer *renderer = NULL;
 
-Renderer *renderer_create(LSCore *core) {
-	Renderer *renderer = ls_malloc(sizeof(Renderer));
+static void check_flags();
+
+void renderer_init(LSCore *core) {
+	renderer = ls_malloc(sizeof(Renderer));
 	renderer->core = core;
 
 	renderer->active_window = NULL;
@@ -47,12 +48,10 @@ Renderer *renderer_create(LSCore *core) {
 
 	texture_manager_init();
 	register_sprite_object();
-
-	return renderer;
 }
 
-void renderer_start(Renderer *renderer) {
-	check_flags(renderer);
+void renderer_start() {
+	check_flags();
 	switch (renderer->backend) {
 		case RENDERER_BACKEND_NONE: {
 		} break;
@@ -69,7 +68,7 @@ void renderer_start(Renderer *renderer) {
 	};
 }
 
-void renderer_destroy(Renderer *renderer) {
+void renderer_deinit() {
 	texture_manager_deinit();
 
 	switch (renderer->backend) {
@@ -85,25 +84,25 @@ void renderer_destroy(Renderer *renderer) {
 	}
 }
 
-RendererBackend renderer_get_backend(const Renderer *renderer) {
+RendererBackend renderer_get_backend() {
 	return renderer->backend;
 }
 
-LSCore *renderer_get_core(const Renderer *renderer) {
+LSCore *renderer_get_core() {
 	return renderer->core;
 }
 
 #if defined(OPENGL_ENABLED)
-OpenGLRenderer *renderer_get_opengl(const Renderer *renderer) {
+OpenGLRenderer *renderer_get_opengl() {
 	return renderer->opengl;
 }
 #endif
 
-void renderer_set_clear_color(const Renderer *renderer, float32 r, float32 g, float32 b, float32 a) {
+void renderer_set_clear_color(float32 r, float32 g, float32 b, float32 a) {
 	renderer->interface.set_clear_color(r, g, b, a);
 }
 
-void renderer_clear(const Renderer *renderer) {
+void renderer_clear() {
 	renderer->interface.clear();
 
 	Vector2u viewport_size = window_get_size(renderer->active_window);
@@ -112,15 +111,15 @@ void renderer_clear(const Renderer *renderer) {
 	}
 }
 
-void renderer_set_active_window(Renderer *renderer, const LSWindow *window) {
+void renderer_set_active_window(const LSWindow *window) {
 	renderer->active_window = window;
 }
 
-void renderer_set_active_context(Renderer *renderer, const Context *context) {
+void renderer_set_active_context(const Context *context) {
 	renderer->active_context = context;
 }
 
-Vector2u renderer_get_viewport_size(const Renderer *renderer) {
+Vector2u renderer_get_viewport_size() {
 	if (!renderer->active_context) {
 		return vec2u(0, 0);
 	}
@@ -128,7 +127,7 @@ Vector2u renderer_get_viewport_size(const Renderer *renderer) {
 	return renderer_context_get_size(renderer->active_context);
 }
 
-static void check_flags(Renderer *renderer) {
+static void check_flags() {
 	ls_str_to_upper(renderer->backend_flag->str);
 
 	if (ls_str_equals(renderer->backend_flag->str, "NONE")) {

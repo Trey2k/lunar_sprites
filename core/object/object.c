@@ -24,6 +24,20 @@ Object *object_create(String type_name) {
 
 	object->children = slice64_create(16, true);
 	object->parent = NULL;
+
+	return object;
+}
+
+Object *object_create_from_data(String type_name, void *data) {
+	Object *object = ls_malloc(sizeof(Object));
+	object->type_id = object_db_get_type_id(type_name);
+
+	object->data = data;
+
+	object->children = slice64_create(16, true);
+	object->parent = NULL;
+
+	return object;
 }
 
 void object_destroy(Object *object) {

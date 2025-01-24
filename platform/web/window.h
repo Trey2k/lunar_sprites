@@ -24,7 +24,6 @@ struct PlatformWindow {
 #endif // OPENGL_ENABLED
 
 	const PlatformOS *os;
-	const Renderer *renderer;
 
 	Slice64 *events;
 

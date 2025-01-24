@@ -30,6 +30,9 @@ static int lua_sprite_index(lua_State *L) {
 	} else if (ls_str_equals(key, "rotation")) {
 		lua_pushnumber(L, sprite_get_rotation(sprite));
 		return 1;
+	} else if (ls_str_equals(key, "scale")) {
+		lua_push_vector2(L, sprite_get_scale(sprite));
+		return 1;
 	}
 
 	return 0;
@@ -47,7 +50,7 @@ static int lua_sprite_newindex(lua_State *L) {
 		sprite_set_rotation(sprite, rotation);
 	} else if (ls_str_equals(key, "scale")) {
 		Vector2 scale = lua_check_vector2(L, 3);
-		sprite_scale(sprite, scale);
+		sprite_set_scale(sprite, scale);
 	}
 
 	return 0;

@@ -6,7 +6,7 @@
 
 typedef struct VertexArray VertexArray;
 
-LS_EXPORT VertexArray *renderer_create_vertex_array(const Renderer *renderer);
+LS_EXPORT VertexArray *renderer_create_vertex_array();
 LS_EXPORT void vertex_array_destroy(VertexArray *vertex_array);
 
 LS_EXPORT void vertex_array_bind(const VertexArray *vertex_array);

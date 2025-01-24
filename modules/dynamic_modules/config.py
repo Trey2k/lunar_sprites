@@ -39,6 +39,7 @@ def configure(env):
         'core/math/math.h',
         'core/math/vector.h',
         'core/math/matrix.h',
+        'core/math/quaternion.h',
         'core/types/slice.h',
         'core/types/hashtable.h',
         'core/object/object.h',
@@ -65,6 +66,7 @@ def configure(env):
         'renderer/texture.h',
         'renderer/camera.h',
         'renderer/sprite.h',
+        'renderer/sprite_object.h',
         'renderer/batch_renderer.h',
     
         'main/application.h',

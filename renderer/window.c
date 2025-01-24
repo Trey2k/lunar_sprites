@@ -19,29 +19,25 @@ struct LSWindow {
 
 	Context *context;
 
-	Renderer *renderer;
 	InputManager *input_manager;
 };
 
-LSWindow *renderer_create_window(Renderer *renderer, WindowConfig config) {
-	LS_ASSERT(renderer);
-
-	if (renderer_get_backend(renderer) == RENDERER_BACKEND_NONE) {
+LSWindow *renderer_create_window(WindowConfig config) {
+	if (renderer_get_backend() == RENDERER_BACKEND_NONE) {
 		ls_log(LOG_LEVEL_WARNING, "Cannot create window with renderer backend NONE\n");
 		return NULL;
 	}
 
-	const LSCore *core = renderer_get_core(renderer);
+	const LSCore *core = renderer_get_core();
 
 	const OS *os = core_get_os(core);
 	LS_ASSERT(os);
 
 	LSWindow *window = ls_malloc(sizeof(LSWindow));
-	window->platform_window = platform_create_window(os_get_platform_os(os), config, renderer, window);
-	window->renderer = renderer;
+	window->platform_window = platform_create_window(os_get_platform_os(os), config, window);
 	window->input_manager = core_get_input_manager(core);
 
-	window->context = renderer_context_create(renderer, window);
+	window->context = renderer_context_create(window);
 	window_make_current(window);
 	window_swap_buffers(window);
 
@@ -138,16 +134,16 @@ void window_make_current(const LSWindow *window) {
 	LS_ASSERT(window);
 	LS_ASSERT(window->platform_window);
 
-	renderer_context_make_current(window->renderer, window->context);
-	renderer_set_active_window(window->renderer, window);
+	renderer_context_make_current(window->context);
+	renderer_set_active_window(window);
 }
 
 void window_detach(const LSWindow *window) {
 	LS_ASSERT(window);
 	LS_ASSERT(window->platform_window);
 
-	renderer_context_detach(window->renderer, window->context);
-	renderer_set_active_window(window->renderer, NULL);
+	renderer_context_detach(window->context);
+	renderer_set_active_window(NULL);
 }
 
 void window_swap_buffers(const LSWindow *window) {

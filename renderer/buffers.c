@@ -131,9 +131,9 @@ struct VertexBuffer {
 	};
 };
 
-VertexBuffer *renderer_create_vertex_buffer_empty(const Renderer *renderer, BufferUsage usage) {
+VertexBuffer *renderer_create_vertex_buffer_empty(BufferUsage usage) {
 	VertexBuffer *vertex_buffer = ls_malloc(sizeof(VertexBuffer));
-	vertex_buffer->backend = renderer_get_backend(renderer);
+	vertex_buffer->backend = renderer_get_backend();
 
 	switch (vertex_buffer->backend) {
 		case RENDERER_BACKEND_NONE: {
@@ -155,9 +155,9 @@ VertexBuffer *renderer_create_vertex_buffer_empty(const Renderer *renderer, Buff
 	return vertex_buffer;
 }
 
-VertexBuffer *renderer_create_vertex_buffer(const Renderer *renderer, const void *data, uint32 size, BufferUsage usage) {
+VertexBuffer *renderer_create_vertex_buffer(const void *data, uint32 size, BufferUsage usage) {
 	VertexBuffer *vertex_buffer = ls_malloc(sizeof(VertexBuffer));
-	vertex_buffer->backend = renderer_get_backend(renderer);
+	vertex_buffer->backend = renderer_get_backend();
 
 	switch (vertex_buffer->backend) {
 		case RENDERER_BACKEND_NONE: {
@@ -225,9 +225,9 @@ struct IndexBuffer {
 	};
 };
 
-IndexBuffer *renderer_create_index_buffer_empty(const Renderer *renderer, BufferUsage usage) {
+IndexBuffer *renderer_create_index_buffer_empty(BufferUsage usage) {
 	IndexBuffer *index_buffer = ls_malloc(sizeof(IndexBuffer));
-	index_buffer->backend = renderer_get_backend(renderer);
+	index_buffer->backend = renderer_get_backend();
 
 	switch (index_buffer->backend) {
 		case RENDERER_BACKEND_NONE: {
@@ -250,9 +250,9 @@ IndexBuffer *renderer_create_index_buffer_empty(const Renderer *renderer, Buffer
 	return index_buffer;
 }
 
-IndexBuffer *renderer_create_index_buffer(const Renderer *renderer, const void *data, uint32 size, BufferUsage usage) {
+IndexBuffer *renderer_create_index_buffer(const void *data, uint32 size, BufferUsage usage) {
 	IndexBuffer *index_buffer = ls_malloc(sizeof(IndexBuffer));
-	index_buffer->backend = renderer_get_backend(renderer);
+	index_buffer->backend = renderer_get_backend();
 
 	switch (index_buffer->backend) {
 		case RENDERER_BACKEND_NONE: {

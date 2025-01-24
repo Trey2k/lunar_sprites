@@ -35,7 +35,6 @@ void font_destroy(Font *font) {
 extern const char *const FONT_SHADER_SOURCE;
 
 typedef struct {
-	const Renderer *renderer;
 	Color font_color;
 
 	Slice32 *indices;
@@ -50,10 +49,10 @@ typedef struct {
 
 static FontRenderer *font_renderer = NULL;
 
-void font_renderer_init(const Renderer *renderer) {
+void font_renderer_init() {
 	font_renderer = ls_malloc(sizeof(FontRenderer));
 
-	font_renderer->viewport_size = renderer_get_viewport_size(renderer);
+	font_renderer->viewport_size = renderer_get_viewport_size();
 	RFont_init(font_renderer->viewport_size.x, font_renderer->viewport_size.y);
 	font_renderer->font_color = COLOR_WHITE;
 	font_renderer->callback = NULL;
@@ -62,7 +61,6 @@ void font_renderer_init(const Renderer *renderer) {
 	font_renderer->indices = slice32_create(128);
 	font_renderer->batch_vertices = ls_malloc(128 * sizeof(BatchVertex));
 	font_renderer->batch_vertices_size = 128;
-	font_renderer->renderer = renderer;
 }
 
 void font_renderer_deinit() {
@@ -73,7 +71,7 @@ void font_renderer_deinit() {
 Vector2u font_draw_text(const Font *font, uint32 font_size, Color font_color, String text, Vector2 position) {
 	LS_ASSERT(font_renderer);
 
-	Vector2u viewport_size = renderer_get_viewport_size(font_renderer->renderer);
+	Vector2u viewport_size = renderer_get_viewport_size();
 	if (font_renderer->viewport_size.x != viewport_size.x || font_renderer->viewport_size.y != viewport_size.y) {
 		font_renderer->viewport_size = viewport_size;
 		RFont_update_framebuffer(viewport_size.x, viewport_size.y);

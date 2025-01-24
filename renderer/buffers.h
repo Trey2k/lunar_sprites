@@ -107,8 +107,8 @@ LS_EXPORT const BufferElement *buffer_layout_get_elements(const BufferLayout *bu
 
 typedef struct VertexBuffer VertexBuffer;
 
-LS_EXPORT VertexBuffer *renderer_create_vertex_buffer_empty(const Renderer *renderer, BufferUsage usage);
-LS_EXPORT VertexBuffer *renderer_create_vertex_buffer(const Renderer *renderer, const void *data, uint32 size, BufferUsage usage);
+LS_EXPORT VertexBuffer *renderer_create_vertex_buffer_empty(BufferUsage usage);
+LS_EXPORT VertexBuffer *renderer_create_vertex_buffer(const void *data, uint32 size, BufferUsage usage);
 LS_EXPORT void vertex_buffer_destroy(VertexBuffer *vertex_buffer);
 
 LS_EXPORT void vertex_buffer_bind(const VertexBuffer *vertex_buffer);
@@ -121,8 +121,8 @@ LS_EXPORT uint32 vertex_buffer_get_count(const VertexBuffer *vertex_buffer);
 
 typedef struct IndexBuffer IndexBuffer;
 
-LS_EXPORT IndexBuffer *renderer_create_index_buffer_empty(const Renderer *renderer, BufferUsage usage);
-LS_EXPORT IndexBuffer *renderer_create_index_buffer(const Renderer *renderer, const void *data, uint32 size, BufferUsage usage);
+LS_EXPORT IndexBuffer *renderer_create_index_buffer_empty(BufferUsage usage);
+LS_EXPORT IndexBuffer *renderer_create_index_buffer(const void *data, uint32 size, BufferUsage usage);
 LS_EXPORT void index_buffer_destroy(IndexBuffer *index_buffer);
 
 LS_EXPORT void index_buffer_bind(const IndexBuffer *index_buffer);

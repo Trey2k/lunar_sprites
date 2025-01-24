@@ -49,11 +49,33 @@ typedef union {
 		}               \
 	}
 
+#define mat4(x)      \
+	(Matrix4) {      \
+		{            \
+			.x0 = x, \
+			.y0 = x, \
+			.z0 = x, \
+			.w0 = x, \
+			.x1 = x, \
+			.y1 = x, \
+			.z1 = x, \
+			.w1 = x, \
+			.x2 = x, \
+			.y2 = x, \
+			.z2 = x, \
+			.w2 = x, \
+			.x3 = x, \
+			.y3 = x, \
+			.z3 = x, \
+			.w3 = x  \
+		}            \
+	}
+
 LS_EXPORT Matrix4 mat4_ortho(float32 left, float32 right, float32 bottom, float32 top, float32 near, float32 far);
 LS_EXPORT Matrix4 mat4_perspective(float32 fov, float32 aspect, float32 near, float32 far);
-LS_EXPORT Matrix4 mat4_translate(const Vector3 translation);
-LS_EXPORT Matrix4 mat4_rotate(float32 angle, const Vector3 axis);
-LS_EXPORT Matrix4 mat4_scale(const Vector3 scale);
+LS_EXPORT Matrix4 mat4_translate(const Matrix4 matrix, const Vector3 translation);
+LS_EXPORT Matrix4 mat4_rotate(const Matrix4 matrix, float32 angle, const Vector3 axis);
+LS_EXPORT Matrix4 mat4_scale(const Matrix4 matrix, const Vector3 scale);
 LS_EXPORT Matrix4 mat4_multiply(const Matrix4 a, const Matrix4 b);
 LS_EXPORT Vector3 mat4_multiply_vec3(const Matrix4 matrix, const Vector3 vector);
 LS_EXPORT Matrix4 mat4_divide(const Matrix4 matrix, float32 value);

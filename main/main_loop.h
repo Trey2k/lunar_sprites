@@ -5,7 +5,7 @@
 
 #include "renderer/renderer.h"
 
-void ls_main_loop_init(LSCore *core, Renderer *renderer, LSWindow *root_window);
+void ls_main_loop_init(LSCore *core, LSWindow *root_window);
 void ls_main_loop_deinit();
 
 void ls_main_loop();

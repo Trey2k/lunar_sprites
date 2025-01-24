@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
+# TODO: Fix this module to work with the new API.
 def can_build(env, platform):
-    return True
+    return False
 
 
 def configure(env):

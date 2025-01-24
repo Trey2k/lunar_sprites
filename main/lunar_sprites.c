@@ -13,7 +13,6 @@
 struct Main {
 	FlagManager *flag_manager;
 	LSCore *core;
-	Renderer *renderer;
 
 	LSWindow *root_window;
 
@@ -49,8 +48,8 @@ void ls_main_init(int32 argc, char *argv[]) {
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE, main.core);
 	ls_log(LOG_LEVEL_INFO, "Initialization level core done.\n");
 
-	main.renderer = renderer_create(main.core);
-	initialize_modules(MODULE_INITIALIZATION_LEVEL_RENDER, main.renderer);
+	renderer_init(main.core);
+	initialize_modules(MODULE_INITIALIZATION_LEVEL_RENDER, NULL);
 	ls_log(LOG_LEVEL_INFO, "Initialization level render done.\n");
 
 	// Parse all flags.
@@ -61,7 +60,7 @@ void ls_main_init(int32 argc, char *argv[]) {
 
 	core_start(main.core);
 
-	renderer_start(main.renderer);
+	renderer_start();
 
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_MAIN, NULL);
 	ls_log(LOG_LEVEL_INFO, "Initialization level main done.\n");
@@ -70,16 +69,16 @@ void ls_main_init(int32 argc, char *argv[]) {
 		ls_log_fatal("No application interface set.\n");
 	}
 
-	main.root_window = main.application_interface.init(main.core, main.renderer, main.application_interface.user_data);
+	main.root_window = main.application_interface.init(main.core, main.application_interface.user_data);
 
-	batch_renderer_init(main.renderer);
+	batch_renderer_init();
 
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_APPLICATION, (void *)main.root_window);
 	ls_log(LOG_LEVEL_INFO, "Initialization level application done.\n");
 
 	main.application_interface.start(main.application_interface.user_data);
 
-	ls_main_loop_init(main.core, main.renderer, main.root_window);
+	ls_main_loop_init(main.core, main.root_window);
 }
 
 void ls_update(float64 delta_time) {
@@ -103,7 +102,7 @@ int32 ls_main_deinit() {
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_MAIN);
 
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_RENDER);
-	renderer_destroy(main.renderer);
+	renderer_deinit();
 
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
 

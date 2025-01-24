@@ -8,7 +8,7 @@
 #include "types/lua_state.h"
 
 LS_EXPORT lua_State *ls_lua_new_settings_state();
-LS_EXPORT lua_State *ls_lua_new_application_state(LSCore *core, Renderer *renderer);
+LS_EXPORT lua_State *ls_lua_new_application_state(LSCore *core);
 
 LS_EXPORT bool ls_lua_dostring(lua_State *L, String string);
 LS_EXPORT bool ls_lua_dofile(lua_State *L, String filename);

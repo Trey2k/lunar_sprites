@@ -4,7 +4,7 @@
 #include "core/core.h"
 #include "renderer/renderer.h"
 
-typedef LSWindow *(*ApplicationInitFunction)(LSCore *core, Renderer *renderer, void *user_data);
+typedef LSWindow *(*ApplicationInitFunction)(LSCore *core, void *user_data);
 typedef void (*ApplicationStartFunction)(void *user_data);
 typedef void (*ApplicationDeinitFunction)(void *user_data);
 

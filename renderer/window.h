@@ -27,7 +27,7 @@ typedef struct {
 	bool root_window;
 } WindowConfig;
 
-LS_EXPORT LSWindow *renderer_create_window(Renderer *renderer, WindowConfig config);
+LS_EXPORT LSWindow *renderer_create_window(WindowConfig config);
 LS_EXPORT void window_destroy(LSWindow *window);
 
 LS_EXPORT LSNativeWindow window_get_native_window(const LSWindow *window);

@@ -111,8 +111,12 @@ LS_EXPORT void vec3_copy(Vector3 *dest, Vector3 src);
 LS_EXPORT Vector3 vec3_add(Vector3 a, Vector3 b);
 LS_EXPORT Vector3 vec3_sub(Vector3 a, Vector3 b);
 LS_EXPORT Vector3 vec3_mul(Vector3 a, Vector3 b);
+LS_EXPORT Vector3 vec3_mul_scalar(Vector3 a, float32 scalar);
 LS_EXPORT Vector3 vec3_div(Vector3 a, Vector3 b);
 LS_EXPORT Vector3 vec3_negate(Vector3 a);
+LS_EXPORT Vector3 vec3_normalize(Vector3 a);
+LS_EXPORT float32 vec3_dot(Vector3 a, Vector3 b);
+LS_EXPORT Vector3 vec3_cross(Vector3 a, Vector3 b);
 
 LS_EXPORT bool vec3i_equals(Vector3i a, Vector3i b);
 LS_EXPORT void vec3i_copy(Vector3i *dest, Vector3i src);

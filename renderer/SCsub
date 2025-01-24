@@ -14,6 +14,7 @@ env.renderer_sources = [
     "texture.c",
     "camera.c",
     "sprite.c",
+    "sprite_object.c",
     "batch_renderer.c",
 
     "batch_shader.gen.c",

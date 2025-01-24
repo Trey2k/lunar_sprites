@@ -39,8 +39,6 @@ typedef struct {
 } Batch;
 
 typedef struct {
-	const Renderer *renderer;
-
 	Shader *shader;
 
 	VertexArray *vao;
@@ -58,24 +56,22 @@ static void batch_renderer_flush();
 
 static void draw_batch(Batch *batch);
 
-void batch_renderer_init(const Renderer *renderer) {
+void batch_renderer_init() {
 	batch_renderer = ls_malloc(sizeof(BatchRenderer));
 
-	batch_renderer->renderer = renderer;
+	batch_renderer->vao = renderer_create_vertex_array();
 
-	batch_renderer->vao = renderer_create_vertex_array(renderer);
-
-	batch_renderer->vbo = renderer_create_vertex_buffer(renderer, NULL, VBO_MAX_ELEMENTS * sizeof(BatchVertex), BUFFER_USAGE_DYNAMIC);
+	batch_renderer->vbo = renderer_create_vertex_buffer(NULL, VBO_MAX_ELEMENTS * sizeof(BatchVertex), BUFFER_USAGE_DYNAMIC);
 	BufferLayout *vbo_layout = buffer_layout_create(BATCH_VBO_LAYOUT, BATCH_VBO_LAYOUT_COUNT);
 	vertex_buffer_set_layout(batch_renderer->vbo, vbo_layout);
 
-	batch_renderer->texid_vbo = renderer_create_vertex_buffer(renderer, NULL, VBO_MAX_ELEMENTS * sizeof(float32), BUFFER_USAGE_DYNAMIC);
+	batch_renderer->texid_vbo = renderer_create_vertex_buffer(NULL, VBO_MAX_ELEMENTS * sizeof(float32), BUFFER_USAGE_DYNAMIC);
 	BufferLayout *texid_vbo_layout = buffer_layout_create(BATCH_TEXID_VBO_LAYOUT, BATCH_TEXID_VBO_LAYOUT_COUNT);
 	vertex_buffer_set_layout(batch_renderer->texid_vbo, texid_vbo_layout);
 
-	batch_renderer->ibo = renderer_create_index_buffer(renderer, NULL, IBO_MAX_ELEMENTS * sizeof(uint32), BUFFER_USAGE_DYNAMIC);
+	batch_renderer->ibo = renderer_create_index_buffer(NULL, IBO_MAX_ELEMENTS * sizeof(uint32), BUFFER_USAGE_DYNAMIC);
 
-	batch_renderer->shader = renderer_create_shader(renderer, BATCH_SHADER_SOURCE, ls_str_length(BATCH_SHADER_SOURCE));
+	batch_renderer->shader = renderer_create_shader(BATCH_SHADER_SOURCE, ls_str_length(BATCH_SHADER_SOURCE));
 
 	batch_renderer->nbatches = 0;
 }
@@ -190,7 +186,7 @@ static void draw_batch(Batch *batch) {
 	shader_bind(batch_renderer->shader);
 	shader_set_uniform_intv(batch_renderer->shader, "u_textures", BATCH_TEXT_IDS, batch->ntextures);
 
-	Vector2u viewport_size = renderer_get_viewport_size(batch_renderer->renderer);
+	Vector2u viewport_size = renderer_get_viewport_size();
 	shader_set_uniform_vec3(batch_renderer->shader, "u_resolution", vec3(viewport_size.x, viewport_size.y, 0.0));
 
 	vertex_array_draw_elements(batch_renderer->vao);
@@ -205,7 +201,7 @@ void batch_renderer_draw_rect(const Texture *texture, Color color, uint32 radius
 		2, 3, 0
 	};
 
-	Vector2u viewport_size = renderer_get_viewport_size(batch_renderer->renderer);
+	Vector2u viewport_size = renderer_get_viewport_size();
 
 	float32 x = (float32)position.x / (float32)viewport_size.x * 2.0f - 1.0f;
 	float32 y = 1.0f - (float32)position.y / (float32)viewport_size.y * 2.0f;

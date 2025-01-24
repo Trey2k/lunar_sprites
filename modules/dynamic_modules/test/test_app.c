@@ -4,7 +4,6 @@
 
 typedef struct {
 	LSCore *core;
-	Renderer *renderer;
 
 	InputManager *input_manager;
 
@@ -49,10 +48,9 @@ ApplicationInterface register_application() {
 	return application_interface;
 }
 
-LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data) {
+LSWindow *test_app_init(LSCore *core, void *user_data) {
 	TestApplication *test_application = user_data;
 	test_application->core = core;
-	test_application->renderer = renderer;
 	test_application->should_stop = false;
 
 	test_application->chirp_sound = sound_create("chirp_test.wav");
@@ -69,7 +67,7 @@ LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data) {
 		.root_window = true,
 	};
 
-	test_application->root_window = renderer_create_window(renderer, ROOT_WINDOW_CONFIG);
+	test_application->root_window = renderer_create_window(ROOT_WINDOW_CONFIG);
 	test_application->input_manager = core_get_input_manager(core);
 
 	test_application->fps_text = ls_str_format("FPS: %f", 60.0);
@@ -96,7 +94,7 @@ void test_app_start(void *user_data) {
 	EventManager *event_handler = core_get_event_manager(test_application->core);
 	event_manager_add_handler(event_handler, input_handler, test_application);
 
-	renderer_set_clear_color(test_application->renderer, 0.0, 0.0, 0.0, 1.0);
+	renderer_set_clear_color(0.0, 0.0, 0.0, 1.0);
 
 	test_application->font = font_create("default.ttf");
 
@@ -143,12 +141,12 @@ void test_app_start(void *user_data) {
 
 	test_application->sprite = object_create("Sprite");
 	Resource *texture = resource_create("moon.png");
-	object_set_property(test_application->sprite, "position", VARIANT_VECTOR2(vec2(0, 0)));
-	object_set_property(test_application->sprite, "scale", VARIANT_VECTOR2(vec2(0.5, 0.5)));
+	object_set_property(test_application->sprite, "position", VARIANT_VECTOR2I(vec2i(0, 0)));
+	object_set_property(test_application->sprite, "scale", VARIANT_VECTOR2(vec2(0.15, 0.15)));
 	object_set_property(test_application->sprite, "rotation", VARIANT_FLOAT(0.0));
 	object_set_property(test_application->sprite, "texture", VARIANT_RESOURCE(texture));
 
-	Vector2u viewport_size = renderer_get_viewport_size(test_application->renderer);
+	Vector2u viewport_size = renderer_get_viewport_size();
 	test_application->camera = camera_create(math_deg_to_rad(100), (float32)viewport_size.y / (float32)viewport_size.x, 0.1, 100.0);
 	camera_set_active(test_application->camera);
 }
@@ -171,11 +169,16 @@ void test_app_deinit(void *user_data) {
 void test_app_update(float64 delta_time, void *user_data) {
 	TestApplication *test_application = user_data;
 
+	Vector2u viewport_size = renderer_get_viewport_size();
+
+	object_set_property(test_application->sprite, "position", VARIANT_VECTOR2I(vec2i(viewport_size.x / 2, viewport_size.y / 2)));
+
 	Variant rotation = object_get_property(test_application->sprite, "rotation");
-	rotation.FLOAT += 0.01 * delta_time;
-	if (rotation.FLOAT >= PI * 2) {
-		rotation.FLOAT = 0.0;
+	rotation.FLOAT += 0.01;
+	if (rotation.FLOAT >= PI) {
+		rotation.FLOAT = -PI;
 	}
+
 	object_set_property(test_application->sprite, "rotation", rotation);
 
 	if (input_is_key_pressed(test_application->input_manager, LS_KEY_W)) {

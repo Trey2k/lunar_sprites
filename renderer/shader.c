@@ -77,7 +77,7 @@ static bool is_preprocessor_command(String cur_char) {
 	return *cur_char == '#' && *(cur_char + 1) == 'L' && *(cur_char + 2) == 'S' && *(cur_char + 3) == ' ';
 }
 
-Shader *renderer_create_shader(const Renderer *renderer, String source, size_t source_size) {
+Shader *renderer_create_shader(String source, size_t source_size) {
 	Slice8 *opengl_vertex_source = slice8_create(source_size / 2);
 	Slice8 *opengl_fragment_source = slice8_create(source_size / 2);
 	Slice8 *preprocessor_command = slice8_create(32);
@@ -134,13 +134,13 @@ Shader *renderer_create_shader(const Renderer *renderer, String source, size_t s
 		cur_char++;
 	}
 
-	RendererBackend backend = renderer_get_backend(renderer);
+	RendererBackend backend = renderer_get_backend();
 
 	if (backend == RENDERER_BACKEND_OPENGL) {
 		slice8_append(opengl_vertex_source, SLICE_VAL8(chr, '\0'));
 		slice8_append(opengl_fragment_source, SLICE_VAL8(chr, '\0'));
 
-		shader = renderer_create_shader_raw(renderer, slice8_get_data(opengl_vertex_source), slice8_get_data(opengl_fragment_source));
+		shader = renderer_create_shader_raw(slice8_get_data(opengl_vertex_source), slice8_get_data(opengl_fragment_source));
 	}
 
 error:
@@ -151,19 +151,19 @@ error:
 	return shader;
 }
 
-Shader *renderer_create_shader_file(const Renderer *renderer, String path) {
+Shader *renderer_create_shader_file(String path) {
 	size_t file_size = 0;
 	char *file_data = os_read_file(path, &file_size);
 
-	Shader *shader = renderer_create_shader(renderer, file_data, file_size);
+	Shader *shader = renderer_create_shader(file_data, file_size);
 	ls_free(file_data);
 
 	return shader;
 }
 
-Shader *renderer_create_shader_raw(const Renderer *renderer, String vertex_source, String fragment_source) {
+Shader *renderer_create_shader_raw(String vertex_source, String fragment_source) {
 	Shader *shader = ls_malloc(sizeof(Shader));
-	shader->backend = renderer_get_backend(renderer);
+	shader->backend = renderer_get_backend();
 
 	switch (shader->backend) {
 		case RENDERER_BACKEND_NONE: {

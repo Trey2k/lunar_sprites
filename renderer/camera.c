@@ -60,10 +60,10 @@ void camera_set_active(const Camera *camera) {
 }
 
 Matrix4 camera_get_view_matrix(const Camera *camera) {
-	Matrix4 view = mat4_translate(vec3_negate(camera->position));
-	view = mat4_multiply(view, mat4_rotate(camera->rotation.x, vec3(1.0, 0.0, 0.0)));
-	view = mat4_multiply(view, mat4_rotate(camera->rotation.y, vec3(0.0, 1.0, 0.0)));
-	view = mat4_multiply(view, mat4_rotate(camera->rotation.z, vec3(0.0, 0.0, 1.0)));
+	Matrix4 view = mat4_translate(mat4(1), vec3_negate(camera->position));
+	view = mat4_rotate(view, camera->rotation.x, vec3(1.0, 0.0, 0.0));
+	view = mat4_rotate(view, camera->rotation.y, vec3(0.0, 1.0, 0.0));
+	view = mat4_rotate(view, camera->rotation.z, vec3(0.0, 0.0, 1.0));
 
 	return view;
 }

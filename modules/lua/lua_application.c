@@ -100,7 +100,7 @@ static bool lua_app_should_stop(void *user_data) {
 	return false;
 }
 
-void lua_project_init(LSCore *core, Renderer *renderer) {
+void lua_project_init(LSCore *core) {
 	if (!os_path_exists(PROJECT_FILE_NAME)) {
 		ls_log(LOG_LEVEL_DEBUG, "No lua project file found, skipping lua initialization\n");
 		return;
@@ -122,7 +122,7 @@ void lua_project_init(LSCore *core, Renderer *renderer) {
 		return;
 	}
 
-	lua_State *application_state = ls_lua_new_application_state(core, renderer);
+	lua_State *application_state = ls_lua_new_application_state(core);
 
 	int32 len = lua_rawlen(settings_state, -1);
 	for (int32 i = 1; i <= len; i++) {

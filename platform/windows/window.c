@@ -6,7 +6,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, LSWindow *parent) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, LSWindow *parent) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 
 	window->title = config.title;

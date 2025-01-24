@@ -9,6 +9,7 @@
 typedef struct Object Object;
 
 LS_EXPORT Object *object_create(String type_name);
+LS_EXPORT Object *object_create_from_data(String type_name, void *data);
 LS_EXPORT void object_destroy(Object *object);
 
 LS_EXPORT void object_draw(Object *object, float64 delta_time);

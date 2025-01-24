@@ -7,7 +7,7 @@
 
 #include "elements.h"
 
-void ui_init(Renderer *renderer, LSCore *core, const LSWindow *window);
+void ui_init(LSCore *core, const LSWindow *window);
 void ui_deinit();
 
 InputManager *ui_get_input_manager();

@@ -50,7 +50,7 @@ typedef struct {
 
 } WebWindowEvent;
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, const Renderer *renderer, LSWindow *parent) {
+PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, LSWindow *parent) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
 
 	window->title = config.title;
@@ -60,7 +60,6 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 	window->hidden = false;
 	window->fullscreen = false;
 	window->os = os;
-	window->renderer = renderer;
 	window->input_manager = os->input_manager;
 
 	window->events = slice64_create(16, true);

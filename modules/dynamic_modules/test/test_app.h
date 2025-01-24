@@ -4,7 +4,7 @@
 
 ApplicationInterface register_application();
 
-LSWindow *test_app_init(LSCore *core, Renderer *renderer, void *user_data);
+LSWindow *test_app_init(LSCore *core, void *user_data);
 void test_app_start(void *user_data);
 void test_app_deinit(void *user_data);
 

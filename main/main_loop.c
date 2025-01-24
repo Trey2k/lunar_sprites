@@ -8,7 +8,6 @@
 #include "renderer/window.h"
 
 typedef struct {
-	Renderer *renderer;
 	LSCore *core;
 
 	LSMutex *render_mutex;
@@ -23,9 +22,8 @@ static MainLoop main_loop;
 
 static void ls_render_loop(void *data);
 
-void ls_main_loop_init(LSCore *core, Renderer *renderer, LSWindow *root_window) {
+void ls_main_loop_init(LSCore *core, LSWindow *root_window) {
 	main_loop.root_window = root_window;
-	main_loop.renderer = renderer;
 	main_loop.core = core;
 
 	// Start render thread, at this point all rendering should be done in the render loop.
@@ -56,7 +54,7 @@ static void ls_render_loop(void *data) {
 		main_loop.delta_time = (current_time - main_loop.last_frame_time) / 1000000.0;
 		main_loop.last_frame_time = current_time;
 
-		renderer_clear(main_loop.renderer);
+		renderer_clear();
 		ls_update(main_loop.delta_time);
 
 		batch_renderer_end_frame();

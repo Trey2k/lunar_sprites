@@ -6,11 +6,6 @@
 
 typedef struct Sprite Sprite;
 
-#define SPRITE_OBJECT_TYPE "Sprite"
-void register_sprite_object();
-
-uint32 sprite_get_object_type();
-
 // Creates a empty sprite.
 LS_EXPORT Sprite *sprite_create_empty();
 // Creates a sprite from an image file.
@@ -26,8 +21,15 @@ LS_EXPORT void sprite_set_position(Sprite *sprite, Vector2i position);
 // Gets the position of the sprite.
 LS_EXPORT Vector2i sprite_get_position(const Sprite *sprite);
 
+LS_EXPORT void sprite_set_texture(Sprite *sprite, Resource *texture);
+LS_EXPORT Resource *sprite_get_texture(const Sprite *sprite);
+
+LS_EXPORT Vector2u sprite_get_size(const Sprite *sprite);
+
 // Sets the scale of the sprite.
-LS_EXPORT void sprite_scale(Sprite *sprite, Vector2 scale);
+LS_EXPORT void sprite_set_scale(Sprite *sprite, Vector2 scale);
+// Gets the scale of the sprite.
+LS_EXPORT Vector2 sprite_get_scale(const Sprite *sprite);
 
 // Sets the rotation of the sprite.
 LS_EXPORT void sprite_set_rotation(Sprite *sprite, float32 rotation);

@@ -16,7 +16,7 @@ typedef struct {
 	float32 radius;
 } BatchVertex;
 
-void batch_renderer_init(const Renderer *renderer);
+void batch_renderer_init();
 void batch_renderer_deinit();
 
 // Ends the current frame
