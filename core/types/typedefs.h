@@ -1,27 +1,65 @@
 #ifndef TYPEDEFS_H
 #define TYPEDEFS_H
 
-typedef char int8;
+#include "core/debug.h"
+
+typedef signed char char8;
+typedef signed short int char16;
+typedef signed int char32;
+typedef unsigned char uchar8;
+typedef unsigned short int uchar16;
+typedef unsigned int uchar32;
+
+#if defined(WINDOWS_ENABLED)
+typedef unsigned short int wchar;
+#define WCHAR_IS_CHAR16
+#else
+typedef int wchar;
+#define WCHAR_IS_CHAR32
+#endif // WINDOWS_ENABLED
+
+typedef signed char int8;
 typedef unsigned char uint8;
-typedef short int16;
+typedef signed short int16;
 typedef unsigned short uint16;
-typedef int int32;
+typedef signed int int32;
 typedef unsigned int uint32;
-typedef long long int64;
+typedef signed long long int64;
 typedef unsigned long long uint64;
 typedef float float32;
 typedef double float64;
 
+LS_STATIC_ASSERT(sizeof(char8) == 1);
+LS_STATIC_ASSERT(sizeof(char16) == 2);
+LS_STATIC_ASSERT(sizeof(char32) == 4);
+LS_STATIC_ASSERT(sizeof(uchar8) == 1);
+LS_STATIC_ASSERT(sizeof(uchar16) == 2);
+LS_STATIC_ASSERT(sizeof(uchar32) == 4);
+LS_STATIC_ASSERT(sizeof(wchar) == 2 || sizeof(wchar) == 4);
+LS_STATIC_ASSERT(sizeof(int8) == 1);
+LS_STATIC_ASSERT(sizeof(uint8) == 1);
+LS_STATIC_ASSERT(sizeof(int16) == 2);
+LS_STATIC_ASSERT(sizeof(uint16) == 2);
+LS_STATIC_ASSERT(sizeof(int32) == 4);
+LS_STATIC_ASSERT(sizeof(uint32) == 4);
+LS_STATIC_ASSERT(sizeof(int64) == 8);
+LS_STATIC_ASSERT(sizeof(uint64) == 8);
+LS_STATIC_ASSERT(sizeof(float32) == 4);
+LS_STATIC_ASSERT(sizeof(float64) == 8);
+
+typedef __builtin_va_list va_list;
+
 typedef struct Variant Variant;
 
 #if !defined(WEB_ENABLED)
-typedef enum {
-	false = 0,
-	true = !false
-} bool;
+typedef unsigned char bool;
+#define true 1
+#define false 0
 #else
 #include <stdbool.h>
 #endif
+
+LS_STATIC_ASSERT(sizeof(bool) == 1);
 
 typedef void *LSFile;
 

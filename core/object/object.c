@@ -1,5 +1,6 @@
 #include "core/object/object.h"
 #include "core/debug.h"
+#include "core/memory.h"
 #include "core/object/object_db.h"
 #include "core/types/slice.h"
 #include "core/types/variant.h"
@@ -10,13 +11,15 @@ struct Object {
 	uint32 type_id;
 	void *data;
 
+	size_t ref_count;
+
 	Vector2i position;
 
 	Slice64 *children;
 	Object *parent;
 };
 
-Object *object_create(String type_name) {
+Object *object_create(BString type_name) {
 	Object *object = ls_malloc(sizeof(Object));
 	object->type_id = object_db_get_type_id(type_name);
 
@@ -24,11 +27,12 @@ Object *object_create(String type_name) {
 
 	object->children = slice64_create(16, true);
 	object->parent = NULL;
+	object->ref_count = 1;
 
 	return object;
 }
 
-Object *object_create_from_data(String type_name, void *data) {
+Object *object_create_from_data(BString type_name, void *data) {
 	Object *object = ls_malloc(sizeof(Object));
 	object->type_id = object_db_get_type_id(type_name);
 
@@ -36,11 +40,26 @@ Object *object_create_from_data(String type_name, void *data) {
 
 	object->children = slice64_create(16, true);
 	object->parent = NULL;
+	object->ref_count = 1;
 
 	return object;
 }
 
-void object_destroy(Object *object) {
+void object_ref(Object *object) {
+	LS_ASSERT(object);
+
+	object->ref_count++;
+}
+
+void object_unref(Object *object) {
+	LS_ASSERT(object);
+
+	object->ref_count--;
+
+	if (object->ref_count != 0) {
+		return;
+	}
+
 	object_db_destroy_instance(object->type_id, object->data);
 	slice64_destroy(object->children);
 	ls_free(object);
@@ -50,23 +69,23 @@ void object_draw(Object *object, float64 delta_time) {
 	object_db_get_draw_function(object->type_id)(object, delta_time);
 }
 
-bool object_has_property(Object *object, String name) {
+bool object_has_property(Object *object, BString name) {
 	return object_db_type_has_property(object->type_id, name);
 }
 
-Variant object_get_property(Object *object, String name) {
+Variant object_get_property(Object *object, BString name) {
 	return object_db_type_get_property(object->type_id, object, name);
 }
 
-void object_set_property(Object *object, String name, Variant value) {
+void object_set_property(Object *object, BString name, Variant value) {
 	object_db_type_set_property(object->type_id, object, name, value);
 }
 
-bool object_has_method(Object *object, String name) {
+bool object_has_method(Object *object, BString name) {
 	return object_db_type_has_method(object->type_id, name);
 }
 
-Variant object_call_method(Object *object, String name, Variant *args, size_t n_args) {
+Variant object_call_method(Object *object, BString name, Variant *args, size_t n_args) {
 	return object_db_type_call_method(object->type_id, object, name, args, n_args);
 }
 
@@ -156,8 +175,14 @@ uint32 object_get_type_id(Object *object) {
 	return object->type_id;
 }
 
-String object_get_type_name(Object *object) {
+BString object_get_type_name(Object *object) {
 	LS_ASSERT(object);
 
 	return object_db_get_type_name(object->type_id);
+}
+
+BString object_to_string(Object *object) {
+	LS_ASSERT(object);
+
+	return object_db_get_to_string_function(object->type_id)(object);
 }

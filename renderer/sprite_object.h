@@ -2,9 +2,11 @@
 #define SPRITE_OBJECT_H
 
 #include "core/core.h"
+#include "core/types/bstring.h"
 #include "renderer/sprite.h"
 
-#define SPRITE_OBJECT_TYPE "Sprite"
+// TODO: Make api export this
+static const BString SPRITE_OBJECT_TYPE = BSTRING_CONST_LENGTH("Sprite", 6);
 void register_sprite_object();
 
 LS_EXPORT uint32 sprite_get_object_type();

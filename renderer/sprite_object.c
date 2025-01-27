@@ -90,23 +90,33 @@ static void sprite_draw_object(Object *object, float64 delta_time) {
 	sprite_draw(sprite);
 }
 
+static BString sprite_to_string_object(Object *object) {
+	Sprite *sprite = (Sprite *)object_get_data(object);
+
+	return sprite_to_string(sprite);
+}
+
 static void sprite_register_methods() {
-	object_db_register_method("get_texture", sprite_object_get_texture, NULL);
-	object_db_register_method("set_texture", sprite_object_set_texture, OBJ_ARGS(OBJ_ARG_LAST("texture", RESOURCE)));
+	object_db_register_method(BSC("get_texture"), sprite_object_get_texture, NULL);
+	object_db_register_method(BSC("set_texture"), sprite_object_set_texture,
+			OBJ_ARGS(OBJ_ARG_LAST("texture", RESOURCE)));
 
-	object_db_register_method("get_size", sprite_object_get_size, NULL);
-	object_db_register_method("set_size", sprite_object_set_size, OBJ_ARGS(OBJ_ARG_LAST("size", VECTOR2I)));
+	object_db_register_method(BSC("get_size"), sprite_object_get_size, NULL);
+	object_db_register_method(BSC("set_size"), sprite_object_set_size,
+			OBJ_ARGS(OBJ_ARG_LAST("size", VECTOR2I)));
 
-	object_db_register_method("get_rotation", sprite_object_get_rotation, NULL);
-	object_db_register_method("set_rotation", sprite_object_set_rotation, OBJ_ARGS(OBJ_ARG_LAST("rotation", FLOAT)));
+	object_db_register_method(BSC("get_rotation"), sprite_object_get_rotation, NULL);
+	object_db_register_method(BSC("set_rotation"), sprite_object_set_rotation,
+			OBJ_ARGS(OBJ_ARG_LAST("rotation", FLOAT)));
 
-	object_db_register_method("set_scale", sprite_object_set_scale, OBJ_ARGS(OBJ_ARG_LAST("scale", VECTOR2)));
-	object_db_register_method("get_scale", sprite_object_get_scale, NULL);
+	object_db_register_method(BSC("set_scale"), sprite_object_set_scale,
+			OBJ_ARGS(OBJ_ARG_LAST("scale", VECTOR2)));
+	object_db_register_method(BSC("get_scale"), sprite_object_get_scale, NULL);
 
-	object_db_register_property("texture", "get_texture", "set_texture");
-	object_db_register_property("size", "get_size", "set_size");
-	object_db_register_property("scale", "get_scale", "set_scale");
-	object_db_register_property("rotation", "get_rotation", "set_rotation");
+	object_db_register_property(BSC("texture"), BSC("get_texture"), BSC("set_texture"));
+	object_db_register_property(BSC("size"), BSC("get_size"), BSC("set_size"));
+	object_db_register_property(BSC("scale"), BSC("get_scale"), BSC("set_scale"));
+	object_db_register_property(BSC("rotation"), BSC("get_rotation"), BSC("set_rotation"));
 }
 
 void register_sprite_object() {
@@ -115,5 +125,7 @@ void register_sprite_object() {
 					.create = sprite_create_object,
 					.destroy = sprite_destroy_object,
 					.register_methods = sprite_register_methods,
-					.draw = sprite_draw_object });
+					.draw = sprite_draw_object,
+					.to_string = sprite_to_string_object,
+			});
 }

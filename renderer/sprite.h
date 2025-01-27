@@ -9,7 +9,7 @@ typedef struct Sprite Sprite;
 // Creates a empty sprite.
 LS_EXPORT Sprite *sprite_create_empty();
 // Creates a sprite from an image file.
-LS_EXPORT Sprite *sprite_create(String image_path, Vector2i position, Vector2 scale, float32 rotation);
+LS_EXPORT Sprite *sprite_create(BString image_path, Vector2i position, Vector2 scale, float32 rotation);
 // Destroys a sprite.
 LS_EXPORT void sprite_destroy(Sprite *sprite);
 
@@ -35,5 +35,7 @@ LS_EXPORT Vector2 sprite_get_scale(const Sprite *sprite);
 LS_EXPORT void sprite_set_rotation(Sprite *sprite, float32 rotation);
 // Gets the rotation of the sprite.
 LS_EXPORT float32 sprite_get_rotation(const Sprite *sprite);
+
+LS_EXPORT BString sprite_to_string(const Sprite *sprite);
 
 #endif // SPRITE_H

@@ -3,6 +3,7 @@
 #include "core/debug.h"
 #include "core/events/event_manager.h"
 #include "core/events/events.h"
+#include "core/input/keycodes.h"
 #include "core/log.h"
 #include "core/memory.h"
 
@@ -176,7 +177,10 @@ bool input_is_key_just_released(const InputManager *input_manager, LSKeycode key
 }
 
 void input_handle_mouse_press(InputManager *input_manager, LSMouseButton button, Vector2u position) {
-	LS_ASSERT(button >= 0 && button <= LS_MOUSE_BUTTON_LAST);
+	LS_ASSERT(button >= LS_MOUSE_BUTTON_NONE && button <= LS_MOUSE_BUTTON_LAST);
+	if (button == LS_MOUSE_BUTTON_NONE) {
+		return;
+	}
 
 	if (!input_manager->mouse_button_state[button].pressed) {
 		input_manager->mouse_button_state[button].pressed = true;

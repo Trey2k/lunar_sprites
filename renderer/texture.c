@@ -19,13 +19,12 @@ static struct TextureManager texture_manager;
 
 static void *texture_resource_create(String path);
 static void texture_resource_destroy(void *texture);
-static void texture_resource_register_methods();
 
 void texture_manager_init() {
 	texture_manager.parsers = hashtable_create(HASHTABLE_KEY_STRING, 16, false);
 
 	texture_manager.resource_type = resource_db_register_type(TEXTURE_RESOURCE_TYPE, ".png,.jpg,.jpeg,.jpg,.bmp",
-			texture_resource_create, texture_resource_destroy, texture_resource_register_methods);
+			texture_resource_create, texture_resource_destroy);
 }
 
 void texture_manager_deinit() {
@@ -138,41 +137,4 @@ static void *texture_resource_create(String path) {
 
 static void texture_resource_destroy(void *texture) {
 	texture_destroy((Texture *)texture);
-}
-
-static Variant texture_resource_get_height(Resource *resource, const Variant *args, size_t argc) {
-	if (argc != 0) {
-		ls_log(LOG_LEVEL_ERROR, "Invalid number of arguments for get_height, expected 0 got %d\n", argc);
-		return VARIANT_NIL;
-	}
-
-	Texture *texture = texture_from_resource(resource);
-	return VARIANT_INT((int32)texture_get_height(texture));
-}
-
-static Variant texture_resource_set_height(Resource *resource, const Variant *args, size_t argc) {
-	ls_log(LOG_LEVEL_ERROR, "Cannot set height of texture\n");
-	return VARIANT_NIL;
-}
-
-static Variant texture_resource_get_width(Resource *resource, const Variant *args, size_t argc) {
-	if (argc != 0) {
-		ls_log(LOG_LEVEL_ERROR, "Invalid number of arguments for get_width, expected 0 got %d\n", argc);
-		return VARIANT_NIL;
-	}
-
-	Texture *texture = texture_from_resource(resource);
-	return VARIANT_INT((int32)texture_get_width(texture));
-}
-
-static Variant texture_resource_set_width(Resource *resource, const Variant *args, size_t argc) {
-	ls_log(LOG_LEVEL_ERROR, "Cannot set width of texture\n");
-	return VARIANT_NIL;
-}
-
-static void texture_resource_register_methods() {
-	resource_db_register_method("get_width", texture_resource_get_width);
-	resource_db_register_method("set_width", texture_resource_set_width);
-	resource_db_register_method("get_height", texture_resource_get_height);
-	resource_db_register_method("set_height", texture_resource_set_height);
 }

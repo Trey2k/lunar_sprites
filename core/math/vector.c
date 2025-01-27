@@ -30,6 +30,16 @@ Vector2 vec2_negate(Vector2 a) {
 	return vec2(-a.x, -a.y);
 }
 
+uint64 vec2_hash(Vector2 a) {
+	// 2 32 bit values can fit directly into a 64 bit value.
+	union {
+		Vector2 v;
+		uint64 hash;
+	} shim;
+	shim.v = a;
+	return shim.hash;
+}
+
 bool vec2i_equals(Vector2i a, Vector2i b) {
 	return a.x == b.x && a.y == b.y;
 }
@@ -57,6 +67,16 @@ Vector2i vec2i_div(Vector2i a, Vector2i b) {
 
 Vector2i vec2i_negate(Vector2i a) {
 	return vec2i(-a.x, -a.y);
+}
+
+uint64 vec2i_hash(Vector2i a) {
+	// 2 32 bit values can fit directly into a 64 bit value.
+	union {
+		Vector2i v;
+		uint64 hash;
+	} shim;
+	shim.v = a;
+	return shim.hash;
 }
 
 bool vec2u_equals(Vector2u a, Vector2u b) {
@@ -139,6 +159,15 @@ Vector3 vec3_cross(Vector3 a, Vector3 b) {
 	return vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
 
+// djb2 hash
+uint64 vec3_hash(Vector3 a) {
+	uint64 hash = 0;
+	hash = (hash << 5) - hash + (uint64)a.x;
+	hash = (hash << 5) - hash + (uint64)a.y;
+	hash = (hash << 5) - hash + (uint64)a.z;
+	return hash;
+}
+
 bool vec3i_equals(Vector3i a, Vector3i b) {
 	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
@@ -167,6 +196,14 @@ Vector3i vec3i_div(Vector3i a, Vector3i b) {
 
 Vector3i vec3i_negate(Vector3i a) {
 	return vec3i(-a.x, -a.y, -a.z);
+}
+
+uint64 vec3i_hash(Vector3i a) {
+	uint64 hash = 0;
+	hash = (hash << 5) - hash + (uint64)a.x;
+	hash = (hash << 5) - hash + (uint64)a.y;
+	hash = (hash << 5) - hash + (uint64)a.z;
+	return hash;
 }
 
 bool vec3u_equals(Vector3u a, Vector3u b) {

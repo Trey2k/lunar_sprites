@@ -4,8 +4,8 @@
 #include "core/log.h"
 #include "core/memory.h"
 #include "core/object/object.h"
+#include "core/types/bstring.h"
 #include "core/types/hashtable.h"
-#include "core/types/string.h"
 #include "core/types/variant.h"
 
 typedef struct {
@@ -34,6 +34,7 @@ typedef struct {
 	ObjectCreateFunction create;
 	ObjectDestroyFunction destroy;
 	ObjectDrawFunction draw;
+	ObjectToStringFunction to_string;
 
 	Hashtable *properties;
 	Hashtable *methods;
@@ -90,12 +91,23 @@ ObjectDrawFunction object_db_get_draw_function(uint32 type_id) {
 	return type->draw;
 }
 
-uint32 object_db_register_type(String type_name, ObjectInterface interface) {
+ObjectToStringFunction object_db_get_to_string_function(uint32 type_id) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+	if (!type) {
+		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
+		return NULL;
+	}
+
+	return type->to_string;
+}
+
+uint32 object_db_register_type(BString type_name, ObjectInterface interface) {
 	ObjectType *type = ls_malloc(sizeof(ObjectType));
-	type->type_name = ls_str_copy(type_name);
+	type->type_name = bstring_encode_utf8(type_name);
 	type->create = interface.create;
 	type->destroy = interface.destroy;
 	type->draw = interface.draw;
+	type->to_string = interface.to_string;
 	type->properties = hashtable_create(HASHTABLE_KEY_STRING, 16, false);
 	type->methods = hashtable_create(HASHTABLE_KEY_STRING, 16, false);
 
@@ -111,50 +123,55 @@ uint32 object_db_register_type(String type_name, ObjectInterface interface) {
 	return type_id;
 }
 
-void object_db_register_property(String name, String getter, String setter) {
+void object_db_register_property(BString name, BString getter, BString setter) {
 	LS_ASSERT(object_db.active_type);
+	// BStrings are not guaranteed to be null terminated.
+	char *getter_key = bstring_encode_utf8(getter);
+	char *setter_key = bstring_encode_utf8(setter);
 
-	if (!hashtable_contains(object_db.active_type->methods, HASH_KEY(str, getter))) {
+	if (!hashtable_contains(object_db.active_type->methods, HASH_KEY(str, getter_key))) {
 		ls_log(LOG_LEVEL_ERROR, "Getter method '%s' not found for property '%s'.\n", getter, name);
-		return;
+		goto free_keys;
 	}
 
-	if (!hashtable_contains(object_db.active_type->methods, HASH_KEY(str, setter))) {
+	if (!hashtable_contains(object_db.active_type->methods, HASH_KEY(str, setter_key))) {
 		ls_log(LOG_LEVEL_ERROR, "Setter method '%s' not found for property '%s'.\n", setter, name);
-		return;
+		goto free_keys;
 	}
 
 	ObjectProperty *property = ls_malloc(sizeof(ObjectProperty));
-	property->name = ls_str_copy(name);
-	property->getter = (const ObjectMethodInfo *)hashtable_get(object_db.active_type->methods, HASH_KEY(str, getter)).ptr;
-	property->setter = (const ObjectMethodInfo *)hashtable_get(object_db.active_type->methods, HASH_KEY(str, setter)).ptr;
+	property->getter = (const ObjectMethodInfo *)hashtable_get(object_db.active_type->methods, HASH_KEY(str, getter_key)).ptr;
+	property->setter = (const ObjectMethodInfo *)hashtable_get(object_db.active_type->methods, HASH_KEY(str, setter_key)).ptr;
 
 	if (property->getter->argc != 0) {
 		ls_log(LOG_LEVEL_ERROR, "Getter method '%s' must have 0 arguments.\n", getter);
-		ls_free(property->name);
 		ls_free(property);
-		return;
+		goto free_keys;
 	}
 
 	if (property->setter->argc != 1) {
 		ls_log(LOG_LEVEL_ERROR, "Setter method '%s' must have 1 argument.\n", setter);
-		ls_free(property->name);
 		ls_free(property);
-		return;
+		goto free_keys;
 	}
 
-	hashtable_set(object_db.active_type->properties, HASH_KEY(str, name), HASH_VAL(ptr, property));
+	property->name = bstring_encode_utf8(name);
+	hashtable_set(object_db.active_type->properties, HASH_KEY(str, property->name), HASH_VAL(ptr, property));
+
+free_keys:
+	ls_free(getter_key);
+	ls_free(setter_key);
 }
 
-void object_db_register_method(String name, ObjectMethod method, const ObjectMethodArgument *args) {
+void object_db_register_method(BString name, ObjectMethod method, const ObjectMethodArgument *args) {
 	LS_ASSERT(object_db.active_type);
 
 	ObjectMethodInfo *info = ls_calloc(sizeof(ObjectMethodInfo), 1);
-	info->name = ls_str_copy(name);
+	info->name = bstring_encode_utf8(name);
 	info->method = method;
 
 	if (!args) {
-		hashtable_set(object_db.active_type->methods, HASH_KEY(str, name), HASH_VAL(ptr, info));
+		hashtable_set(object_db.active_type->methods, HASH_KEY(str, info->name), HASH_VAL(ptr, info));
 		return;
 	}
 
@@ -217,41 +234,48 @@ void object_db_register_method(String name, ObjectMethod method, const ObjectMet
 		}
 	}
 
-	hashtable_set(object_db.active_type->methods, HASH_KEY(str, name), HASH_VAL(ptr, info));
+	hashtable_set(object_db.active_type->methods, HASH_KEY(str, info->name), HASH_VAL(ptr, info));
 }
 
-uint32 object_db_get_type_id(String type_name) {
-	return ls_str_hash_djb2(type_name);
+uint32 object_db_get_type_id(BString type_name) {
+	return bstring_hash(type_name);
 }
 
-String object_db_get_type_name(uint32 type_id) {
+BString object_db_get_type_name(uint32 type_id) {
 	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
-		return NULL;
 	}
 
-	return type->type_name;
+	return BSTRING_CONST(type->type_name);
 }
 
-bool object_db_type_has_property(uint32 type_id, String name) {
+bool object_db_type_has_property(uint32 type_id, BString name) {
 	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return false;
 	}
 
-	return hashtable_contains(type->properties, HASH_KEY(str, name));
+	char *name_str = bstring_encode_utf8(name);
+
+	bool result = hashtable_contains(type->properties, HASH_KEY(str, name_str));
+	ls_free(name_str);
+
+	return result;
 }
 
-void object_db_type_set_property(uint32 type_id, Object *object, String name, Variant value) {
+void object_db_type_set_property(uint32 type_id, Object *object, BString name, Variant value) {
 	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return;
 	}
 
-	ObjectProperty *property = hashtable_get(type->properties, HASH_KEY(str, name)).ptr;
+	char *name_str = bstring_encode_utf8(name);
+
+	ObjectProperty *property = hashtable_get(type->properties, HASH_KEY(str, name_str)).ptr;
+	ls_free(name_str);
 	if (!property) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown property '%s.%s'\n", type->type_name, name);
 		return;
@@ -268,14 +292,17 @@ void object_db_type_set_property(uint32 type_id, Object *object, String name, Va
 	(void)property->setter->method(object, &value, 1);
 }
 
-Variant object_db_type_get_property(uint32 type_id, Object *object, String name) {
+Variant object_db_type_get_property(uint32 type_id, Object *object, BString name) {
 	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return VARIANT_NIL;
 	}
 
-	ObjectProperty *property = hashtable_get(type->properties, HASH_KEY(str, name)).ptr;
+	char *name_str = bstring_encode_utf8(name);
+
+	ObjectProperty *property = hashtable_get(type->properties, HASH_KEY(str, name_str)).ptr;
+	ls_free(name_str);
 	if (!property) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown property '%s.%s'\n", type->type_name, name);
 		return VARIANT_NIL;
@@ -284,24 +311,32 @@ Variant object_db_type_get_property(uint32 type_id, Object *object, String name)
 	return property->getter->method(object, NULL, 0);
 }
 
-bool object_db_type_has_method(uint32 type_id, String name) {
+bool object_db_type_has_method(uint32 type_id, BString name) {
 	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return false;
 	}
 
-	return hashtable_contains(type->methods, HASH_KEY(str, name));
+	char *name_str = bstring_encode_utf8(name);
+
+	bool result = hashtable_contains(type->methods, HASH_KEY(str, name_str));
+	ls_free(name_str);
+
+	return result;
 }
 
-Variant object_db_type_call_method(uint32 type_id, Object *object, String name, const Variant *args, size_t n_args) {
+Variant object_db_type_call_method(uint32 type_id, Object *object, BString name, const Variant *args, size_t n_args) {
 	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return VARIANT_NIL;
 	}
 
-	ObjectMethodInfo *method = hashtable_get(type->methods, HASH_KEY(str, name)).ptr;
+	char *name_str = bstring_encode_utf8(name);
+
+	ObjectMethodInfo *method = hashtable_get(type->methods, HASH_KEY(str, name_str)).ptr;
+	ls_free(name_str);
 	if (!method) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown method '%s.%s'\n", type->type_name, name);
 		return VARIANT_NIL;
@@ -451,14 +486,18 @@ static Variant db_object_get_global_position(Object *object, const Variant *args
 }
 
 static void register_base_methods() {
-	object_db_register_method("add_child", db_object_add_child, OBJ_ARGS(OBJ_ARG_LAST("child", OBJECT)));
-	object_db_register_method("get_child", db_object_get_child, OBJ_ARGS(OBJ_ARG_LAST("index", INT)));
-	object_db_register_method("get_child_count", db_object_get_child_count, NULL);
-	object_db_register_method("get_parent", db_object_get_parent, NULL);
-	object_db_register_method("draw", db_objet_draw, OBJ_ARGS(OBJ_ARG_LAST("delta", FLOAT)));
-	object_db_register_method("set_position", db_object_set_position, OBJ_ARGS(OBJ_ARG_LAST("position", VECTOR2I)));
-	object_db_register_method("get_position", db_object_get_position, NULL);
-	object_db_register_method("get_global_position", db_object_get_global_position, NULL);
+	object_db_register_method(BSC("add_child"), db_object_add_child,
+			OBJ_ARGS(OBJ_ARG_LAST("child", OBJECT)));
+	object_db_register_method(BSC("get_child"), db_object_get_child,
+			OBJ_ARGS(OBJ_ARG_LAST("index", INT)));
+	object_db_register_method(BSC("get_child_count"), db_object_get_child_count, NULL);
+	object_db_register_method(BSC("get_parent"), db_object_get_parent, NULL);
+	object_db_register_method(BSC("draw"), db_objet_draw,
+			OBJ_ARGS(OBJ_ARG_LAST("delta", FLOAT)));
+	object_db_register_method(BSC("set_position"), db_object_set_position,
+			OBJ_ARGS(OBJ_ARG_LAST("position", VECTOR2I)));
+	object_db_register_method(BSC("get_position"), db_object_get_position, NULL);
+	object_db_register_method(BSC("get_global_position"), db_object_get_global_position, NULL);
 
-	object_db_register_property("position", "get_position", "set_position");
+	object_db_register_property(BSC("position"), BSC("get_position"), BSC("set_position"));
 }

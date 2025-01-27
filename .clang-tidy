@@ -5,14 +5,6 @@ HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
 FormatStyle: none
 CheckOptions:
-  - key:             cert-dcl16-c.NewSuffixes
-    value:           'L;LL;LU;LLU'
-  - key:             cert-oop54-cpp.WarnOnlyIfThisHasSuspiciousField
-    value:           '0'
-  - key:             cppcoreguidelines-explicit-virtual-functions.IgnoreDestructors
-    value:           '1'
-  - key:             cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
-    value:           '1'
   - key:             cppcoreguidelines-pro-type-member-init.IgnoreArrays
     value:           '1'
   - key:             cppcoreguidelines-pro-type-member-init.UseAssignment

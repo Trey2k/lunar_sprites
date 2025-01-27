@@ -139,12 +139,12 @@ void test_app_start(void *user_data) {
 
 	ui_add_element(test_application->horizontal_container);
 
-	test_application->sprite = object_create("Sprite");
-	Resource *texture = resource_create("moon.png");
-	object_set_property(test_application->sprite, "position", VARIANT_VECTOR2I(vec2i(0, 0)));
-	object_set_property(test_application->sprite, "scale", VARIANT_VECTOR2(vec2(0.15, 0.15)));
-	object_set_property(test_application->sprite, "rotation", VARIANT_FLOAT(0.0));
-	object_set_property(test_application->sprite, "texture", VARIANT_RESOURCE(texture));
+	test_application->sprite = object_create(BSC("Sprite"));
+	Resource *texture = resource_create(BSC("moon.png"));
+	object_set_property(test_application->sprite, BSC("position"), VARIANT_VECTOR2I(vec2i(0, 0)));
+	object_set_property(test_application->sprite, BSC("scale"), VARIANT_VECTOR2(vec2(0.15, 0.15)));
+	object_set_property(test_application->sprite, BSC("rotation"), VARIANT_FLOAT(0.0));
+	object_set_property(test_application->sprite, BSC("texture"), VARIANT_RESOURCE(texture));
 
 	Vector2u viewport_size = renderer_get_viewport_size();
 	test_application->camera = camera_create(math_deg_to_rad(100), (float32)viewport_size.y / (float32)viewport_size.x, 0.1, 100.0);
@@ -154,7 +154,7 @@ void test_app_start(void *user_data) {
 void test_app_deinit(void *user_data) {
 	TestApplication *test_application = user_data;
 
-	object_destroy(test_application->sprite);
+	object_unref(test_application->sprite);
 	camera_destroy(test_application->camera);
 	font_destroy(test_application->font);
 
@@ -171,15 +171,15 @@ void test_app_update(float64 delta_time, void *user_data) {
 
 	Vector2u viewport_size = renderer_get_viewport_size();
 
-	object_set_property(test_application->sprite, "position", VARIANT_VECTOR2I(vec2i(viewport_size.x / 2, viewport_size.y / 2)));
+	object_set_property(test_application->sprite, BSC("position"), VARIANT_VECTOR2I(vec2i(viewport_size.x / 2, viewport_size.y / 2)));
 
-	Variant rotation = object_get_property(test_application->sprite, "rotation");
+	Variant rotation = object_get_property(test_application->sprite, BSC("rotation"));
 	rotation.FLOAT += 0.01;
 	if (rotation.FLOAT >= PI) {
 		rotation.FLOAT = -PI;
 	}
 
-	object_set_property(test_application->sprite, "rotation", rotation);
+	object_set_property(test_application->sprite, BSC("rotation"), rotation);
 
 	if (input_is_key_pressed(test_application->input_manager, LS_KEY_W)) {
 		camera_move(test_application->camera, vec3(0.0, 0.01, 0.0));
@@ -205,6 +205,13 @@ void test_app_update(float64 delta_time, void *user_data) {
 	object_draw(test_application->sprite, delta_time);
 
 	if (test_application->timer > 0.25) {
+		Variant test = json_parse(BSC("{\"test\": [1, 2.5, 3, {\"bool\": false}], \"test2\": {\"test3\": \"test4\"}}"));
+		ls_printf("Test: %V\n", test);
+		BString json = json_stringify(test);
+		ls_printf("JSON: %S\n", json);
+		bstring_unref(json);
+		variant_unref(test);
+
 		ls_free(test_application->fps_text);
 		test_application->fps_text = ls_str_format("FPS: %f", 1.0 / delta_time);
 		test_application->timer = 0.0;

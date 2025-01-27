@@ -7,9 +7,13 @@
 
 typedef const char *String;
 
+// Only supports normal C format specifiers.
 LS_EXPORT int ls_sprintf(char *buffer, size_t buffer_size, String format, ...);
+// Only supports normal C format specifiers.
+LS_EXPORT int ls_fprintf(LSFile *stream, String format, ...);
 
 LS_EXPORT size_t ls_str_length(String string);
+LS_EXPORT size_t ls_wstr_length(const wchar *string);
 LS_EXPORT size_t ls_str_hash_djb2(String string);
 
 LS_EXPORT bool ls_str_is_empty(String string);

@@ -6,7 +6,10 @@
 /* --------------TYPES-------------- */
 #include "core/object/object.h"
 #include "core/resource/resource.h"
+#include "core/types/array.h"
+#include "core/types/bstring.h"
 #include "core/types/color.h"
+#include "core/types/dictionary.h"
 #include "core/types/hashtable.h"
 #include "core/types/slice.h"
 #include "core/types/string.h"

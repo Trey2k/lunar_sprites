@@ -42,6 +42,9 @@ def configure(env):
         'core/math/quaternion.h',
         'core/types/slice.h',
         'core/types/hashtable.h',
+        'core/types/bstring.h',
+        'core/types/dictionary.h',
+        'core/types/array.h',
         'core/object/object.h',
         'core/resource/resource.h',
         'core/types/variant.h',
@@ -57,6 +60,7 @@ def configure(env):
         'core/os/thread.h',
         'core/config.h',
         'core/core.h',
+        'core/json.h',
         
         'renderer/window.h',
         'renderer/renderer.h',

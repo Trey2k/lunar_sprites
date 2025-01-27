@@ -20,10 +20,35 @@ int ls_sprintf(char *buffer, size_t buffer_size, String format, ...) {
 	return ret;
 }
 
+int ls_fprintf(LSFile *stream, String format, ...) {
+	LS_ASSERT(stream);
+	LS_ASSERT(format);
+
+	va_list args;
+	va_start(args, format);
+
+	int ret = vfprintf(stream, format, args);
+
+	va_end(args);
+
+	return ret;
+}
+
 size_t ls_str_length(String string) {
 	LS_ASSERT(string);
 
 	return strlen(string);
+}
+
+size_t ls_wstr_length(const wchar *string) {
+	LS_ASSERT(string);
+
+	size_t length = 0;
+	while (string[length] != L'\0') {
+		length++;
+	}
+
+	return length;
 }
 
 size_t ls_str_hash_djb2(String string) {

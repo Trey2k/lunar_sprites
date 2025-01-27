@@ -3,9 +3,10 @@
 
 #include "core/core.h"
 
+#include "core/types/bstring.h"
 #include "renderer/renderer.h"
 
-#define TEXTURE_RESOURCE_TYPE "Texture"
+static const BString TEXTURE_RESOURCE_TYPE = BSTRING_CONST_LENGTH("Texture", 7);
 
 void texture_manager_init();
 void texture_manager_deinit();

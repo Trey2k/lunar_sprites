@@ -1,6 +1,8 @@
 #include "core/types/hashtable.h"
 
 #include "core/debug.h"
+#include "core/log.h"
+#include "core/memory.h"
 
 // https://en.wikipedia.org/wiki/Universal_hashing#Hashing_integers
 #define GOLDEN_RATIO_HASH 0x9E3779B9

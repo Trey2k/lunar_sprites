@@ -3,6 +3,7 @@
 
 #include "core/api.h"
 
+#include "core/types/bstring.h"
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
 #include "core/types/variant.h"
@@ -22,12 +23,15 @@ typedef void (*ObjectDestroyFunction)(void *object_data);
 typedef void (*ObjectRegisterMethodsFunction)();
 // Draws the object to the screen.
 typedef void (*ObjectDrawFunction)(Object *object, float64 delta_time);
+// Returns a string representation of the object.
+typedef BString (*ObjectToStringFunction)(Object *object);
 
 typedef struct {
 	ObjectCreateFunction create;
 	ObjectDestroyFunction destroy;
 	ObjectRegisterMethodsFunction register_methods;
 	ObjectDrawFunction draw;
+	ObjectToStringFunction to_string;
 } ObjectInterface;
 
 #define OBJ_ARGUMENT_FLAG_TYPE_MASK 0xFF
@@ -64,25 +68,26 @@ void *object_db_create_instance(uint32 type_id);
 void object_db_destroy_instance(uint32 type_id, void *object_data);
 
 ObjectDrawFunction object_db_get_draw_function(uint32 type_id);
+ObjectToStringFunction object_db_get_to_string_function(uint32 type_id);
 
 // Registers a new object type.
-LS_EXPORT uint32 object_db_register_type(String type_name, ObjectInterface interface);
+LS_EXPORT uint32 object_db_register_type(BString type_name, ObjectInterface interface);
 
 // Register a new int property. Must be called from the register_methods function, after the getter and setter functions have been registered.
-LS_EXPORT void object_db_register_property(String name, String getter, String setter);
+LS_EXPORT void object_db_register_property(BString name, BString getter, BString setter);
 
 // Register a new method. Must be called from the register_properties function.
-LS_EXPORT void object_db_register_method(String name, ObjectMethod method, const ObjectMethodArgument *args);
+LS_EXPORT void object_db_register_method(BString name, ObjectMethod method, const ObjectMethodArgument *args);
 
 // Gets the type id of the object type.
-LS_EXPORT uint32 object_db_get_type_id(String type_type);
-LS_EXPORT String object_db_get_type_name(uint32 type_id);
+LS_EXPORT uint32 object_db_get_type_id(BString type_name);
+LS_EXPORT BString object_db_get_type_name(uint32 type_id);
 
-LS_EXPORT bool object_db_type_has_property(uint32 type_id, String name);
-LS_EXPORT void object_db_type_set_property(uint32 type_id, Object *object, String name, Variant value);
-LS_EXPORT Variant object_db_type_get_property(uint32 type_id, Object *object, String name);
+LS_EXPORT bool object_db_type_has_property(uint32 type_id, BString name);
+LS_EXPORT void object_db_type_set_property(uint32 type_id, Object *object, BString name, Variant value);
+LS_EXPORT Variant object_db_type_get_property(uint32 type_id, Object *object, BString name);
 
-LS_EXPORT bool object_db_type_has_method(uint32 type_id, String name);
-LS_EXPORT Variant object_db_type_call_method(uint32 type_id, Object *object, String name, const Variant *args, size_t n_args);
+LS_EXPORT bool object_db_type_has_method(uint32 type_id, BString name);
+LS_EXPORT Variant object_db_type_call_method(uint32 type_id, Object *object, BString name, const Variant *args, size_t n_args);
 
 #endif // OBJECT_DB_H

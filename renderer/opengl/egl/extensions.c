@@ -1,6 +1,7 @@
 #include "extensions.h"
 
 #include "core/debug.h"
+#include "core/memory.h"
 #include "core/types/slice.h"
 
 static void append_extension(Slice64 *extensions, String extension);

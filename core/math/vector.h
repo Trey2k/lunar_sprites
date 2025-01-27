@@ -89,6 +89,7 @@ LS_EXPORT Vector2 vec2_sub(Vector2 a, Vector2 b);
 LS_EXPORT Vector2 vec2_mul(Vector2 a, Vector2 b);
 LS_EXPORT Vector2 vec2_div(Vector2 a, Vector2 b);
 LS_EXPORT Vector2 vec2_negate(Vector2 a);
+LS_EXPORT uint64 vec2_hash(Vector2 a);
 
 LS_EXPORT bool vec2i_equals(Vector2i a, Vector2i b);
 LS_EXPORT void vec2i_copy(Vector2i *dest, Vector2i src);
@@ -97,6 +98,7 @@ LS_EXPORT Vector2i vec2i_sub(Vector2i a, Vector2i b);
 LS_EXPORT Vector2i vec2i_mul(Vector2i a, Vector2i b);
 LS_EXPORT Vector2i vec2i_div(Vector2i a, Vector2i b);
 LS_EXPORT Vector2i vec2i_negate(Vector2i a);
+LS_EXPORT uint64 vec2i_hash(Vector2i a);
 
 LS_EXPORT bool vec2u_equals(Vector2u a, Vector2u b);
 LS_EXPORT void vec2u_copy(Vector2u *dest, Vector2u src);
@@ -117,6 +119,7 @@ LS_EXPORT Vector3 vec3_negate(Vector3 a);
 LS_EXPORT Vector3 vec3_normalize(Vector3 a);
 LS_EXPORT float32 vec3_dot(Vector3 a, Vector3 b);
 LS_EXPORT Vector3 vec3_cross(Vector3 a, Vector3 b);
+LS_EXPORT uint64 vec3_hash(Vector3 a);
 
 LS_EXPORT bool vec3i_equals(Vector3i a, Vector3i b);
 LS_EXPORT void vec3i_copy(Vector3i *dest, Vector3i src);
@@ -125,6 +128,7 @@ LS_EXPORT Vector3i vec3i_sub(Vector3i a, Vector3i b);
 LS_EXPORT Vector3i vec3i_mul(Vector3i a, Vector3i b);
 LS_EXPORT Vector3i vec3i_div(Vector3i a, Vector3i b);
 LS_EXPORT Vector3i vec3i_negate(Vector3i a);
+LS_EXPORT uint64 vec3i_hash(Vector3i a);
 
 LS_EXPORT bool vec3u_equals(Vector3u a, Vector3u b);
 LS_EXPORT void vec3u_copy(Vector3u *dest, Vector3u src);

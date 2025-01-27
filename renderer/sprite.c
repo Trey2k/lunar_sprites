@@ -93,7 +93,7 @@ Sprite *sprite_create_empty() {
 	return sprite;
 }
 
-Sprite *sprite_create(String image_path, Vector2i position, Vector2 scale, float32 rotation) {
+Sprite *sprite_create(BString image_path, Vector2i position, Vector2 scale, float32 rotation) {
 	Sprite *sprite = ls_malloc(sizeof(Sprite));
 	sprite->texture = resource_create(image_path);
 
@@ -110,7 +110,7 @@ Sprite *sprite_create(String image_path, Vector2i position, Vector2 scale, float
 }
 
 void sprite_destroy(Sprite *sprite) {
-	resource_destroy(sprite->texture);
+	resource_unref(sprite->texture);
 
 	ls_free(sprite);
 }
@@ -170,4 +170,8 @@ void sprite_set_rotation(Sprite *sprite, float32 rotation) {
 
 float32 sprite_get_rotation(const Sprite *sprite) {
 	return sprite->rotation;
+}
+
+BString sprite_to_string(const Sprite *sprite) {
+	return bstring_format("Sprite(Position: %v2i, Scale: %v2, Rotation: %f, Size: %v2u)", sprite->position, sprite->scale, sprite->rotation, sprite->size);
 }

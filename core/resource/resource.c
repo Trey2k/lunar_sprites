@@ -1,4 +1,6 @@
 #include "core/resource/resource.h"
+#include "core/debug.h"
+#include "core/memory.h"
 #include "core/os/os.h"
 #include "core/resource/resource_db.h"
 #include "core/types/variant.h"
@@ -7,67 +9,47 @@
 
 struct Resource {
 	uint32 type_id;
+	size_t ref_count;
+
 	void *data;
 };
 
-Resource *resource_create(String path) {
+Resource *resource_create(BString path) {
+	char *c_str = bstring_encode_utf8(path);
 	Resource *resource = ls_malloc(sizeof(Resource));
-	char *ext = os_path_get_extension(path);
+	char *ext = os_path_get_extension(c_str);
 	resource->type_id = resource_db_get_type_id_by_extension(ext);
-	resource->data = resource_db_create_instance(resource->type_id, path);
+	resource->data = resource_db_create_instance(resource->type_id, c_str);
+	resource->ref_count = 1;
+	ls_free(c_str);
 
 	return resource;
 }
 
-Resource *resource_create_from_data(String type_name, void *data) {
+Resource *resource_create_from_data(BString type_name, void *data) {
 	Resource *resource = ls_malloc(sizeof(Resource));
 	resource->type_id = resource_db_get_type_id(type_name);
 	resource->data = data;
+	resource->ref_count = 1;
 
 	return resource;
 }
 
-void resource_destroy(Resource *resource) {
-	resource_db_destroy_instance(resource->type_id, resource->data);
-	ls_free(resource);
+void resource_ref(Resource *resource) {
+	LS_ASSERT(resource);
+	resource->ref_count++;
 }
 
-bool resource_has_property(Resource *resource, String name) {
-	return resource_db_type_has_property(resource->type_id, name);
-}
+void resource_unref(Resource *resource) {
+	LS_ASSERT(resource);
+	resource->ref_count--;
 
-Variant resource_get_property(Resource *resource, String name) {
-	ResourcePropertyInterface interface = resource_db_type_get_property(resource->type_id, name);
-	if (!interface.getter) {
-		ls_log(LOG_LEVEL_ERROR, "Resource type %d does not have a property %s\n", resource->type_id, name);
-		return VARIANT_NIL;
-	}
-
-	return interface.getter(resource, NULL, 0);
-}
-
-void resource_set_property(Resource *resource, String name, Variant value) {
-	ResourcePropertyInterface interface = resource_db_type_get_property(resource->type_id, name);
-	if (!interface.setter) {
-		ls_log(LOG_LEVEL_ERROR, "Resource type %d does not have a property %s\n", resource->type_id, name);
+	if (resource->ref_count != 0) {
 		return;
 	}
 
-	interface.setter(resource, &value, 1);
-}
-
-bool resource_has_method(Resource *resource, String name) {
-	return resource_db_type_has_method(resource->type_id, name);
-}
-
-Variant resource_call_method(Resource *resource, String name, Variant *args, size_t n_args) {
-	ResourceMethod method = resource_db_type_get_method(resource->type_id, name);
-	if (!method) {
-		ls_log(LOG_LEVEL_ERROR, "Resource type %d does not have a method %s\n", resource->type_id, name);
-		return VARIANT_NIL;
-	}
-
-	return method(resource, args, n_args);
+	resource_db_destroy_instance(resource->type_id, resource->data);
+	ls_free(resource);
 }
 
 bool resource_equals(Resource *a, Resource *b) {
@@ -80,4 +62,13 @@ void *resource_get_data(Resource *resource) {
 
 uint32 resource_get_type_id(Resource *resource) {
 	return resource->type_id;
+}
+
+BString resource_get_type_name(Resource *resource) {
+	return resource_db_get_type_name(resource->type_id);
+}
+
+BString resource_to_string(Resource *resource) {
+	BString type_name = resource_get_type_name(resource);
+	return bstring_format("Resource(%s)#%p", type_name.string, resource->data);
 }

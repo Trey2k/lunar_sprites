@@ -11,142 +11,142 @@ typedef struct Color {
 } Color;
 
 #define COLOR_WHITE \
-	(Color) { .r = 1.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f }
 
 #define COLOR_BLACK \
-	(Color) { .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_RED \
-	(Color) { .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 0.0f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_GREEN \
-	(Color) { .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_BLUE \
-	(Color) { .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f }
 
 #define COLOR_YELLOW \
-	(Color) { .r = 1.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 1.0f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_CYAN \
-	(Color) { .r = 0.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 1.0f, .b = 1.0f, .a = 1.0f }
 
 #define COLOR_MAGENTA \
-	(Color) { .r = 1.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 0.0f, .b = 1.0f, .a = 1.0f }
 
 #define COLOR_TRANSPARENT \
-	(Color) { .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 0.0f }
+	(Color){ .r = 0.0f, .g = 0.0f, .b = 0.0f, .a = 0.0f }
 
 #define COLOR_GREY \
-	(Color) { .r = 0.5f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_PINK \
-	(Color) { .r = 1.0f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_ORANGE \
-	(Color) { .r = 1.0f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_PURPLE \
-	(Color) { .r = 0.5f, .g = 0.0f, .b = 1.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.0f, .b = 1.0f, .a = 1.0f }
 
 #define COLOR_BROWN \
-	(Color) { .r = 0.5f, .g = 0.25f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.25f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_LIME \
-	(Color) { .r = 0.5f, .g = 1.0f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 1.0f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_TEAL \
-	(Color) { .r = 0.0f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_AQUA \
-	(Color) { .r = 0.0f, .g = 1.0f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 1.0f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_MAROON \
-	(Color) { .r = 0.5f, .g = 0.0f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.0f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_NAVY \
-	(Color) { .r = 0.0f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_OLIVE \
-	(Color) { .r = 0.5f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_SILVER \
-	(Color) { .r = 0.75f, .g = 0.75f, .b = 0.75f, .a = 1.0f }
+	(Color){ .r = 0.75f, .g = 0.75f, .b = 0.75f, .a = 1.0f }
 
 #define COLOR_GOLD \
-	(Color) { .r = 1.0f, .g = 0.84f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 0.84f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_BRONZE \
-	(Color) { .r = 0.8f, .g = 0.5f, .b = 0.2f, .a = 1.0f }
+	(Color){ .r = 0.8f, .g = 0.5f, .b = 0.2f, .a = 1.0f }
 
 #define COLOR_TURQUOISE \
-	(Color) { .r = 0.25f, .g = 0.88f, .b = 0.82f, .a = 1.0f }
+	(Color){ .r = 0.25f, .g = 0.88f, .b = 0.82f, .a = 1.0f }
 
 #define COLOR_LIGHT_RED \
-	(Color) { .r = 1.0f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_LIGHT_GREEN \
-	(Color) { .r = 0.5f, .g = 1.0f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 1.0f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_LIGHT_BLUE \
-	(Color) { .r = 0.5f, .g = 0.5f, .b = 1.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.5f, .b = 1.0f, .a = 1.0f }
 
 #define COLOR_LIGHT_YELLOW \
-	(Color) { .r = 1.0f, .g = 1.0f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 1.0f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_LIGHT_CYAN \
-	(Color) { .r = 0.5f, .g = 1.0f, .b = 1.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 1.0f, .b = 1.0f, .a = 1.0f }
 
 #define COLOR_LIGHT_MAGENTA \
-	(Color) { .r = 1.0f, .g = 0.5f, .b = 1.0f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 0.5f, .b = 1.0f, .a = 1.0f }
 
 #define COLOR_LIGHT_GREY \
-	(Color) { .r = 0.75f, .g = 0.75f, .b = 0.75f, .a = 1.0f }
+	(Color){ .r = 0.75f, .g = 0.75f, .b = 0.75f, .a = 1.0f }
 
 #define COLOR_LIGHT_PINK \
-	(Color) { .r = 1.0f, .g = 0.5f, .b = 0.75f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 0.5f, .b = 0.75f, .a = 1.0f }
 
 #define COLOR_LIGHT_ORANGE \
-	(Color) { .r = 1.0f, .g = 0.75f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 1.0f, .g = 0.75f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_LIGHT_PURPLE \
-	(Color) { .r = 0.75f, .g = 0.5f, .b = 1.0f, .a = 1.0f }
+	(Color){ .r = 0.75f, .g = 0.5f, .b = 1.0f, .a = 1.0f }
 
 #define COLOR_LIGHT_BROWN \
-	(Color) { .r = 0.75f, .g = 0.5f, .b = 0.25f, .a = 1.0f }
+	(Color){ .r = 0.75f, .g = 0.5f, .b = 0.25f, .a = 1.0f }
 
 #define COLOR_DARK_RED \
-	(Color) { .r = 0.5f, .g = 0.0f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.0f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_DARK_GREEN \
-	(Color) { .r = 0.0f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_DARK_BLUE \
-	(Color) { .r = 0.0f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_DARK_YELLOW \
-	(Color) { .r = 0.5f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.5f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_DARK_CYAN \
-	(Color) { .r = 0.0f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 0.0f, .g = 0.5f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_DARK_MAGENTA \
-	(Color) { .r = 0.5f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_DARK_GREY \
-	(Color) { .r = 0.25f, .g = 0.25f, .b = 0.25f, .a = 1.0f }
+	(Color){ .r = 0.25f, .g = 0.25f, .b = 0.25f, .a = 1.0f }
 
 #define COLOR_DARK_PINK \
-	(Color) { .r = 0.5f, .g = 0.0f, .b = 0.25f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.0f, .b = 0.25f, .a = 1.0f }
 
 #define COLOR_DARK_ORANGE \
-	(Color) { .r = 0.5f, .g = 0.25f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.5f, .g = 0.25f, .b = 0.0f, .a = 1.0f }
 
 #define COLOR_DARK_PURPLE \
-	(Color) { .r = 0.25f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
+	(Color){ .r = 0.25f, .g = 0.0f, .b = 0.5f, .a = 1.0f }
 
 #define COLOR_DARK_BROWN \
-	(Color) { .r = 0.25f, .g = 0.125f, .b = 0.0f, .a = 1.0f }
+	(Color){ .r = 0.25f, .g = 0.125f, .b = 0.0f, .a = 1.0f }
 
 // Creates a color from RGBA values.
 _FORCE_INLINE_ Color color_create(float32 r, float32 g, float32 b, float32 a) {
@@ -215,6 +215,16 @@ _FORCE_INLINE_ Color color_divide(Color a, Color b) {
 // Compares 2 color values
 _FORCE_INLINE_ bool color_equals(Color a, Color b) {
 	return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
+}
+
+// Converts a color to a uint64 hash value using djb2.
+_FORCE_INLINE_ uint64 color_hash(Color color) {
+	uint64 hash = 5381;
+	hash = ((hash << 5) + hash) + (uint64)(color.r * 1000);
+	hash = ((hash << 5) + hash) + (uint64)(color.g * 1000);
+	hash = ((hash << 5) + hash) + (uint64)(color.b * 1000);
+	hash = ((hash << 5) + hash) + (uint64)(color.a * 1000);
+	return hash;
 }
 
 #endif // COLOR_H

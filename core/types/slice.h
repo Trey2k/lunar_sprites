@@ -13,32 +13,6 @@
 typedef bool (*SliceCompareFunc)(const Variant a, const Variant b);
 typedef struct Slice Slice;
 
-// Slice is a dynamic array
-// should_free: if true, and the variant is a Object or Resource,
-// then it will be freed when the slice is destroyed or the data is removed.
-LS_EXPORT Slice *slice_create(size_t inital_size, bool should_free);
-LS_EXPORT void slice_destroy(Slice *slice);
-
-LS_EXPORT void slice_append(Slice *slice, Variant data);
-LS_EXPORT void slice_append_slice(Slice *slice, const Slice *other);
-LS_EXPORT void slice_insert(Slice *slice, size_t index, Variant data);
-LS_EXPORT void slice_remove(Slice *slice, size_t index);
-LS_EXPORT void slice_remove_range(Slice *slice, size_t index, size_t count);
-LS_EXPORT void slice_clear(Slice *slice);
-LS_EXPORT void slice_sort(Slice *slice, SliceCompareFunc compare_func);
-
-LS_EXPORT const void *slice_get_data(const Slice *slice);
-
-LS_EXPORT Variant slice_get(const Slice *slice, size_t index);
-LS_EXPORT Variant slice_get_last(const Slice *slice);
-LS_EXPORT Variant slice_get_first(const Slice *slice);
-
-LS_EXPORT bool slice_is_empty(const Slice *slice);
-LS_EXPORT bool slice_contains(const Slice *slice, Variant data);
-
-LS_EXPORT size_t slice_get_size(const Slice *slice);
-LS_EXPORT size_t slice_get_capacity(const Slice *slice);
-
 typedef union {
 	void *ptr;
 	const void *cptr;
