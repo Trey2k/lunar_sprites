@@ -69,6 +69,22 @@ typedef __SIZE_TYPE__ size_t;
 typedef unsigned long long size_t;
 #endif // __SIZE_TYPE__
 
+#ifndef likely
+#if defined(__GNUC__)
+#define likely(x) __builtin_expect(!!(x), 1)
+#else // __GNUC__
+#define likely(x) (x)
+#endif // __GNUC__
+#endif // likely
+
+#ifndef unlikely
+#if defined(__GNUC__)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#else // __GNUC__
+#define unlikely(x) (x)
+#endif // __GNUC__
+#endif // unlikely
+
 #ifndef NULL
 #define NULL ((void *)0)
 #endif

@@ -70,5 +70,5 @@ BString resource_get_type_name(Resource *resource) {
 
 BString resource_to_string(Resource *resource) {
 	BString type_name = resource_get_type_name(resource);
-	return bstring_format("Resource(%s)#%p", type_name.string, resource->data);
+	return bstring_format("Resource(%S)#%p", type_name, resource->data);
 }

@@ -1,6 +1,7 @@
 #include "core/types/bstring.h"
 
 #include "core/core.h"
+#include "core/types/cow_data.h"
 #include "core/types/string.h"
 
 #include <stdarg.h>
@@ -13,79 +14,84 @@ static char16 *utf8_to_utf16(const char *utf8, uint32 length, uint32 *out_length
 static char *utf32_to_utf8(const char32 *utf32, uint32 length, uint32 *out_length);
 static char32 *utf8_to_utf32(const char *utf8, uint32 length, uint32 *out_length);
 
-#if defined(DEBUG_ENABLED)
-static void bstring_tracker_add(BString string);
-static void bstring_tracker_remove(BString string);
-#endif // DEBUG_ENABLED
+static void bstring_make_mutable(BString *string) {
+	if (string->is_const) {
+		string->is_const = false;
+		const char *old_string = string->c_const;
+		string->c_const = NULL;
+		cowdata_set(&string->cow_data, old_string, 1, string->length);
+	}
+}
 
 static void bstring_resize(BString *string, uint32 new_length) {
-	if (string->ref_count) {
-#if defined(DEBUG_ENABLED)
-		bstring_tracker_remove(*string);
-#endif // DEBUG_ENABLED
-
-		string->string = ls_realloc(string->string, new_length);
-
-#if defined(DEBUG_ENABLED)
-		bstring_tracker_add(*string);
-#endif // DEBUG_ENABLED
-
-		return;
-	}
-
-	char *new_string = ls_malloc(new_length);
-	ls_memcpy(new_string, string->string, string->length);
-	string->string = new_string;
-	string->ref_count = ls_malloc(sizeof(size_t));
-	*string->ref_count = 1;
-
-#if defined(DEBUG_ENABLED)
-	bstring_tracker_add(*string);
-#endif // DEBUG_ENABLED
+	bstring_make_mutable(string);
+	cowdata_resize(&string->cow_data, 1, new_length);
 }
 
 BString bstring_copy(const BString string) {
 	BString copy = BSTRING_EMPTY;
-	copy.string = ls_malloc(string.length);
-	ls_memcpy(copy.string, string.string, string.length);
 	copy.length = string.length;
-	copy.ref_count = ls_malloc(sizeof(size_t));
-	*copy.ref_count = 1;
+	if (string.is_const) {
+		copy.c_const = string.c_const;
+		copy.is_const = true;
+		return copy;
+	}
 
-#if defined(DEBUG_ENABLED)
-	bstring_tracker_add(copy);
-#endif // DEBUG_ENABLED
+	copy.cow_data = string.cow_data;
+	copy.is_const = false;
+	cowdata_ref(&copy.cow_data);
 
 	return copy;
 }
 
-void bstring_ref(BString str) {
-	if (str.ref_count) {
-		(*str.ref_count)++;
+BString bstring_substring(const BString string, uint32 start, uint32 end) {
+	LS_ASSERT(start <= end);
+	LS_ASSERT(end <= string.length);
+
+	BString sub = BSTRING_EMPTY;
+	sub.length = end - start;
+	if (string.is_const) {
+		sub.c_const = string.c_const + start;
+		sub.is_const = true;
+		return sub;
 	}
+
+	sub.c_const = cowdata_get_data_ptr(&string.cow_data) + start;
+	sub.is_const = true;
+
+	return sub;
+}
+
+void bstring_ref(BString str) {
+	if (str.is_const) {
+		return;
+	}
+
+	cowdata_ref(&str.cow_data);
 }
 
 void bstring_unref(BString str) {
-	if (str.ref_count) {
-		(*str.ref_count)--;
-
-		if (*str.ref_count != 0) {
-			return;
-		}
-
-#if defined(DEBUG_ENABLED)
-		bstring_tracker_remove(str);
-#endif // DEBUG_ENABLED
-
-		ls_free(str.ref_count);
-		ls_free(str.string);
+	if (str.is_const) {
+		return;
 	}
+
+	cowdata_unref(&str.cow_data);
+}
+
+char bstring_get(const BString string, uint32 index) {
+	LS_ASSERT(index < string.length);
+
+	if (string.is_const) {
+		return string.c_const[index];
+	}
+
+	return cowdata_get_byte(&string.cow_data, index);
 }
 
 uint64 bstring_hash(const BString string) {
 	uint64 hash = 5381;
 	for (uint32 i = 0; i < string.length; i++) {
-		hash = ((hash << 5) + hash) + string.string[i];
+		hash = ((hash << 5) + hash) + bstring_get(string, i);
 	}
 
 	return hash;
@@ -93,11 +99,16 @@ uint64 bstring_hash(const BString string) {
 
 void bstring_append(BString *string, const BString append) {
 	LS_ASSERT(string);
-	LS_ASSERT(append.string);
 
 	uint32 new_length = string->length + append.length;
-	bstring_resize(string, new_length);
-	ls_memcpy(string->string + string->length, append.string, append.length);
+
+	if (new_length == 0)
+		return;
+
+	bstring_make_mutable(string);
+
+	const char *append_string = append.is_const ? append.c_const : cowdata_get_data_ptr(&append.cow_data);
+	cowdata_append(&string->cow_data, append_string, 1, append.length);
 	string->length = new_length;
 }
 
@@ -106,8 +117,13 @@ void bstring_append_cstr(BString *string, const char *append, uint32 length) {
 	LS_ASSERT(append);
 
 	uint32 new_length = string->length + length;
-	bstring_resize(string, new_length);
-	ls_memcpy(string->string + string->length, append, length);
+
+	if (new_length == 0)
+		return;
+
+	bstring_make_mutable(string);
+
+	cowdata_append(&string->cow_data, append, 1, length);
 	string->length = new_length;
 }
 
@@ -115,45 +131,48 @@ void bstring_append_char(BString *string, char append) {
 	LS_ASSERT(string);
 
 	uint32 new_length = string->length + 1;
-	bstring_resize(string, new_length);
-	string->string[string->length] = append;
+
+	if (new_length == 0)
+		return;
+
+	bstring_make_mutable(string);
+
+	cowdata_append_byte(&string->cow_data, append);
 	string->length = new_length;
 }
 
 void bstring_insert(BString *string, const BString insert, uint32 index) {
 	LS_ASSERT(string);
-	LS_ASSERT(insert.string);
-	LS_ASSERT(index <= string->length);
-
-	uint32 new_length = string->length + insert.length;
+	uint64 new_length = index + insert.length;
 	bstring_resize(string, new_length);
-	ls_memmove(string->string + index + insert.length, string->string + index, string->length - index);
-	ls_memcpy(string->string + index, insert.string, insert.length);
+
+	char *data = cowdata_get_data_ptrw(&string->cow_data);
+	const char *src = insert.is_const ? insert.c_const : cowdata_get_data_ptr(&insert.cow_data);
+	ls_memmove(data + index + insert.length, data + index, string->length - index);
+	ls_memcpy(data + index, src, insert.length);
+
 	string->length = new_length;
 }
 
 void bstring_insert_cstr(BString *string, const char *insert, uint32 index) {
 	LS_ASSERT(string);
 	LS_ASSERT(insert);
-	LS_ASSERT(index <= string->length);
-
-	uint32 insert_length = ls_str_length(insert);
-	uint32 new_length = string->length + insert_length;
+	uint64 insert_length = ls_str_length(insert);
+	uint64 new_length = index + insert_length;
 	bstring_resize(string, new_length);
-	ls_memmove(string->string + index + insert_length, string->string + index, string->length - index);
-	ls_memcpy(string->string + index, insert, insert_length);
+
+	char *data = cowdata_get_data_ptrw(&string->cow_data);
+	ls_memmove(data + index + insert_length, data + index, string->length - index);
+	ls_memcpy(data + index, insert, insert_length);
+
 	string->length = new_length;
 }
 
 void bstring_insert_char(BString *string, char insert, uint32 index) {
 	LS_ASSERT(string);
 	LS_ASSERT(index <= string->length);
-
-	uint32 new_length = string->length + 1;
-	bstring_resize(string, new_length);
-	ls_memmove(string->string + index + 1, string->string + index, string->length - index);
-	string->string[index] = insert;
-	string->length = new_length;
+	bstring_make_mutable(string);
+	cowdata_set_byte(&string->cow_data, index, insert);
 }
 
 void bstring_remove(BString *string, uint32 start, uint32 end) {
@@ -162,9 +181,15 @@ void bstring_remove(BString *string, uint32 start, uint32 end) {
 	LS_ASSERT(end <= string->length);
 	LS_ASSERT(start <= end);
 
-	uint32 remove_length = end - start;
-	ls_memmove(string->string + start, string->string + end, string->length - end);
-	string->length -= remove_length;
+	if (string->is_const) {
+		string->is_const = false;
+		string->c_const = NULL;
+	}
+
+	char *data = cowdata_get_data_ptrw(&string->cow_data);
+	ls_memmove(data + start, data + end, string->length - end);
+	bstring_resize(string, string->length - (end - start));
+	string->length -= (end - start);
 }
 
 BString bstring_format(const char *format, ...) {
@@ -191,8 +216,8 @@ BString bstring_formatb(const BString format, ...) {
 
 void bstring_fwrite(LSFile file, const BString string) {
 	LS_ASSERT(file);
-
-	fwrite(string.string, 1, string.length, file);
+	const char *data = string.is_const ? string.c_const : cowdata_get_data_ptr(&string.cow_data);
+	fwrite(data, 1, string.length, file);
 }
 
 void bstring_fwritef(LSFile file, const char *format, ...) {
@@ -211,7 +236,8 @@ void bstring_fwritefb(LSFile file, const BString format, ...) {
 
 char *bstring_encode_ascii(const BString string) {
 	char *encoded = ls_malloc(string.length + 1);
-	ls_memcpy(encoded, string.string, string.length);
+	const char *data = string.is_const ? string.c_const : cowdata_get_data_ptr(&string.cow_data);
+	ls_memcpy(encoded, data, string.length);
 	encoded[string.length] = '\0';
 
 	return encoded;
@@ -222,25 +248,18 @@ BString bstring_decode_ascii(const char *string) {
 
 	uint32 length = ls_str_length(string);
 
-	// BStrings are NOT null-terminated
 	BString decoded = BSTRING_EMPTY;
-	decoded.string = ls_malloc(length);
-	ls_memcpy(decoded.string, string, length);
+	cowdata_set(&decoded.cow_data, string, 1, length);
 
 	decoded.length = length;
-	decoded.ref_count = ls_malloc(sizeof(size_t));
-	*decoded.ref_count = 1;
-
-#if defined(DEBUG_ENABLED)
-	bstring_tracker_add(decoded);
-#endif // DEBUG_ENABLED
 
 	return decoded;
 }
 
 char *bstring_encode_utf8(const BString string) {
 	char *encoded = ls_malloc((string.length + 1) * sizeof(char));
-	ls_memcpy(encoded, string.string, string.length);
+	const char *data = string.is_const ? string.c_const : cowdata_get_data_ptr(&string.cow_data);
+	ls_memcpy(encoded, data, string.length);
 	encoded[string.length] = '\0';
 
 	return encoded;
@@ -251,58 +270,42 @@ BString bstring_decode_utf8(const char *string) {
 
 	uint32 length = ls_str_length(string);
 
-	// BStrings are NOT null-terminated
 	BString decoded = BSTRING_EMPTY;
-	decoded.string = ls_malloc(length);
-	ls_memcpy(decoded.string, string, length);
+	cowdata_set(&decoded.cow_data, string, 1, length);
 
 	decoded.length = length;
-	decoded.ref_count = ls_malloc(sizeof(size_t));
-	*decoded.ref_count = 1;
-
-#if defined(DEBUG_ENABLED)
-	bstring_tracker_add(decoded);
-#endif // DEBUG_ENABLED
 
 	return decoded;
 }
 
 char16 *bstring_encode_utf16(const BString string) {
-	return utf8_to_utf16(string.string, string.length, NULL);
+	const char *data = string.is_const ? string.c_const : cowdata_get_data_ptr(&string.cow_data);
+	return utf8_to_utf16(data, string.length, NULL);
 }
 
 BString bstring_decode_utf16(const char16 *string) {
 	LS_ASSERT(string);
 
 	BString decoded = BSTRING_EMPTY;
-	decoded.string = utf16_to_utf8(string, utf16_strlen(string), &decoded.length);
-	decoded.length = utf16_strlen(string);
-	decoded.ref_count = ls_malloc(sizeof(size_t));
-	*decoded.ref_count = 1;
-
-#if defined(DEBUG_ENABLED)
-	bstring_tracker_add(decoded);
-#endif // DEBUG_ENABLED
+	char *c_str = utf16_to_utf8(string, utf16_strlen(string), &decoded.length);
+	cowdata_set(&decoded.cow_data, c_str, 1, decoded.length);
 
 	return decoded;
 }
 
 char32 *bstring_encode_utf32(const BString string) {
-	return utf8_to_utf32(string.string, string.length, NULL);
+	const char *data = string.is_const ? string.c_const : cowdata_get_data_ptr(&string.cow_data);
+	return utf8_to_utf32(data, string.length, NULL);
 }
 
 BString bstring_decode_utf32(const char32 *string) {
 	LS_ASSERT(string);
 
 	BString decoded = BSTRING_EMPTY;
-	decoded.string = utf32_to_utf8(string, utf32_strlen(string), &decoded.length);
-	decoded.length = utf32_strlen(string);
-	decoded.ref_count = ls_malloc(sizeof(size_t));
-	*decoded.ref_count = 1;
+	char *c_str = utf32_to_utf8(string, utf32_strlen(string), &decoded.length);
+	cowdata_set(&decoded.cow_data, c_str, 1, decoded.length);
 
-#if defined(DEBUG_ENABLED)
-	bstring_tracker_add(decoded);
-#endif // DEBUG_ENABLED
+	ls_free(c_str);
 
 	return decoded;
 }
@@ -319,7 +322,7 @@ bool bstring_equals(const BString a, const BString b) {
 	}
 
 	for (uint32 i = 0; i < a.length; i++) {
-		if (a.string[i] != b.string[i]) {
+		if (bstring_get(a, i) != bstring_get(b, i)) {
 			return false;
 		}
 	}
@@ -333,7 +336,7 @@ bool bstring_starts_with(const BString string, const BString substring) {
 	}
 
 	for (uint32 i = 0; i < substring.length; i++) {
-		if (string.string[i] != substring.string[i]) {
+		if (bstring_get(string, i) != bstring_get(substring, i)) {
 			return false;
 		}
 	}
@@ -348,7 +351,7 @@ bool bstring_ends_with(const BString string, const BString substring) {
 
 	uint32 offset = string.length - substring.length;
 	for (uint32 i = 0; i < substring.length; i++) {
-		if (string.string[offset + i] != substring.string[i]) {
+		if (bstring_get(string, offset + i) != bstring_get(substring, i)) {
 			return false;
 		}
 	}
@@ -362,7 +365,7 @@ bool bstring_contains(const BString string, const BString substring) {
 	}
 
 	for (uint32 i = 0; i < string.length - substring.length; i++) {
-		if (bstring_starts_with(BSTRING_SUB_STRING(string, i, i + substring.length), substring)) {
+		if (bstring_starts_with(bstring_substring(string, i, i + substring.length), substring)) {
 			return true;
 		}
 	}
@@ -377,8 +380,8 @@ bool bstring_is_number(const BString string) {
 
 	bool found_dot = false;
 	for (uint32 i = 0; i < string.length; i++) {
-		if (string.string[i] < '0' || string.string[i] > '9') {
-			if (string.string[i] == '.' && !found_dot) {
+		if (bstring_get(string, i) < '0' || bstring_get(string, i) > '9') {
+			if (bstring_get(string, i) == '.' && !found_dot) {
 				found_dot = true;
 			} else {
 				return false;
@@ -394,13 +397,13 @@ int64 bstring_to_int(const BString string) {
 	int64 sign = 1;
 	uint32 i = 0;
 
-	if (string.string[0] == '-') {
+	if (bstring_get(string, 0) == '-') {
 		sign = -1;
 		i++;
 	}
 
 	for (; i < string.length; i++) {
-		result = result * 10 + string.string[i] - '0';
+		result = result * 10 + bstring_get(string, i) - '0';
 	}
 
 	return result * sign;
@@ -411,23 +414,23 @@ float64 bstring_to_float(const BString string) {
 	float64 sign = 1.0;
 	uint32 i = 0;
 
-	if (string.string[0] == '-') {
+	if (bstring_get(string, 0) == '-') {
 		sign = -1.0;
 		i++;
 	}
 
 	for (; i < string.length; i++) {
-		if (string.string[i] == '.') {
+		if (bstring_get(string, i) == '.') {
 			break;
 		}
 
-		result = result * 10.0 + string.string[i] - '0';
+		result = result * 10.0 + bstring_get(string, i) - '0';
 	}
 
 	float64 fraction = 0.0;
 	float64 multiplier = 0.1;
 	for (i++; i < string.length; i++) {
-		fraction += (string.string[i] - '0') * multiplier;
+		fraction += (bstring_get(string, i) - '0') * multiplier;
 		multiplier *= 0.1;
 	}
 
@@ -703,15 +706,15 @@ BString bstring_formatb_va(const BString format, va_list args) {
 
 	uint32 start = 0;
 	for (uint32 i = 0; i < format.length; i++) {
-		if (format.string[i] == '%') {
-			bstring_append(&formatted, BSTRING_SUB_STRING(format, start, i));
+		if (bstring_get(format, i) == '%') {
+			bstring_append(&formatted, bstring_substring(format, start, i));
 			i++;
 			if (i > format.length) {
 				ls_log(LOG_LEVEL_ERROR, "Invalid format string: %S\n", format);
 				return BSTRING_EMPTY;
 			}
 
-			switch (format.string[i]) {
+			switch (bstring_get(format, i)) {
 				// Custom specifiers
 				case 'S': {
 					BString arg = va_arg(args, BString);
@@ -724,47 +727,47 @@ BString bstring_formatb_va(const BString format, va_list args) {
 						return BSTRING_EMPTY;
 					}
 
-					if (format.string[i] == '2') {
+					if (bstring_get(format, i) == '2') {
 						i++;
 						if (i > format.length) {
 							ls_log(LOG_LEVEL_ERROR, "Invalid format string: %S\n", format);
 							return BSTRING_EMPTY;
 						}
 
-						if (format.string[i] == 'i') {
+						if (bstring_get(format, i) == 'i') {
 							Vector2i arg = va_arg(args, Vector2i);
 							BString arg_string = bstring_format("Vector2i(%d, %d)", arg.x, arg.y);
 							bstring_append(&formatted, arg_string);
 							bstring_unref(arg_string);
-						} else if (format.string[i] == 'u') {
+						} else if (bstring_get(format, i) == 'u') {
 							Vector2u arg = va_arg(args, Vector2u);
 							BString arg_string = bstring_format("Vector2u(%u, %u)", arg.x, arg.y);
 							bstring_append(&formatted, arg_string);
 							bstring_unref(arg_string);
-						} else if (format.string[i] == 'f') {
+						} else if (bstring_get(format, i) == 'f') {
 							Vector2 arg = va_arg(args, Vector2);
 							BString arg_string = bstring_format("Vector2(%f, %f)", arg.x, arg.y);
 							bstring_append(&formatted, arg_string);
 							bstring_unref(arg_string);
 						}
-					} else if (format.string[i] == '3') {
+					} else if (bstring_get(format, i) == '3') {
 						i++;
 						if (i > format.length) {
 							ls_log(LOG_LEVEL_ERROR, "Invalid format string: %S\n", format);
 							return BSTRING_EMPTY;
 						}
 
-						if (format.string[i] == 'i') {
+						if (bstring_get(format, i) == 'i') {
 							Vector3i arg = va_arg(args, Vector3i);
 							BString arg_string = bstring_format("Vector3i(%d, %d, %d)", arg.x, arg.y, arg.z);
 							bstring_append(&formatted, arg_string);
 							bstring_unref(arg_string);
-						} else if (format.string[i] == 'u') {
+						} else if (bstring_get(format, i) == 'u') {
 							Vector3u arg = va_arg(args, Vector3u);
 							BString arg_string = bstring_format("Vector3u(%u, %u, %u)", arg.x, arg.y, arg.z);
 							bstring_append(&formatted, arg_string);
 							bstring_unref(arg_string);
-						} else if (format.string[i] == 'f') {
+						} else if (bstring_get(format, i) == 'f') {
 							Vector3 arg = va_arg(args, Vector3);
 							BString arg_string = bstring_format("Vector3(%f, %f, %f)", arg.x, arg.y, arg.z);
 							bstring_append(&formatted, arg_string);
@@ -932,7 +935,7 @@ BString bstring_formatb_va(const BString format, va_list args) {
 						return BSTRING_EMPTY;
 					}
 
-					switch (format.string[i]) {
+					switch (bstring_get(format, i)) {
 						case 'i':
 						case 'd': {
 							int32 arg = va_arg(args, int32);
@@ -972,7 +975,7 @@ BString bstring_formatb_va(const BString format, va_list args) {
 								return BSTRING_EMPTY;
 							}
 
-							switch (format.string[i]) {
+							switch (bstring_get(format, i)) {
 								case 'i':
 								case 'd': {
 									int64 arg = va_arg(args, int64);
@@ -1008,7 +1011,7 @@ BString bstring_formatb_va(const BString format, va_list args) {
 		}
 	}
 
-	bstring_append(&formatted, BSTRING_SUB_STRING(format, start, format.length));
+	bstring_append(&formatted, bstring_substring(format, start, format.length));
 
 	return formatted;
 }
@@ -1017,15 +1020,15 @@ void bstring_fwrite_va(LSFile file, const BString format, va_list args) {
 	uint32 start = 0;
 
 	for (uint32 i = 0; i < format.length; i++) {
-		if (format.string[i] == '%') {
-			bstring_fwrite(file, BSTRING_SUB_STRING(format, start, i));
+		if (bstring_get(format, i) == '%') {
+			bstring_fwrite(file, bstring_substring(format, start, i));
 			i++;
 			if (i > format.length) {
 				ls_log(LOG_LEVEL_ERROR, "Invalid format string: %S\n", format);
 				return;
 			}
 
-			switch (format.string[i]) {
+			switch (bstring_get(format, i)) {
 				// Custom specifiers
 				case 'S': {
 					BString arg = va_arg(args, BString);
@@ -1039,38 +1042,38 @@ void bstring_fwrite_va(LSFile file, const BString format, va_list args) {
 						return;
 					}
 
-					if (format.string[i] == '2') {
+					if (bstring_get(format, i) == '2') {
 						i++;
 						if (i > format.length) {
 							ls_log(LOG_LEVEL_ERROR, "Invalid format string: %S\n", format);
 							return;
 						}
 
-						if (format.string[i] == 'i') {
+						if (bstring_get(format, i) == 'i') {
 							Vector2i arg = va_arg(args, Vector2i);
 							bstring_fwritef(file, "Vector2i(%d, %d)", arg.x, arg.y);
-						} else if (format.string[i] == 'u') {
+						} else if (bstring_get(format, i) == 'u') {
 							Vector2u arg = va_arg(args, Vector2u);
 							bstring_fwritef(file, "Vector2u(%u, %u)", arg.x, arg.y);
-						} else if (format.string[i] == 'f') {
+						} else if (bstring_get(format, i) == 'f') {
 							Vector2 arg = va_arg(args, Vector2);
 							bstring_fwritef(file, "Vector2(%f, %f)", arg.x, arg.y);
 						}
 
-					} else if (format.string[i] == '3') {
+					} else if (bstring_get(format, i) == '3') {
 						i++;
 						if (i > format.length) {
 							ls_log(LOG_LEVEL_ERROR, "Invalid format string: %S\n", format);
 							return;
 						}
 
-						if (format.string[i] == 'i') {
+						if (bstring_get(format, i) == 'i') {
 							Vector3i arg = va_arg(args, Vector3i);
 							bstring_fwritef(file, "Vector3i(%d, %d, %d)", arg.x, arg.y, arg.z);
-						} else if (format.string[i] == 'u') {
+						} else if (bstring_get(format, i) == 'u') {
 							Vector3u arg = va_arg(args, Vector3u);
 							bstring_fwritef(file, "Vector3u(%u, %u, %u)", arg.x, arg.y, arg.z);
-						} else if (format.string[i] == 'f') {
+						} else if (bstring_get(format, i) == 'f') {
 							Vector3 arg = va_arg(args, Vector3);
 							bstring_fwritef(file, "Vector3(%f, %f, %f)", arg.x, arg.y, arg.z);
 						}
@@ -1200,7 +1203,7 @@ void bstring_fwrite_va(LSFile file, const BString format, va_list args) {
 						return;
 					}
 
-					switch (format.string[i]) {
+					switch (bstring_get(format, i)) {
 						case 'i':
 						case 'd': {
 							int32 arg = va_arg(args, int32);
@@ -1231,7 +1234,7 @@ void bstring_fwrite_va(LSFile file, const BString format, va_list args) {
 								return;
 							}
 
-							switch (format.string[i]) {
+							switch (bstring_get(format, i)) {
 								case 'i':
 								case 'd': {
 									int64 arg = va_arg(args, int64);
@@ -1261,62 +1264,5 @@ void bstring_fwrite_va(LSFile file, const BString format, va_list args) {
 		}
 	}
 
-	bstring_fwrite(file, BSTRING_SUB_STRING(format, start, format.length));
+	bstring_fwrite(file, bstring_substring(format, start, format.length));
 }
-
-#if defined(DEBUG_ENABLED)
-
-#define BSTRING_TRACKER_INITIAL_CAPACITY 16
-
-static struct {
-	BString *strings;
-	size_t count;
-	size_t capacity;
-	bool tracking;
-} string_tracker = { 0 };
-
-void bstring_tracker_init() {
-	string_tracker.strings = ls_malloc(BSTRING_TRACKER_INITIAL_CAPACITY * sizeof(BString));
-	string_tracker.count = 0;
-	string_tracker.tracking = true;
-	string_tracker.capacity = BSTRING_TRACKER_INITIAL_CAPACITY;
-}
-
-void bstring_tracker_deinit() {
-	string_tracker.tracking = false;
-
-	for (size_t i = 0; i < string_tracker.count; i++) {
-		ls_log(LOG_LEVEL_DEBUG, "BString(ref_count: %d) leaked: \"%S\"\n", string_tracker.strings[i].ref_count, string_tracker.strings[i]);
-		ls_free(string_tracker.strings[i].string);
-	}
-
-	ls_free(string_tracker.strings);
-}
-
-static void bstring_tracker_add(BString string) {
-	if (!string_tracker.tracking) {
-		return;
-	}
-
-	if (string_tracker.count == string_tracker.capacity) {
-		string_tracker.capacity *= 2;
-		string_tracker.strings = ls_realloc(string_tracker.strings, string_tracker.capacity * sizeof(BString));
-	}
-
-	string_tracker.strings[string_tracker.count++] = string;
-}
-
-static void bstring_tracker_remove(BString string) {
-	if (!string_tracker.tracking) {
-		return;
-	}
-
-	for (size_t i = 0; i < string_tracker.count; i++) {
-		if (string_tracker.strings[i].string == string.string) {
-			string_tracker.strings[i] = string_tracker.strings[--string_tracker.count];
-			return;
-		}
-	}
-}
-
-#endif // DEBUG_ENABLED

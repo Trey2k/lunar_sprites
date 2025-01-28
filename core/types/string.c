@@ -20,7 +20,7 @@ int ls_sprintf(char *buffer, size_t buffer_size, String format, ...) {
 	return ret;
 }
 
-int ls_fprintf(LSFile *stream, String format, ...) {
+int ls_fprintf(LSFile stream, String format, ...) {
 	LS_ASSERT(stream);
 	LS_ASSERT(format);
 

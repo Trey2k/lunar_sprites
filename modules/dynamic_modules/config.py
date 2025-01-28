@@ -36,6 +36,7 @@ def configure(env):
         'core/log.h',
         'core/memory.h',
         'core/debug.h',
+        'core/types/cow_data.h',
         'core/math/math.h',
         'core/math/vector.h',
         'core/math/matrix.h',

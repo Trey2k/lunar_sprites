@@ -24,10 +24,6 @@ static void core_check_flags(const LSCore *core);
 LSCore *core_create(FlagManager *flag_manager) {
 	LSCore *core = ls_malloc(sizeof(LSCore));
 
-#if defined(DEBUG_ENABLED)
-	bstring_tracker_init();
-#endif // DEBUG_ENABLED
-
 	core->flag_manager = flag_manager;
 
 	core->log_level = flag_manager_register(core->flag_manager, "log-level", FLAG_TYPE_STRING, (FlagValue){ .str = "INFO" },
@@ -64,10 +60,6 @@ void core_destroy(LSCore *core) {
 	input_manager_destroy(core->input_manager);
 	event_manager_destroy(core->event_manager);
 	flag_manager_destroy(core->flag_manager);
-
-#if defined(DEBUG_ENABLED)
-	bstring_tracker_deinit();
-#endif // DEBUG_ENABLED
 }
 
 FlagManager *core_get_flag_manager(const LSCore *core) {

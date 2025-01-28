@@ -5,28 +5,27 @@
 #include "core/types/string.h"
 #include "core/types/typedefs.h"
 
+#include "core/types/cow_data.h"
+
 // This will replace the use of C strings in the engine.
 // BStrings are UTF-8 backed bounded strings.
 typedef struct {
-	// UTF-8 encoded string.
-	char *string;
-	// Length of the string in bytes.
+	bool is_const;
 	uint32 length;
-
-	// Reference count for the string.
-	size_t *ref_count;
-	// If true, the string will be freed when the BString is destroyed.
-	// Is false when the BString is a slice of another BString or when the BString is stack allocated.
+	union {
+		const char *c_const;
+		COWData cow_data;
+	};
 } BString;
 
 // Creates a BString which does not own the string.
 // The string must be valid for the lifetime of the BString, unless the BString is modified, in which case the string will be copied.
 #define BSTRING_CONST(a_str) \
-	(BString) { .string = ((char *)(const char *)a_str), .length = ls_str_length(a_str), .ref_count = NULL }
+	(BString) { .c_const = a_str, .length = ls_str_length(a_str), .is_const = true }
 // Creates a BString which does not own the string.
 // The string must be valid for the lifetime of the BString, unless the BString is modified, in which case the string will be copied.
 #define BSTRING_CONST_LENGTH(a_str, a_length) \
-	(BString) { .string = ((char *)(const char *)a_str), .length = a_length, .ref_count = NULL }
+	(BString) { .c_const = a_str, .length = a_length, .is_const = true }
 // Short hand alias for BSTRING_CONST.
 #define BSC(a_str) BSTRING_CONST(a_str)
 
@@ -34,20 +33,21 @@ typedef struct {
 #define BSTRING(a_str) bstring_encode_utf8(BSTRING_CONST(a_str))
 // Creates a new empty BString.
 #define BSTRING_EMPTY \
-	(BString) { .string = NULL, .length = 0, .ref_count = NULL }
-// Creates a sub-string of the BString which directly references the original string.
-#define BSTRING_SUB_STRING(a_str, a_start, a_end) \
-	(BString) { .string = a_str.string + a_start, .length = a_end - a_start, .ref_count = NULL }
+	(BString) { .c_const = NULL, .length = 0, .is_const = true }
 
 #define BSTRING_IS_EMPTY(a_str) (a_str.length == 0)
 
 // Creates a copy of the BString.
 LS_EXPORT BString bstring_copy(const BString string);
+// Creates a sub-string of the BString which directly references the original string.
+LS_EXPORT BString bstring_substring(const BString string, uint32 start, uint32 end);
 // Creates a djb2 hash of the string.
 LS_EXPORT uint64 bstring_hash(const BString string);
 
 LS_EXPORT void bstring_ref(BString str);
 LS_EXPORT void bstring_unref(BString str);
+
+LS_EXPORT char bstring_get(const BString string, uint32 index);
 
 LS_EXPORT void bstring_append(BString *string, const BString append);
 LS_EXPORT void bstring_append_cstr(BString *string, const char *append, uint32 length);
