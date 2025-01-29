@@ -1,7 +1,6 @@
 #include "font.h"
 
 #include "core/debug.h"
-#include "core/events/events.h"
 #include "core/memory.h"
 #include "core/types/color.h"
 

@@ -7,10 +7,8 @@
 
 #include "elements.h"
 
-void ui_init(LSCore *core, const LSWindow *window);
+void ui_init(const LSWindow *window);
 void ui_deinit();
-
-InputManager *ui_get_input_manager();
 
 // Adds an element to the UI.
 // The UI will take ownership of the element and free it when it is removed.

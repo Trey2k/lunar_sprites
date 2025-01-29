@@ -26,7 +26,6 @@ typedef struct {
 
 void ui_button_draw(UIElement *element);
 void ui_button_destroy(UIButton *element);
-void ui_button_handle_event(UIElement *element, Event *event);
 void ui_button_calculate_size(UIElement *element, Vector2u outer_bounds, Vector2u inner_bounds);
 
 void ui_button_set_layout(UIElement *element, UILayout layout);

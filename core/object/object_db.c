@@ -11,7 +11,7 @@
 typedef struct {
 	char *name;
 	ObjectMethod method;
-	uint32 argc;
+	uint64 argc;
 	uint16 *arg_flags;
 	char **arg_names;
 	// Only used when there is optional arguments.
@@ -61,8 +61,8 @@ void object_db_deinit() {
 	hashtable_destroy(object_db.types);
 }
 
-void *object_db_create_instance(uint32 type_id) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+void *object_db_create_instance(uint64 type_id) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return NULL;
@@ -71,8 +71,8 @@ void *object_db_create_instance(uint32 type_id) {
 	return type->create();
 }
 
-void object_db_destroy_instance(uint32 type_id, void *object_data) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+void object_db_destroy_instance(uint64 type_id, void *object_data) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return;
@@ -81,8 +81,8 @@ void object_db_destroy_instance(uint32 type_id, void *object_data) {
 	type->destroy(object_data);
 }
 
-ObjectDrawFunction object_db_get_draw_function(uint32 type_id) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+ObjectDrawFunction object_db_get_draw_function(uint64 type_id) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return NULL;
@@ -91,8 +91,8 @@ ObjectDrawFunction object_db_get_draw_function(uint32 type_id) {
 	return type->draw;
 }
 
-ObjectToStringFunction object_db_get_to_string_function(uint32 type_id) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+ObjectToStringFunction object_db_get_to_string_function(uint64 type_id) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return NULL;
@@ -101,7 +101,7 @@ ObjectToStringFunction object_db_get_to_string_function(uint32 type_id) {
 	return type->to_string;
 }
 
-uint32 object_db_register_type(BString type_name, ObjectInterface interface) {
+uint64 object_db_register_type(BString type_name, ObjectInterface interface) {
 	ObjectType *type = ls_malloc(sizeof(ObjectType));
 	type->type_name = bstring_encode_utf8(type_name);
 	type->create = interface.create;
@@ -111,9 +111,9 @@ uint32 object_db_register_type(BString type_name, ObjectInterface interface) {
 	type->properties = hashtable_create(HASHTABLE_KEY_STRING, 16, false);
 	type->methods = hashtable_create(HASHTABLE_KEY_STRING, 16, false);
 
-	uint32 type_id = object_db_get_type_id(type_name);
+	uint64 type_id = object_db_get_type_id(type_name);
 
-	hashtable_set(object_db.types, HASH_KEY(u32, type_id), HASH_VAL(ptr, type));
+	hashtable_set(object_db.types, HASH_KEY(u64, type_id), HASH_VAL(ptr, type));
 
 	object_db.active_type = type;
 	register_base_methods();
@@ -237,12 +237,12 @@ void object_db_register_method(BString name, ObjectMethod method, const ObjectMe
 	hashtable_set(object_db.active_type->methods, HASH_KEY(str, info->name), HASH_VAL(ptr, info));
 }
 
-uint32 object_db_get_type_id(BString type_name) {
+uint64 object_db_get_type_id(BString type_name) {
 	return bstring_hash(type_name);
 }
 
-BString object_db_get_type_name(uint32 type_id) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+BString object_db_get_type_name(uint64 type_id) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 	}
@@ -250,8 +250,8 @@ BString object_db_get_type_name(uint32 type_id) {
 	return BSTRING_CONST(type->type_name);
 }
 
-bool object_db_type_has_property(uint32 type_id, BString name) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+bool object_db_type_has_property(uint64 type_id, BString name) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return false;
@@ -265,8 +265,8 @@ bool object_db_type_has_property(uint32 type_id, BString name) {
 	return result;
 }
 
-void object_db_type_set_property(uint32 type_id, Object *object, BString name, Variant value) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+void object_db_type_set_property(uint64 type_id, Object *object, BString name, Variant value) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return;
@@ -292,8 +292,8 @@ void object_db_type_set_property(uint32 type_id, Object *object, BString name, V
 	(void)property->setter->method(object, &value, 1);
 }
 
-Variant object_db_type_get_property(uint32 type_id, Object *object, BString name) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+Variant object_db_type_get_property(uint64 type_id, Object *object, BString name) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return VARIANT_NIL;
@@ -311,8 +311,8 @@ Variant object_db_type_get_property(uint32 type_id, Object *object, BString name
 	return property->getter->method(object, NULL, 0);
 }
 
-bool object_db_type_has_method(uint32 type_id, BString name) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+bool object_db_type_has_method(uint64 type_id, BString name) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return false;
@@ -326,8 +326,8 @@ bool object_db_type_has_method(uint32 type_id, BString name) {
 	return result;
 }
 
-Variant object_db_type_call_method(uint32 type_id, Object *object, BString name, const Variant *args, size_t n_args) {
-	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+Variant object_db_type_call_method(uint64 type_id, Object *object, BString name, const Variant *args, size_t n_args) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
 		return VARIANT_NIL;
@@ -424,8 +424,8 @@ static void clear_methods(Hashtable *methods) {
 static void clear_types() {
 	Slice64 *type_ids = hashtable_get_keys(object_db.types);
 	for (size_t i = 0; i < slice64_get_size(type_ids); i++) {
-		uint32 type_id = *(uint32 *)slice64_get(type_ids, i).ptr;
-		ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u32, type_id)).ptr;
+		uint64 type_id = *(uint64 *)slice64_get(type_ids, i).ptr;
+		ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 		ls_free(type->type_name);
 		clear_properties(type->properties);
 		hashtable_destroy(type->properties);

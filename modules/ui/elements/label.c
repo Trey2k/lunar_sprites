@@ -264,15 +264,6 @@ void ui_label_calculate_size(UIElement *label_elm, Vector2u outer_bounds, Vector
 	}
 }
 
-void ui_label_handle_event(UIElement *label_elm, Event *event) {
-	LS_ASSERT(label_elm->type == UI_ELEMENT_TYPE_LABEL);
-	if (event->type != EVENT_MOUSE || event->mouse.type != EVENT_MOUSE_RELEASED || event->mouse.button != LS_MOUSE_BUTTON_LEFT) {
-		return;
-	}
-
-	ls_printf("Label clicked: %s\n", label_elm->label.text);
-}
-
 void ui_label_set_layout(UIElement *label_elm, UILayout layout) {
 	LS_ASSERT(label_elm->type == UI_ELEMENT_TYPE_LABEL);
 	label_elm->layout = layout;

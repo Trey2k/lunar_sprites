@@ -23,10 +23,9 @@ typedef struct {
 
 	bool fullscreen;
 	bool hidden;
+	bool should_close;
 
 	Display *display;
-
-	InputManager *input_manager;
 } X11Window;
 
 X11Window *x11_window_create(const X11Server *server, WindowConfig config);
@@ -49,5 +48,6 @@ void x11_window_hide(X11Window *window);
 
 bool x11_window_is_visible(const X11Window *window);
 bool x11_window_is_fullscreen(const X11Window *window);
+bool x11_window_should_close(const X11Window *window);
 
 #endif // X11_WINDOW_H

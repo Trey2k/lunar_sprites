@@ -18,8 +18,6 @@ struct LSWindow {
 	PlatformWindow *platform_window;
 
 	Context *context;
-
-	InputManager *input_manager;
 };
 
 LSWindow *renderer_create_window(WindowConfig config) {
@@ -28,20 +26,12 @@ LSWindow *renderer_create_window(WindowConfig config) {
 		return NULL;
 	}
 
-	const LSCore *core = renderer_get_core();
-
-	const OS *os = core_get_os(core);
-	LS_ASSERT(os);
-
 	LSWindow *window = ls_malloc(sizeof(LSWindow));
-	window->platform_window = platform_create_window(os_get_platform_os(os), config, window);
-	window->input_manager = core_get_input_manager(core);
+	window->platform_window = platform_create_window(config, window);
 
 	window->context = renderer_context_create(window);
 	window_make_current(window);
 	window_swap_buffers(window);
-
-	input_handle_window_open(window->input_manager, window);
 
 	return window;
 }
@@ -69,9 +59,9 @@ void window_poll(const LSWindow *window) {
 	LS_ASSERT(window);
 	LS_ASSERT(window->platform_window);
 
-	input_set_active_window(window->input_manager, window);
+	input_set_active_window(window);
 	platform_window_poll(window->platform_window);
-	input_set_active_window(window->input_manager, NULL);
+	input_set_active_window(NULL);
 }
 
 void window_set_title(LSWindow *window, String title) {
@@ -179,4 +169,11 @@ bool window_is_fullscreen(const LSWindow *window) {
 	LS_ASSERT(window->platform_window);
 
 	return platform_window_is_fullscreen(window->platform_window);
+}
+
+bool window_should_close(const LSWindow *window) {
+	LS_ASSERT(window);
+	LS_ASSERT(window->platform_window);
+
+	return platform_window_should_close(window->platform_window);
 }

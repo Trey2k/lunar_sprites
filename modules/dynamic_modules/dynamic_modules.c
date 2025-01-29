@@ -32,13 +32,11 @@ static DynamicModules dynamic_modules;
 
 static void load_modules(Slice64 *interfaces, String path, int32 depth);
 
-void dynamic_modules_init(LSCore *core) {
+void dynamic_modules_init() {
 	api_interface_init();
 
-	FlagManager *flag_manager = core_get_flag_manager(core);
-
-	dynamic_modules.dump_api = flag_manager_register(flag_manager, "dump-api", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Extract the native API header file.");
-	dynamic_modules.dump_api_file = flag_manager_register(flag_manager, "api-file", FLAG_TYPE_STRING, FLAG_VAL(str, "ls_api.h"), "If dump-api is true, extract the native API to this file.");
+	dynamic_modules.dump_api = flag_manager_register("dump-api", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Extract the native API header file.");
+	dynamic_modules.dump_api_file = flag_manager_register("api-file", FLAG_TYPE_STRING, FLAG_VAL(str, "ls_api.h"), "If dump-api is true, extract the native API to this file.");
 
 	dynamic_modules.interfaces = slice64_create(16, true);
 

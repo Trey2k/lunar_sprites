@@ -10,7 +10,7 @@
 #include <EGL/egl.h>
 #endif
 
-bool egl_init(const OS *os);
+bool egl_init();
 
 void egl_deinit();
 

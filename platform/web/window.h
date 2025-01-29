@@ -26,8 +26,6 @@ struct PlatformWindow {
 	const PlatformOS *os;
 
 	Slice64 *events;
-
-	InputManager *input_manager;
 };
 
 #endif // WEB_WINDOW_H

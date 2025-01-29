@@ -5,9 +5,11 @@
 
 #include "renderer/renderer.h"
 
-void ls_main_loop_init(LSCore *core, LSWindow *root_window);
-void ls_main_loop_deinit();
+void ls_main_loop_init(LSWindow *root_window);
 
+// Draws a frame.
+void ls_draw_frame();
+// Polls input and draws a frame.
 void ls_main_loop();
 
 #endif // MAIN_LOOP_H

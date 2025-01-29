@@ -23,7 +23,6 @@ typedef struct {
 void ui_draw_label(UIElement *label);
 void ui_label_destroy(UILabel *label);
 void ui_label_calculate_size(UIElement *label, Vector2u outer_bounds, Vector2u inner_bounds);
-void ui_label_handle_event(UIElement *label, Event *event);
 void ui_label_set_layout(UIElement *label, UILayout layout);
 
 #endif // UI_LABEL_IMPL_H

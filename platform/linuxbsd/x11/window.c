@@ -25,7 +25,7 @@ X11Window *x11_window_create(const X11Server *server, WindowConfig config) {
 	window->hidden = config.hidden;
 	window->fullscreen = false;
 	window->title = config.title;
-	window->input_manager = server->input_manager;
+	window->should_close = false;
 
 	Colormap colormap = XCreateColormap(display, root, visual, AllocNone);
 
@@ -132,7 +132,7 @@ static void handle_event(X11Window *window, XEvent *event) {
 		case Expose:
 			break;
 		case KeyPress: {
-			input_handle_press(window->input_manager, x11_map_key(event->xkey.keycode));
+			input_handle_press(x11_map_key(event->xkey.keycode));
 		} break;
 
 		case KeyRelease: {
@@ -144,30 +144,36 @@ static void handle_event(X11Window *window, XEvent *event) {
 				}
 			}
 
-			input_handle_release(window->input_manager, x11_map_key(event->xkey.keycode));
+			input_handle_release(x11_map_key(event->xkey.keycode));
 		} break;
 
 		case ButtonPress: {
-			input_handle_mouse_press(window->input_manager, x11_map_mbutton(event->xbutton.button),
+			input_handle_mouse_press(x11_map_mbutton(event->xbutton.button),
 					vec2u(event->xbutton.x, event->xbutton.y));
 
 		} break;
 
 		case ButtonRelease: {
-			input_handle_mouse_release(window->input_manager, x11_map_mbutton(event->xbutton.button),
+			input_handle_mouse_release(x11_map_mbutton(event->xbutton.button),
 					vec2u(event->xbutton.x, event->xbutton.y));
 		} break;
 
 		case MotionNotify: {
-			input_handle_mouse_move(window->input_manager, vec2u(event->xmotion.x, event->xmotion.y));
+			input_handle_mouse_move(vec2u(event->xmotion.x, event->xmotion.y));
 		} break;
 
 		case EnterNotify: {
-			input_handle_mouse_enter(window->input_manager, vec2u(event->xcrossing.x, event->xcrossing.y));
+			input_handle_mouse_enter(vec2u(event->xcrossing.x, event->xcrossing.y));
 		} break;
 
 		case LeaveNotify: {
-			input_handle_mouse_leave(window->input_manager, vec2u(event->xcrossing.x, event->xcrossing.y));
+			input_handle_mouse_leave(vec2u(event->xcrossing.x, event->xcrossing.y));
+		} break;
+
+		case ClientMessage: {
+			if (event->xclient.data.l[0] == XInternAtom(window->display, "WM_DELETE_WINDOW", false)) {
+				window->should_close = true;
+			}
 		} break;
 
 		case ConfigureNotify: {
@@ -176,7 +182,6 @@ static void handle_event(X11Window *window, XEvent *event) {
 					(xce.width > 0 && xce.height > 0)) {
 				window->width = xce.width;
 				window->height = xce.height;
-				input_handle_resize(window->input_manager, vec2u(window->width, window->height));
 			}
 
 		} break;
@@ -223,4 +228,10 @@ bool x11_window_is_fullscreen(const X11Window *window) {
 	LS_ASSERT(window);
 
 	return window->fullscreen;
+}
+
+bool x11_window_should_close(const X11Window *window) {
+	LS_ASSERT(window);
+
+	return window->should_close;
 }

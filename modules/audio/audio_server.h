@@ -8,7 +8,7 @@ typedef struct AudioProcessor AudioProcessor;
 
 typedef void (*AudioCallback)(void *buffer_data, uint32 frames);
 
-void audio_server_init(LSCore *core);
+void audio_server_init();
 void audio_server_deinit();
 
 void audio_server_track_buffer(AudioBuffer *buffer);

@@ -8,9 +8,7 @@
 static EGLDisplay egl_display;
 static EGLConfig egl_config;
 
-bool egl_init(const OS *os) {
-	LS_ASSERT(os);
-
+bool egl_init() {
 	int32 version = gladLoaderLoadEGL(NULL);
 	if (!version) {
 		ls_log(LOG_LEVEL_WARNING, "Failed to load EGL.\n");
@@ -19,7 +17,7 @@ bool egl_init(const OS *os) {
 
 	ls_log(LOG_LEVEL_INFO, "Loaded EGL version %d.%d on first load.\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
-	egl_display = eglGetDisplay(os_get_native_display(os));
+	egl_display = eglGetDisplay(os_get_native_display());
 	if (egl_display == EGL_NO_DISPLAY) {
 		ls_log(LOG_LEVEL_WARNING, "Failed to get EGL display.\n");
 		return false;

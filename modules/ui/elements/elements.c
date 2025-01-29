@@ -169,23 +169,3 @@ void ui_element_calculate_position(UIElement *element, Vector2u outer_bounds, Ve
 
 	ui_element_calculate_layout(element, outer_bounds, inner_bounds);
 }
-
-void ui_element_handle_event(UIElement *element, Event *event) {
-	switch (element->type) {
-		case UI_ELEMENT_TYPE_LABEL:
-			ui_label_handle_event(element, event);
-			break;
-		case UI_ELEMENT_TYPE_VERTICAL_CONTAINER:
-			ui_vertical_container_handle_event(element, event);
-			break;
-		case UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER:
-			ui_horizontal_container_handle_event(element, event);
-			break;
-		case UI_ELEMENT_TYPE_BUTTON:
-			ui_button_handle_event(element, event);
-			break;
-		default:
-			ls_log_fatal("Unknown element type: %d\n", element->type);
-			break;
-	};
-}

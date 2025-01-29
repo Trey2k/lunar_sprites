@@ -38,6 +38,12 @@ static size_t hashtable_index(const Hashtable *hashtable, HashtableKey key) {
 			return (size_t)key.u32 * GOLDEN_RATIO_HASH % hashtable->capacity;
 		case HASHTABLE_KEY_FLOAT32:
 			return (size_t)key.f32 * GOLDEN_RATIO_HASH % hashtable->capacity;
+		case HASHTABLE_KEY_INT64:
+			return (size_t)key.i64 * GOLDEN_RATIO_HASH % hashtable->capacity;
+		case HASHTABLE_KEY_UINT64:
+			return (size_t)key.u64 * GOLDEN_RATIO_HASH % hashtable->capacity;
+		case HASHTABLE_KEY_FLOAT64:
+			return (size_t)key.f64 * GOLDEN_RATIO_HASH % hashtable->capacity;
 		case HASHTABLE_KEY_STRING:
 			return ls_str_hash_djb2(key.str) % hashtable->capacity;
 		default:
@@ -90,6 +96,12 @@ static bool keys_match(HashtableKeyType key_type, HashtableKey a, HashtableKey b
 			return a.u32 == b.u32;
 		case HASHTABLE_KEY_FLOAT32:
 			return a.f32 == b.f32;
+		case HASHTABLE_KEY_INT64:
+			return a.i64 == b.i64;
+		case HASHTABLE_KEY_UINT64:
+			return a.u64 == b.u64;
+		case HASHTABLE_KEY_FLOAT64:
+			return a.f64 == b.f64;
 		case HASHTABLE_KEY_STRING:
 			return ls_str_equals(a.str, b.str);
 		default:
@@ -105,7 +117,7 @@ static HashtableEntry *hashtable_get_entry_create(Hashtable *hashtable, Hashtabl
 	const size_t index = hashtable_index(hashtable, key);
 	HashtableEntry *entry = &hashtable->entries[index];
 
-	if (!entry->key.u32 || keys_match(hashtable->key_type, entry->key, key)) {
+	if (!entry->key.u64 || keys_match(hashtable->key_type, entry->key, key)) {
 		return entry;
 	}
 
@@ -128,7 +140,7 @@ static HashtableEntry *hashtable_get_entry(const Hashtable *hashtable, Hashtable
 
 	const size_t index = hashtable_index(hashtable, key);
 	HashtableEntry *entry = &hashtable->entries[index];
-	if (!entry->key.u32) {
+	if (!entry->key.u64) {
 		return NULL;
 	}
 
@@ -179,7 +191,7 @@ void hashtable_set(Hashtable *hashtable, HashtableKey key, HashtableValue value)
 
 	HashtableEntry *entry = hashtable_get_entry_create(hashtable, key);
 
-	if (entry->key.u32) {
+	if (entry->key.u64) {
 		entry->value = value;
 		return;
 	}
@@ -202,7 +214,7 @@ void hashtable_clear(Hashtable *hashtable) {
 			ls_free(entry->value.ptr);
 		}
 
-		entry->key.u32 = 0;
+		entry->key.u64 = 0;
 		entry->value.ptr = NULL;
 		entry->next = NULL;
 	}
@@ -217,7 +229,7 @@ bool hashtable_remove(Hashtable *hashtable, HashtableKey key) {
 
 	const size_t index = hashtable_index(hashtable, key);
 	HashtableEntry *entry = &hashtable->entries[index];
-	if (!entry->key.u32) {
+	if (!entry->key.u64) {
 		return false;
 	}
 
@@ -252,7 +264,7 @@ bool hashtable_contains(const Hashtable *hashtable, HashtableKey key) {
 	LS_ASSERT(hashtable);
 
 	HashtableEntry *entry = hashtable_get_entry(hashtable, key);
-	return entry && entry->key.u32;
+	return entry && entry->key.u64;
 }
 
 HashtableValue hashtable_get(const Hashtable *hashtable, HashtableKey key) {
@@ -260,7 +272,7 @@ HashtableValue hashtable_get(const Hashtable *hashtable, HashtableKey key) {
 
 	HashtableEntry *entry = hashtable_get_entry(hashtable, key);
 	if (!entry) {
-		return HASH_VAL(u32, 0);
+		return HASH_VAL(u64, 0);
 	}
 
 	return entry->value;
@@ -292,7 +304,7 @@ Slice64 *hashtable_get_keys(const Hashtable *table) {
 	for (size_t i = 0; i < table->capacity; i++) {
 		HashtableEntry *entry = &table->entries[i];
 		while (entry) {
-			if (entry->key.u32) {
+			if (entry->key.u64) {
 				slice64_append(slice, SLICE_VAL64(ptr, &entry->key));
 			}
 			entry = entry->next;

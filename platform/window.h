@@ -13,7 +13,7 @@
 
 typedef struct PlatformWindow PlatformWindow;
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, LSWindow *parent);
+PlatformWindow *platform_create_window(WindowConfig config, LSWindow *parent);
 void platform_destroy_window(PlatformWindow *window);
 
 LSNativeWindow platform_window_get_native_window(const PlatformWindow *window);
@@ -36,5 +36,6 @@ void platform_window_hide(PlatformWindow *window);
 
 bool platform_window_is_visible(const PlatformWindow *window);
 bool platform_window_is_fullscreen(const PlatformWindow *window);
+bool platform_window_should_close(const PlatformWindow *window);
 
 #endif // PLATFORM_WINDOW_H

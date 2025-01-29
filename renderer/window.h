@@ -53,5 +53,6 @@ LS_EXPORT void window_hide(LSWindow *window);
 
 LS_EXPORT bool window_is_visible(const LSWindow *window);
 LS_EXPORT bool window_is_fullscreen(const LSWindow *window);
+LS_EXPORT bool window_should_close(const LSWindow *window);
 
 #endif // WINDOW_H

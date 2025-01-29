@@ -14,8 +14,6 @@
 #endif
 
 typedef struct {
-	LSCore *core;
-
 	RendererInterface interface;
 
 	const LSWindow *active_window;
@@ -35,15 +33,13 @@ static Renderer *renderer = NULL;
 
 static void check_flags();
 
-void renderer_init(LSCore *core) {
+void renderer_init() {
 	renderer = ls_malloc(sizeof(Renderer));
-	renderer->core = core;
 
 	renderer->active_window = NULL;
 	renderer->active_context = NULL;
 
-	renderer->backend_flag = flag_manager_register(core_get_flag_manager(core),
-			"renderer-backend", FLAG_TYPE_STRING, FLAG_VAL(str, "OPENGL"),
+	renderer->backend_flag = flag_manager_register("renderer-backend", FLAG_TYPE_STRING, FLAG_VAL(str, "OPENGL"),
 			"The renderer backend to use. Valid values are NONE and OPENGL.");
 
 	texture_manager_init();
@@ -58,7 +54,7 @@ void renderer_start() {
 
 #if defined(OPENGL_ENABLED)
 		case RENDERER_BACKEND_OPENGL: {
-			renderer->opengl = opengl_renderer_create(renderer->core);
+			renderer->opengl = opengl_renderer_create();
 			opengl_register_methods(&renderer->interface);
 		} break;
 #endif
@@ -86,10 +82,6 @@ void renderer_deinit() {
 
 RendererBackend renderer_get_backend() {
 	return renderer->backend;
-}
-
-LSCore *renderer_get_core() {
-	return renderer->core;
 }
 
 #if defined(OPENGL_ENABLED)

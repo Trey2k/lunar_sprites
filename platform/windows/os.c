@@ -10,41 +10,34 @@
 
 #include <stdio.h>
 
+static WNDCLASSEX window_class = { 0 };
+
 static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param, int64 l_param);
 
-PlatformOS *platform_create_os(InputManager *input_manager) {
-	LS_ASSERT(input_manager);
+void platform_os_init() {
+	window_class.cbSize = sizeof(WNDCLASSEX);
+	window_class.style = 0;
+	window_class.lpfnWndProc = &window_procedure;
+	window_class.cbClsExtra = 0;
+	window_class.cbWndExtra = 0;
+	window_class.hInstance = NULL;
+	window_class.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
+	window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	window_class.lpszMenuName = NULL;
+	window_class.lpszClassName = LS_WIN_CLASS_NAME;
+	window_class.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-	PlatformOS *os = ls_malloc(sizeof(PlatformOS));
-
-	os->window_class.cbSize = sizeof(WNDCLASSEX);
-	os->window_class.style = 0;
-	os->window_class.lpfnWndProc = &window_procedure;
-	os->window_class.cbClsExtra = 0;
-	os->window_class.cbWndExtra = 0;
-	os->window_class.hInstance = NULL;
-	os->window_class.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	os->window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
-	os->window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	os->window_class.lpszMenuName = NULL;
-	os->window_class.lpszClassName = LS_WIN_CLASS_NAME;
-	os->window_class.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-
-	os->input_manager = input_manager;
-
-	if (!RegisterClassEx(&os->window_class)) {
+	if (!RegisterClassEx(&window_class)) {
 		ls_log_fatal("Failed to register window class!\n");
-		return NULL;
 	}
-
-	return os;
 }
 
-void platform_destroy_os(PlatformOS *os) {
-	ls_free(os);
+void platform_os_deinit() {
+	UnregisterClass(LS_WIN_CLASS_NAME, NULL);
 }
 
-LSNativeDisplayType platform_get_native_display(const PlatformOS *os) {
+LSNativeDisplayType platform_get_native_display() {
 	return CreateCompatibleDC(NULL);
 }
 
@@ -70,76 +63,68 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 		} break;
 
 		case WM_KEYDOWN: {
-			input_handle_press(window->input_manager, win_map_key(w_param));
+			input_handle_press(win_map_key(w_param));
 			return 0;
 		} break;
 
 		case WM_KEYUP: {
-			input_handle_release(window->input_manager, win_map_key(w_param));
+			input_handle_release(win_map_key(w_param));
 			return 0;
 		} break;
 
 		case WM_MOUSEMOVE: {
-			input_handle_mouse_move(window->input_manager,
-					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+			input_handle_mouse_move(vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_LBUTTONDOWN: {
-			input_handle_mouse_press(window->input_manager, LS_MOUSE_BUTTON_LEFT,
+			input_handle_mouse_press(LS_MOUSE_BUTTON_LEFT,
 					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_RBUTTONDOWN: {
-			input_handle_mouse_press(window->input_manager, LS_MOUSE_BUTTON_RIGHT,
+			input_handle_mouse_press(LS_MOUSE_BUTTON_RIGHT,
 					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_MBUTTONDOWN: {
-			input_handle_mouse_press(window->input_manager, LS_MOUSE_BUTTON_MIDDLE,
+			input_handle_mouse_press(LS_MOUSE_BUTTON_MIDDLE,
 					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_LBUTTONUP: {
-			input_handle_mouse_release(window->input_manager, LS_MOUSE_BUTTON_LEFT,
+			input_handle_mouse_release(LS_MOUSE_BUTTON_LEFT,
 					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_RBUTTONUP: {
-			input_handle_mouse_release(window->input_manager, LS_MOUSE_BUTTON_RIGHT,
+			input_handle_mouse_release(LS_MOUSE_BUTTON_RIGHT,
 					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_MBUTTONUP: {
-			input_handle_mouse_release(window->input_manager, LS_MOUSE_BUTTON_MIDDLE,
+			input_handle_mouse_release(LS_MOUSE_BUTTON_MIDDLE,
 					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_MOUSELEAVE: {
-			input_handle_mouse_leave(window->input_manager,
-					vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
+			input_handle_mouse_leave(vec2u(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)));
 			return 0;
 		} break;
 
 		case WM_CLOSE: {
-			input_handle_window_close(window->input_manager);
+			window->should_close = true;
 			return 0;
 		} break;
 
 		case WM_SIZE: {
-			input_set_active_window(window->input_manager, window->parent);
-
 			window->size = vec2u(LOWORD(l_param), HIWORD(l_param));
-
-			input_handle_resize(window->input_manager, window->size);
-
-			input_set_active_window(window->input_manager, NULL);
 			return 0;
 		} break;
 
@@ -155,6 +140,10 @@ static int64 window_procedure(HWND native_window, uint32 message, uint64 w_param
 				min_max_info->ptMaxTrackSize.y = window->max_size.y;
 			}
 			return 0;
+		} break;
+
+		case WM_PAINT: {
+			ls_draw_frame();
 		} break;
 	};
 

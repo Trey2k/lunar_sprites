@@ -21,7 +21,6 @@ env.add_source_files(env.core_sources, "version_info.gen.c")
 
 SConscript("types/SCsub")
 SConscript("math/SCsub")
-SConscript("events/SCsub")
 SConscript("input/SCsub")
 SConscript("os/SCsub")
 SConscript("object/SCsub")

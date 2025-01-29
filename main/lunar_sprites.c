@@ -11,9 +11,6 @@
 #include "main_loop.h"
 
 struct Main {
-	FlagManager *flag_manager;
-	LSCore *core;
-
 	LSWindow *root_window;
 
 	ApplicationInterface application_interface;
@@ -34,31 +31,31 @@ void ls_main_init(int32 argc, char *argv[]) {
 	main.should_stop = false;
 	main.exit_code = 0;
 
-	main.flag_manager = flag_manager_create();
-	main.path = flag_manager_register(main.flag_manager, "path", FLAG_TYPE_STRING, FLAG_VAL(str, "./"), "Path to the game directory.");
+	flag_manager_init();
+
+	main.path = flag_manager_register("path", FLAG_TYPE_STRING, FLAG_VAL(str, "./"), "Path to the game directory.");
 
 	main.update_callbacks = slice64_create(16, false);
 
+	core_init();
 	// Lazy parse early flags.
-	flag_manager_parse(main.flag_manager, argc, argv, true);
-
-	main.core = core_create(main.flag_manager);
+	flag_manager_parse(argc, argv, true);
+	core_check_flags();
 	check_path();
+
 	ls_log(LOG_LEVEL_INFO, "Initializing Lunar Sprites.\n");
-	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE, main.core);
+	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE, NULL);
 	ls_log(LOG_LEVEL_INFO, "Initialization level core done.\n");
 
-	renderer_init(main.core);
+	renderer_init();
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_RENDER, NULL);
 	ls_log(LOG_LEVEL_INFO, "Initialization level render done.\n");
 
 	// Parse all flags.
-	flag_manager_parse(main.flag_manager, argc, argv, false);
+	flag_manager_parse(argc, argv, false);
 
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_FLAGS, NULL);
 	ls_log(LOG_LEVEL_INFO, "Initialization level flags done.\n");
-
-	core_start(main.core);
 
 	renderer_start();
 
@@ -69,7 +66,7 @@ void ls_main_init(int32 argc, char *argv[]) {
 		ls_log_fatal("No application interface set.\n");
 	}
 
-	main.root_window = main.application_interface.init(main.core, main.application_interface.user_data);
+	main.root_window = main.application_interface.init(main.application_interface.user_data);
 
 	batch_renderer_init();
 
@@ -78,7 +75,7 @@ void ls_main_init(int32 argc, char *argv[]) {
 
 	main.application_interface.start(main.application_interface.user_data);
 
-	ls_main_loop_init(main.core, main.root_window);
+	ls_main_loop_init(main.root_window);
 }
 
 void ls_update(float64 delta_time) {
@@ -93,8 +90,6 @@ void ls_update(float64 delta_time) {
 }
 
 int32 ls_main_deinit() {
-	ls_main_loop_deinit();
-
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_APPLICATION);
 	main.application_interface.deinit(main.application_interface.user_data);
 	batch_renderer_deinit();
@@ -106,7 +101,8 @@ int32 ls_main_deinit() {
 
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
 
-	core_destroy(main.core);
+	core_deinit();
+	flag_manager_deinit();
 	slice64_destroy(main.update_callbacks);
 
 	return main.exit_code;

@@ -9,8 +9,7 @@ void initialize_audio_module(ModuleInitializationLevel p_level, void *p_arg) {
 
 	ls_log(LOG_LEVEL_INFO, "Initializing Audio module\n");
 
-	LSCore *core = (LSCore *)p_arg;
-	audio_server_init(core);
+	audio_server_init();
 }
 
 void uninitialize_audio_module(ModuleInitializationLevel p_level) {

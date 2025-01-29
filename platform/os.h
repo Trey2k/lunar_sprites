@@ -10,12 +10,10 @@ typedef int32 LSNativeDisplayType;
 typedef void *LSNativeDisplayType;
 #endif
 
-typedef struct PlatformOS PlatformOS;
+void platform_os_init();
+void platform_os_deinit();
 
-PlatformOS *platform_create_os(InputManager *input_manager);
-void platform_destroy_os(PlatformOS *os);
-
-LSNativeDisplayType platform_get_native_display(const PlatformOS *os);
+LSNativeDisplayType platform_get_native_display();
 
 uint64 platform_get_time();
 bool platform_path_exists(String path);

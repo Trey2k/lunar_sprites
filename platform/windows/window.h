@@ -15,8 +15,8 @@ struct PlatformWindow {
 
 	bool fullscreen;
 	bool hidden;
+	bool should_close;
 
-	InputManager *input_manager;
 	LSWindow *parent;
 };
 

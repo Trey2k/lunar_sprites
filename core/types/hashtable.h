@@ -14,6 +14,9 @@ typedef enum {
 	HASHTABLE_KEY_INT32,
 	HASHTABLE_KEY_UINT32,
 	HASHTABLE_KEY_FLOAT32,
+	HASHTABLE_KEY_INT64,
+	HASHTABLE_KEY_UINT64,
+	HASHTABLE_KEY_FLOAT64,
 	HASHTABLE_KEY_STRING
 } HashtableKeyType;
 
@@ -21,6 +24,9 @@ typedef union {
 	int32 i32;
 	uint32 u32;
 	float32 f32;
+	int64 i64;
+	uint64 u64;
+	float64 f64;
 	String str;
 } HashtableKey;
 

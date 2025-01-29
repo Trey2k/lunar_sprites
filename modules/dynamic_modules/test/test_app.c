@@ -3,10 +3,6 @@
 #include "modules/dynamic_modules/test/ls_api.gen.h"
 
 typedef struct {
-	LSCore *core;
-
-	InputManager *input_manager;
-
 	LSWindow *root_window;
 
 	bool should_stop;
@@ -34,7 +30,6 @@ typedef struct {
 } TestApplication;
 
 static void check_input(TestApplication *test_application);
-static void input_handler(Event *event, void *user_data);
 
 ApplicationInterface register_application() {
 	ApplicationInterface application_interface;
@@ -48,9 +43,8 @@ ApplicationInterface register_application() {
 	return application_interface;
 }
 
-LSWindow *test_app_init(LSCore *core, void *user_data) {
+LSWindow *test_app_init(void *user_data) {
 	TestApplication *test_application = user_data;
-	test_application->core = core;
 	test_application->should_stop = false;
 
 	test_application->chirp_sound = sound_create("chirp_test.wav");
@@ -68,7 +62,6 @@ LSWindow *test_app_init(LSCore *core, void *user_data) {
 	};
 
 	test_application->root_window = renderer_create_window(ROOT_WINDOW_CONFIG);
-	test_application->input_manager = core_get_input_manager(core);
 
 	test_application->fps_text = ls_str_format("FPS: %f", 60.0);
 
@@ -90,9 +83,6 @@ static void on_exit_button_click(UIElement *element, void *user_data) {
 
 void test_app_start(void *user_data) {
 	TestApplication *test_application = user_data;
-
-	EventManager *event_handler = core_get_event_manager(test_application->core);
-	event_manager_add_handler(event_handler, input_handler, test_application);
 
 	renderer_set_clear_color(0.0, 0.0, 0.0, 1.0);
 
@@ -181,19 +171,19 @@ void test_app_update(float64 delta_time, void *user_data) {
 
 	object_set_property(test_application->sprite, BSC("rotation"), rotation);
 
-	if (input_is_key_pressed(test_application->input_manager, LS_KEY_W)) {
+	if (input_is_key_pressed(LS_KEY_W)) {
 		camera_move(test_application->camera, vec3(0.0, 0.01, 0.0));
 	}
 
-	if (input_is_key_pressed(test_application->input_manager, LS_KEY_S)) {
+	if (input_is_key_pressed(LS_KEY_S)) {
 		camera_move(test_application->camera, vec3(0.0, -0.01, 0.0));
 	}
 
-	if (input_is_key_pressed(test_application->input_manager, LS_KEY_A)) {
+	if (input_is_key_pressed(LS_KEY_A)) {
 		camera_move(test_application->camera, vec3(-0.01, 0.0, 0.0));
 	}
 
-	if (input_is_key_pressed(test_application->input_manager, LS_KEY_D)) {
+	if (input_is_key_pressed(LS_KEY_D)) {
 		camera_move(test_application->camera, vec3(0.01, 0.0, 0.0));
 	}
 
@@ -205,12 +195,12 @@ void test_app_update(float64 delta_time, void *user_data) {
 	object_draw(test_application->sprite, delta_time);
 
 	if (test_application->timer > 0.25) {
-		Variant test = json_parse(BSC("{\"test\": [1, 2.5, 3, {\"bool\": false}], \"test2\": {\"test3\": \"test4\"}}"));
-		ls_printf("Test: %V\n", test);
-		BString json = json_stringify(test);
-		ls_printf("JSON: %S\n", json);
-		bstring_unref(json);
-		variant_unref(test);
+		// Variant test = json_parse(BSC("{\"test\": [1, 2.5, 3, {\"bool\": false}], \"test2\": {\"test3\": \"test4\"}}"));
+		// ls_printf("Test: %V\n", test);
+		// BString json = json_stringify(test);
+		// ls_printf("JSON: %S\n", json);
+		// bstring_unref(json);
+		// variant_unref(test);
 
 		ls_free(test_application->fps_text);
 		test_application->fps_text = ls_str_format("FPS: %f", 1.0 / delta_time);
@@ -224,28 +214,8 @@ bool test_app_should_stop(void *user_data) {
 }
 
 static void check_input(TestApplication *test_application) {
-	if (input_is_key_just_released(test_application->input_manager, LS_KEY_ESCAPE) ||
-			input_is_key_just_released(test_application->input_manager, LS_KEY_Q)) {
+	if (input_is_key_just_released(LS_KEY_ESCAPE) ||
+			input_is_key_just_released(LS_KEY_Q) || window_should_close(test_application->root_window)) {
 		test_application->should_stop = true;
-	}
-}
-
-static void input_handler(Event *e, void *user_data) {
-	LS_ASSERT(e);
-
-	TestApplication *test_application = user_data;
-
-	switch (e->type) {
-		case EVENT_WINDOW: {
-			switch (e->window.type) {
-				case EVENT_WINDOW_CLOSE: {
-					test_application->should_stop = true;
-				} break;
-				default: {
-				} break;
-			}
-		} break;
-		default: {
-		} break;
 	}
 }

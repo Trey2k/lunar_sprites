@@ -6,8 +6,4 @@
 
 #include "platform/web/window.h"
 
-struct PlatformOS {
-	InputManager *input_manager;
-};
-
 #endif // WEB_OS_H

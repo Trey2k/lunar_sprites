@@ -174,33 +174,3 @@ void ui_horizontal_container_draw(UIElement *element) {
 			break;
 	};
 }
-
-static void ui_horizontal_container_handle_mouse_event(UIElement *element, Event *event) {
-	LS_ASSERT(element->type == UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER);
-
-	Vector2u mouse_pos = event->mouse.position;
-
-	for (size_t i = 0; i < slice64_get_size(element->horizontal_container.children); i++) {
-		UIElement *child = slice64_get(element->horizontal_container.children, i).ptr;
-		if (mouse_pos.x >= child->position.x && mouse_pos.x <= child->position.x + child->size.x &&
-				mouse_pos.y >= child->position.y && mouse_pos.y <= child->position.y + child->size.y) {
-			ui_element_handle_event(child, event);
-		}
-
-		if (event->handled) {
-			break;
-		}
-	}
-}
-
-void ui_horizontal_container_handle_event(UIElement *element, Event *event) {
-	LS_ASSERT(element->type == UI_ELEMENT_TYPE_HORIZONTAL_CONTAINER);
-
-	switch (event->type) {
-		case EVENT_MOUSE: {
-			ui_horizontal_container_handle_mouse_event(element, event);
-		} break;
-		default:
-			break;
-	}
-}

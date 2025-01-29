@@ -55,8 +55,6 @@ def configure(env):
         'core/window.h',
         'core/input/keycodes.h',
         'core/input/input_manager.h',
-        'core/events/events.h',
-        'core/events/event_manager.h',
         'core/os/os.h',
         'core/os/thread.h',
         'core/config.h',

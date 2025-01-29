@@ -11,20 +11,15 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-PlatformOS *platform_create_os(InputManager *input_manager) {
-	PlatformOS *os = ls_malloc(sizeof(PlatformOS));
-	os->input_manager = input_manager;
+void platform_os_init() {
 	keymap_init();
-
-	return os;
 }
 
-void platform_destroy_os(PlatformOS *os) {
+void platform_os_deinit() {
 	keymap_deinit();
-	ls_free(os);
 }
 
-LSNativeDisplayType platform_get_native_display(const PlatformOS *os) {
+LSNativeDisplayType platform_get_native_display() {
 	return 0;
 }
 

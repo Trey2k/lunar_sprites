@@ -21,7 +21,7 @@ extern const unsigned char *LS_API_HEADER;
 extern const unsigned char *LS_API_SOURCE;
 
 void api_interface_init();
-void dynamic_modules_init(LSCore *core);
+void dynamic_modules_init();
 void dynamic_modules_start();
 void dynamic_modules_deinit();
 

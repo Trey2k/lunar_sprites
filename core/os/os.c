@@ -3,30 +3,16 @@
 #include "core/memory.h"
 #include "platform/os.h"
 
-struct OS {
-	PlatformOS *platform_os;
-};
-
-OS *ls_create_os(InputManager *input_manager) {
-	OS *os = ls_malloc(sizeof(OS));
-	os->platform_os = platform_create_os(input_manager);
-
-	return os;
+void os_init() {
+	platform_os_init();
 }
 
-void ls_destroy_os(OS *os) {
-	LS_ASSERT(os);
-
-	platform_destroy_os(os->platform_os);
-	ls_free(os);
+void os_deinit() {
+	platform_os_deinit();
 }
 
-LSNativeDisplayType os_get_native_display(const OS *os) {
-	return platform_get_native_display(os->platform_os);
-}
-
-const PlatformOS *os_get_platform_os(const OS *os) {
-	return os->platform_os;
+LSNativeDisplayType os_get_native_display() {
+	return platform_get_native_display();
 }
 
 uint64 os_get_time() {

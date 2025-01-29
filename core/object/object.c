@@ -8,7 +8,7 @@
 #include <stdarg.h>
 
 struct Object {
-	uint32 type_id;
+	uint64 type_id;
 	void *data;
 
 	size_t ref_count;
@@ -169,7 +169,7 @@ void *object_get_data(Object *object) {
 	return object->data;
 }
 
-uint32 object_get_type_id(Object *object) {
+uint64 object_get_type_id(Object *object) {
 	LS_ASSERT(object);
 
 	return object->type_id;

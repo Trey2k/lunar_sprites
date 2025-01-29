@@ -12,9 +12,9 @@
 #include "platform/linuxbsd/x11/window.h"
 #endif
 
-PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config, LSWindow *parent) {
+PlatformWindow *platform_create_window(WindowConfig config, LSWindow *parent) {
 	PlatformWindow *window = ls_malloc(sizeof(PlatformWindow));
-	window->display_server = os->display_server;
+	window->display_server = os_linuxbsd_get_display_server();
 
 	switch (window->display_server) {
 #if defined(WAYLAND_ENABLED)
@@ -31,7 +31,7 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 #if defined(X11_ENABLED)
 		case DISPLAY_SERVER_X11: {
 			// TODO: Pass in X11Server
-			X11Window *win = x11_window_create(os->x11_server, config);
+			X11Window *win = x11_window_create(os_linuxbsd_get_x11_server(), config);
 			if (!win) {
 				ls_log(LOG_LEVEL_ERROR, "Failed to create X11 window\n");
 				return NULL;
@@ -277,6 +277,20 @@ bool platform_window_is_fullscreen(const PlatformWindow *window) {
 #if defined(X11_ENABLED)
 		case DISPLAY_SERVER_X11: {
 			return x11_window_is_fullscreen(window->x11_window);
+		} break;
+#endif
+
+		default:
+			ls_log_fatal("Unknown display server: %d\n", window->display_server);
+			return false;
+	};
+}
+
+bool platform_window_should_close(const PlatformWindow *window) {
+	switch (window->display_server) {
+#if defined(X11_ENABLED)
+		case DISPLAY_SERVER_X11: {
+			return x11_window_should_close(window->x11_window);
 		} break;
 #endif
 

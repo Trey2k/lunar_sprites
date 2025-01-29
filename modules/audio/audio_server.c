@@ -45,7 +45,7 @@ static void audio_server_start_device();
 static void audio_server_event_handler(Event *event, void *user_data);
 #endif // WEB_ENABLED
 
-void audio_server_init(LSCore *p_core) {
+void audio_server_init() {
 	ma_context_config ctx_config = ma_context_config_init();
 	ma_log_callback_init(on_log, NULL);
 

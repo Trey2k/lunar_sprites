@@ -60,7 +60,6 @@ PlatformWindow *platform_create_window(const PlatformOS *os, WindowConfig config
 	window->hidden = false;
 	window->fullscreen = false;
 	window->os = os;
-	window->input_manager = os->input_manager;
 
 	window->events = slice64_create(16, true);
 
@@ -140,31 +139,31 @@ void platform_window_poll(PlatformWindow *window) {
 
 		switch (event->type) {
 			case WEBW_EVENT_KEYDOWN: {
-				input_handle_press(window->input_manager, event->keycode);
+				input_handle_press(event->keycode);
 			} break;
 
 			case WEBW_EVENT_KEYUP: {
-				input_handle_release(window->input_manager, event->keycode);
+				input_handle_release(event->keycode);
 			} break;
 
 			case WEBW_EVENT_MOUSEDOWN: {
-				input_handle_mouse_press(window->input_manager, event->mbutton, event->position);
+				input_handle_mouse_press(event->mbutton, event->position);
 			} break;
 
 			case WEBW_EVENT_MOUSEUP: {
-				input_handle_mouse_release(window->input_manager, event->mbutton, event->position);
+				input_handle_mouse_release(event->mbutton, event->position);
 			} break;
 
 			case WEBW_EVENT_MOUSEMOVE: {
-				input_handle_mouse_move(window->input_manager, event->position);
+				input_handle_mouse_move(event->position);
 			} break;
 
 			case WEBW_EVENT_MOUSEENTER: {
-				input_handle_mouse_enter(window->input_manager, event->position);
+				input_handle_mouse_enter(event->position);
 			} break;
 
 			case WEBW_EVENT_MOUSELEAVE: {
-				input_handle_mouse_leave(window->input_manager, event->position);
+				input_handle_mouse_leave(event->position);
 			} break;
 
 			default:
@@ -273,6 +272,12 @@ bool platform_window_is_fullscreen(const PlatformWindow *window) {
 	LS_ASSERT(window);
 
 	return window->fullscreen;
+}
+
+bool platform_window_should_close(const PlatformWindow *window) {
+	LS_ASSERT(window);
+
+	return false;
 }
 
 static void register_callbacks(PlatformWindow *window) {

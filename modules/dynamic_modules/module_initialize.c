@@ -6,7 +6,7 @@ void initialize_dynamic_modules_module(ModuleInitializationLevel p_level, void *
 	switch (p_level) {
 		case MODULE_INITIALIZATION_LEVEL_CORE: {
 			// Dynamic modules currently can not have a flag manager registration level.
-			dynamic_modules_init(p_arg);
+			dynamic_modules_init();
 		} break;
 		case MODULE_INITIALIZATION_LEVEL_FLAGS: {
 			dynamic_modules_start();

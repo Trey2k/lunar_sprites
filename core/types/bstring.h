@@ -28,6 +28,7 @@ typedef struct {
 	(BString) { .c_const = a_str, .length = a_length, .is_const = true }
 // Short hand alias for BSTRING_CONST.
 #define BSC(a_str) BSTRING_CONST(a_str)
+#define STR(a_str) BSTRING_CONST(a_str)
 
 // Creates a BString copy of the string.
 #define BSTRING(a_str) bstring_encode_utf8(BSTRING_CONST(a_str))

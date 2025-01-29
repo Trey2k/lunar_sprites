@@ -2,18 +2,10 @@
 
 #include "ui.h"
 
-static LSCore *core = NULL;
-
 void initialize_ui_module(ModuleInitializationLevel p_level, void *p_arg) {
-	if (p_level == MODULE_INITIALIZATION_LEVEL_CORE) {
-		core = (LSCore *)p_arg;
-		LS_ASSERT(core);
-	} else if (p_level == MODULE_INITIALIZATION_LEVEL_APPLICATION) {
-		LSWindow *window = (LSWindow *)p_arg;
-		LS_ASSERT(window);
-
+	if (p_level == MODULE_INITIALIZATION_LEVEL_APPLICATION) {
 		ls_printf("Initializing UI module.\n");
-		ui_init(core, window);
+		ui_init(p_arg);
 	}
 }
 

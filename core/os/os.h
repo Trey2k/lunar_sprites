@@ -2,19 +2,15 @@
 #define OS_H
 
 #include "core/api.h"
-#include "core/input/input_manager.h"
 #include "core/types/slice.h"
 #include "core/types/typedefs.h"
 
 #include "platform/os.h"
 
-typedef struct OS OS;
+void os_init();
+void os_deinit();
 
-OS *ls_create_os(InputManager *input_manager);
-void ls_destroy_os(OS *os);
-
-LSNativeDisplayType os_get_native_display(const OS *os);
-const PlatformOS *os_get_platform_os(const OS *os);
+LSNativeDisplayType os_get_native_display();
 
 // Returns current time in microseconds
 LS_EXPORT uint64 os_get_time();

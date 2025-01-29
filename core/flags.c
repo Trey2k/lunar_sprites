@@ -23,19 +23,17 @@ struct FlagManager {
 	char *program_name;
 
 	FlagValue *help;
-};
+} manager = { 0 };
 
 static void parse_flag_value(struct Flag *flag, String flag_name, String raw_value);
 
-FlagManager *flag_manager_create() {
-	FlagManager *manager = ls_calloc(1, sizeof(FlagManager));
-	manager->help = flag_manager_register(manager, "help", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Prints this help message.");
-	return manager;
+void flag_manager_init() {
+	manager.help = flag_manager_register("help", FLAG_TYPE_BOOL, FLAG_VAL(b, false), "Prints this help message.");
 }
 
-void flag_manager_destroy(FlagManager *manager) {
-	ls_free(manager->program_name);
-	struct Flag *flag = manager->first;
+void flag_manager_deinit() {
+	ls_free(manager.program_name);
+	struct Flag *flag = manager.first;
 	while (flag) {
 		struct Flag *next = flag->next;
 		if (flag->type == FLAG_TYPE_STRING) {
@@ -58,7 +56,7 @@ void flag_manager_destroy(FlagManager *manager) {
 	}
 }
 
-FlagValue *flag_manager_register(FlagManager *manager, String flag_name, FlagType type, FlagValue default_value, String description) {
+FlagValue *flag_manager_register(String flag_name, FlagType type, FlagValue default_value, String description) {
 	struct Flag *flag = ls_malloc(sizeof(struct Flag));
 	flag->value = ls_malloc(sizeof(FlagValue));
 	flag->type = type;
@@ -76,19 +74,19 @@ FlagValue *flag_manager_register(FlagManager *manager, String flag_name, FlagTyp
 			ls_flag_value_to_string(type, default_value));
 	flag->next = NULL;
 
-	if (!manager->first) {
-		manager->first = flag;
-		manager->last = flag;
+	if (!manager.first) {
+		manager.first = flag;
+		manager.last = flag;
 	} else {
-		manager->last->next = flag;
-		manager->last = flag;
+		manager.last->next = flag;
+		manager.last = flag;
 	}
 
 	return flag->value;
 }
 
-void flag_manager_parse(FlagManager *manager, int argc, char *argv[], bool lazy_parse) {
-	manager->program_name = ls_str_copy(argv[0]);
+void flag_manager_parse(int argc, char *argv[], bool lazy_parse) {
+	manager.program_name = ls_str_copy(argv[0]);
 	for (int i = 1; i < argc; i++) {
 		if (ls_str_length(argv[i]) <= 2 || argv[i][0] != '-' || argv[i][1] != '-') {
 			ls_log_fatal("Invalid command line option: %s\n", argv[i]);
@@ -102,7 +100,7 @@ void flag_manager_parse(FlagManager *manager, int argc, char *argv[], bool lazy_
 			i++;
 		}
 
-		struct Flag *flag = manager->first;
+		struct Flag *flag = manager.first;
 		bool found = false;
 		while (flag) {
 			if (ls_str_equals(flag_name, flag->name)) {
@@ -124,16 +122,16 @@ void flag_manager_parse(FlagManager *manager, int argc, char *argv[], bool lazy_
 		parse_flag_value(flag, flag_name, raw_value);
 	}
 
-	if (manager->help->b) {
-		flag_manager_print_help(manager);
+	if (manager.help->b) {
+		flag_manager_print_help();
 		exit(1);
 	}
 }
 
-void flag_manager_print_help(const FlagManager *manager) {
-	ls_printf("Usage: %s [options]\nOptions:\n", manager->program_name);
+void flag_manager_print_help() {
+	ls_printf("Usage: %s [options]\nOptions:\n", manager.program_name);
 
-	struct Flag *flag = manager->first;
+	struct Flag *flag = manager.first;
 	while (flag) {
 		ls_printf("%s", flag->description);
 		flag = flag->next;
@@ -141,6 +139,7 @@ void flag_manager_print_help(const FlagManager *manager) {
 }
 
 static void parse_flag_value(struct Flag *flag, String flag_name, String raw_value) {
+	LS_ASSERT(flag);
 	switch (flag->type) {
 		case FLAG_TYPE_INT: {
 			if (!raw_value) {

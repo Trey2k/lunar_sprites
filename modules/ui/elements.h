@@ -7,7 +7,6 @@
 typedef struct UIElement UIElement;
 
 void ui_draw_element(UIElement *element);
-void ui_element_handle_event(UIElement *element, Event *event);
 
 // Element Anchors
 #define UI_ANCHOR_TOP 0x01 // 0000 0001

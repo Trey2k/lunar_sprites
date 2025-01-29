@@ -38,7 +38,7 @@ LS_EXPORT bool object_equals(Object *a, Object *b);
 
 LS_EXPORT void *object_get_data(Object *object);
 
-LS_EXPORT uint32 object_get_type_id(Object *object);
+LS_EXPORT uint64 object_get_type_id(Object *object);
 LS_EXPORT BString object_get_type_name(Object *object);
 LS_EXPORT BString object_to_string(Object *object);
 

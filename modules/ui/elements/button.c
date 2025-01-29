@@ -76,8 +76,7 @@ void ui_button_draw(UIElement *element) {
 
 	button->label->position = element->position;
 	button->label->size = element->size;
-	InputManager *input_manager = ui_get_input_manager();
-	Vector2u mouse_pos = input_get_mouse_position(input_manager);
+	Vector2u mouse_pos = input_get_mouse_position();
 
 	if (button->hovering) {
 		if (mouse_pos.x <= element->position.x || mouse_pos.x >= element->position.x + element->size.x ||
@@ -96,31 +95,6 @@ void ui_button_calculate_size(UIElement *element, Vector2u outer_bounds, Vector2
 
 	element->size = button->label->size;
 	element->position = button->label->position;
-}
-
-void ui_button_handle_event(UIElement *element, Event *event) {
-	UIButton *button = &element->button;
-
-	if (event->type != EVENT_MOUSE || !button->enabled) {
-		return;
-	}
-
-	if (event->mouse.type == EVENT_MOUSE_PRESSED) {
-		button->pressed = true;
-		ui_label_set_theme(element->button.label, &button->click_theme);
-	} else if (event->mouse.type == EVENT_MOUSE_RELEASED) {
-		if (button->pressed) {
-			button->on_click(element, button->user_data);
-			ui_label_set_theme(element->button.label, &button->hover_theme);
-		}
-
-		button->pressed = false;
-	} else if (event->mouse.type == EVENT_MOUSE_MOVED) {
-		if (!button->hovering) {
-			button->hovering = true;
-			ui_label_set_theme(element->button.label, &button->hover_theme);
-		}
-	}
 }
 
 void ui_button_set_theme(UIElement *element, const UIElementTheme *theme) {

@@ -18,29 +18,14 @@ typedef enum {
 	DISPLAY_SERVER_X11
 } DisplayServer;
 
-struct PlatformOS {
-	DisplayServer display_server;
-	InputManager *input_manager;
-
-	union {
-#if defined(WAYLAND_ENABLED)
-		WaylandServer *wayland_server;
-#endif
-
-#if defined(X11_ENABLED)
-		X11Server *x11_server;
-#endif
-	};
-};
-
-DisplayServer os_linuxbsd_get_display_server(const PlatformOS *os);
+DisplayServer os_linuxbsd_get_display_server();
 
 #if defined(WAYLAND_ENABLED)
 WaylandServer *os_linuxbsd_get_wayland_server(const PlatformOS *os);
 #endif
 
 #if defined(X11_ENABLED)
-X11Server *os_linuxbsd_get_x11_server(const PlatformOS *os);
+X11Server *os_linuxbsd_get_x11_server();
 #endif
 
 #endif // LINUXBSD_OS_H

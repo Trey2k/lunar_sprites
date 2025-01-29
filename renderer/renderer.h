@@ -14,14 +14,12 @@ typedef enum {
 
 typedef struct Context Context;
 
-void renderer_init(LSCore *core);
+void renderer_init();
 void renderer_start();
 void renderer_deinit();
 
 void renderer_set_active_window(const LSWindow *window);
 void renderer_set_active_context(const Context *context);
-
-LSCore *renderer_get_core();
 
 #if defined(OPENGL_ENABLED)
 OpenGLRenderer *renderer_get_opengl();

@@ -19,8 +19,6 @@ typedef struct {
 	Slice32 *indices;
 	BatchVertex *batch_vertices;
 	size_t batch_vertices_size;
-
-	InputManager *input_manager;
 } UIRenderer;
 
 static UIRenderer ui_renderer;
@@ -39,36 +37,7 @@ static void ui_on_update(float64 delta_time) {
 	}
 }
 
-static void ui_mouse_event_handler(Event *event) {
-	Vector2u mouse_pos = event->mouse.position;
-	for (size_t i = 0; i < slice64_get_size(ui_renderer.elements); i++) {
-		UIElement *element = slice64_get(ui_renderer.elements, i).ptr;
-		if (mouse_pos.x >= element->position.x && mouse_pos.x <= element->position.x + element->size.x &&
-				mouse_pos.y >= element->position.y && mouse_pos.y <= element->position.y + element->size.y) {
-			ui_element_handle_event(element, event);
-		}
-
-		if (event->handled) {
-			break;
-		}
-	}
-}
-
-static void ui_event_handler(Event *event, void *user_data) {
-	switch (event->type) {
-		case EVENT_MOUSE: {
-			ui_mouse_event_handler(event);
-		} break;
-		case EVENT_KEY: {
-			// TODO: Handle key events
-		} break;
-		default:
-			break;
-	}
-}
-
-void ui_init(LSCore *core, const LSWindow *window) {
-	ui_renderer.input_manager = core_get_input_manager(core);
+void ui_init(const LSWindow *window) {
 	ui_renderer.window = window;
 	ui_renderer.elements = slice64_create(16, false);
 	ui_renderer.indices = slice32_create(128);
@@ -77,7 +46,6 @@ void ui_init(LSCore *core, const LSWindow *window) {
 
 	// Called before the main frame for now, might change later.
 	ls_register_update_callback(ui_on_update);
-	event_manager_add_handler(core_get_event_manager(core), ui_event_handler, NULL);
 }
 
 void ui_deinit() {
@@ -103,8 +71,4 @@ void ui_remove_element(const UIElement *element) {
 			break;
 		}
 	}
-}
-
-InputManager *ui_get_input_manager() {
-	return ui_renderer.input_manager;
 }

@@ -12,9 +12,9 @@
 // ref_count            data_size           data
 // REF_COUNT_OFFSET     DATA_SIZE_OFFSET    DATA_OFFSET
 
-#define REF_COUNT_OFFSET 0
-#define DATA_SIZE_OFFSET sizeof(size_t)
-#define DATA_OFFSET (DATA_SIZE_OFFSET + sizeof(uint64))
+#define COW_DATA_REF_COUNT_OFFSET 0
+#define COW_DATA_SIZE_OFFSET sizeof(size_t)
+#define COW_DATA_DATA_OFFSET (COW_DATA_SIZE_OFFSET + sizeof(uint64))
 
 typedef struct {
 	uint8 *data;
