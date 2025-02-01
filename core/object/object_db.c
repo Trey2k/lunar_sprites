@@ -14,10 +14,6 @@ typedef struct {
 	uint64 argc;
 	uint16 *arg_flags;
 	char **arg_names;
-	// Only used when there is optional arguments.
-	Variant *arg_buffer;
-	// Only used when there is a varargs argument.
-	Variant *default_values;
 
 	int16 max_args;
 	uint8 min_args;
@@ -33,7 +29,8 @@ typedef struct {
 	char *type_name;
 	ObjectCreateFunction create;
 	ObjectDestroyFunction destroy;
-	ObjectDrawFunction draw;
+	ObjectProcFunction draw;
+	ObjectProcFunction update;
 	ObjectToStringFunction to_string;
 
 	Hashtable *properties;
@@ -81,7 +78,7 @@ void object_db_destroy_instance(uint64 type_id, void *object_data) {
 	type->destroy(object_data);
 }
 
-ObjectDrawFunction object_db_get_draw_function(uint64 type_id) {
+ObjectProcFunction object_db_get_draw_function(uint64 type_id) {
 	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
@@ -89,6 +86,16 @@ ObjectDrawFunction object_db_get_draw_function(uint64 type_id) {
 	}
 
 	return type->draw;
+}
+
+ObjectProcFunction object_db_get_update_function(uint64 type_id) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
+	if (!type) {
+		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
+		return NULL;
+	}
+
+	return type->update;
 }
 
 ObjectToStringFunction object_db_get_to_string_function(uint64 type_id) {
@@ -107,6 +114,7 @@ uint64 object_db_register_type(BString type_name, ObjectInterface interface) {
 	type->create = interface.create;
 	type->destroy = interface.destroy;
 	type->draw = interface.draw;
+	type->update = interface.update;
 	type->to_string = interface.to_string;
 	type->properties = hashtable_create(HASHTABLE_KEY_STRING, 16, false);
 	type->methods = hashtable_create(HASHTABLE_KEY_STRING, 16, false);
@@ -190,46 +198,14 @@ void object_db_register_method(BString name, ObjectMethod method, const ObjectMe
 	info->min_args = info->argc - 1;
 
 	for (size_t i = 0; i < info->argc; i++) {
-		if (OBJ_ARGFLAG_IS_OPTIONAL(info->arg_flags[i])) {
-			info->min_args = i;
-			// Verify that all arguments after an optional argument are also optional.
-			// TODO: We can save some space here by only allocating the default_values buffer to the number of optional arguments.
-			info->default_values = ls_realloc(info->default_values, sizeof(Variant) * info->argc);
-			info->default_values[i] = args[i].default_value;
-
-			for (size_t j = i + 1; j < info->argc; j++) {
-				if (!OBJ_ARGFLAG_IS_OPTIONAL(info->arg_flags[j])) {
-					ls_log(LOG_LEVEL_ERROR, "All arguments after an optional argument must also be optional.\n");
-					ls_free(info->arg_buffer);
-					ls_free(info->default_values);
-					ls_free(info->arg_names);
-					ls_free(info->arg_flags);
-					ls_free(info);
-					return;
-				}
-				info->default_values[j] = args[j].default_value;
-			}
-			info->arg_buffer = ls_realloc(info->arg_buffer, sizeof(Variant) * info->argc);
-			break;
-		}
-
-		if (OBJ_ARGFLAG_IS_VARARGS(info->arg_flags[i])) {
-			info->max_args = -1;
-			info->min_args = i;
-			if (!OBJ_ARGFLAG_IS_LAST(info->arg_flags[i])) {
-				ls_log(LOG_LEVEL_ERROR, "Varargs argument must be the last argument.\n");
-				ls_free(info->default_values);
-				ls_free(info->arg_names);
-				ls_free(info->arg_flags);
-				ls_free(info);
-				return;
-			}
-			break;
-		}
-
 		if (OBJ_ARGFLAG_IS_LAST(info->arg_flags[i])) {
-			info->max_args = i - 1;
-			info->min_args = i - 1;
+			if (OBJ_ARGFLAG_IS_VARARGS(info->arg_flags[i])) {
+				info->max_args = -1;
+				info->min_args = i;
+			} else {
+				info->max_args = i - 1;
+				info->min_args = i - 1;
+			}
 			break;
 		}
 	}
@@ -292,7 +268,7 @@ void object_db_type_set_property(uint64 type_id, Object *object, BString name, V
 	(void)property->setter->method(object, &value, 1);
 }
 
-Variant object_db_type_get_property(uint64 type_id, Object *object, BString name) {
+Variant object_db_type_get_property(uint64 type_id, const Object *object, BString name) {
 	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
 	if (!type) {
 		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
@@ -308,7 +284,50 @@ Variant object_db_type_get_property(uint64 type_id, Object *object, BString name
 		return VARIANT_NIL;
 	}
 
-	return property->getter->method(object, NULL, 0);
+	return property->getter->method((Object *)object, NULL, 0);
+}
+
+VariantType object_db_type_get_property_type(uint64 type_id, BString name) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
+	if (!type) {
+		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
+		return VARIANT_TYPE_NIL;
+	}
+
+	char *name_str = bstring_encode_utf8(name);
+
+	ObjectProperty *property = hashtable_get(type->properties, HASH_KEY(str, name_str)).ptr;
+	ls_free(name_str);
+	if (!property) {
+		ls_log(LOG_LEVEL_ERROR, "Unkown property '%s.%s'\n", type->type_name, name);
+		return VARIANT_TYPE_NIL;
+	}
+
+	if (!property->setter->arg_flags) {
+		return VARIANT_TYPE_NIL;
+	}
+
+	uint16 prop_flags = property->setter->arg_flags[0];
+	return OBJ_ARGFLAG_TYPE(prop_flags);
+}
+
+Array *object_db_type_get_properties(uint64 type_id) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
+	if (!type) {
+		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
+		return NULL;
+	}
+
+	Array *properties = array_create(hashtable_get_size(type->properties));
+	Slice64 *keys = hashtable_get_keys(type->properties);
+	for (size_t i = 0; i < slice64_get_size(keys); i++) {
+		String key = *(char **)slice64_get(keys, i).ptr;
+		array_append(properties, BSCV(key));
+	}
+
+	slice64_destroy(keys);
+
+	return properties;
 }
 
 bool object_db_type_has_method(uint64 type_id, BString name) {
@@ -366,24 +385,41 @@ Variant object_db_type_call_method(uint64 type_id, Object *object, BString name,
 
 	if (n_args < method->argc) {
 		uint16 next_arg_flags = method->arg_flags[n_args];
-		if (!OBJ_ARGFLAG_IS_OPTIONAL(next_arg_flags)) {
+		if (!OBJ_ARGFLAG_IS_VARARGS(next_arg_flags)) {
 			ls_log(LOG_LEVEL_ERROR, "Missing required argument %s\n", method->arg_names[n_args]);
 			return VARIANT_NIL;
 		}
 
-		for (size_t i = 0; i < n_args; i++) {
-			method->arg_buffer[i] = args[i];
+		args_out = method->argc;
+	} else if (n_args > method->argc) {
+		if (!OBJ_ARGFLAG_IS_VARARGS(method->arg_flags[method->argc - 1])) {
+			ls_log(LOG_LEVEL_ERROR, "Too many arguments provided\n");
+			return VARIANT_NIL;
 		}
 
-		for (size_t i = n_args; i < method->argc; i++) {
-			method->arg_buffer[i] = method->default_values[i];
-		}
-
-		args = method->arg_buffer;
 		args_out = method->argc;
 	}
 
 	return method->method(object, args, args_out);
+}
+
+Array *object_db_type_get_methods(uint64 type_id) {
+	ObjectType *type = hashtable_get(object_db.types, HASH_KEY(u64, type_id)).ptr;
+	if (!type) {
+		ls_log(LOG_LEVEL_ERROR, "Unkown object type id: %d\n", type_id);
+		return NULL;
+	}
+
+	Array *methods = array_create(hashtable_get_size(type->methods));
+	Slice64 *keys = hashtable_get_keys(type->methods);
+	for (size_t i = 0; i < slice64_get_size(keys); i++) {
+		String key = *(char **)slice64_get(keys, i).ptr;
+		array_append(methods, BSCV(key));
+	}
+
+	slice64_destroy(keys);
+
+	return methods;
 }
 
 static void clear_properties(Hashtable *properties) {
@@ -406,14 +442,6 @@ static void clear_methods(Hashtable *methods) {
 		ls_free(method->name);
 		ls_free(method->arg_flags);
 		ls_free(method->arg_names);
-
-		if (method->arg_buffer) {
-			ls_free(method->arg_buffer);
-		}
-
-		if (method->default_values) {
-			ls_free(method->default_values);
-		}
 
 		ls_free(method);
 	}

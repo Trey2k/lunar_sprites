@@ -13,16 +13,36 @@ static void json_stringify_value(BString *string, Variant value);
 static void json_stringify_object(BString *string, Dictionary *dict);
 static void json_stringify_array(BString *string, Array *array);
 
+static void json_stringify_pretty_value(BString *string, Variant value, uint32 indent, uint32 spaces);
+static void json_stringify_pretty_object(BString *string, Dictionary *dict, uint32 indent, uint32 spaces);
+static void json_stringify_pretty_array(BString *string, Array *array, uint32 indent, uint32 spaces);
+
 static bool is_whitespace(char c) {
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
-
+static bool is_whitespace_between(const BString json, uint32 start, uint32 end) {
+	for (uint32 i = start; i < end; i++) {
+		if (!is_whitespace(bstring_get(json, i))) {
+			return false;
+		}
+	}
+	return true;
+}
 Variant json_parse(const BString json) {
 	if (json.length == 0) {
+		ls_log(LOG_LEVEL_ERROR, "Empty JSON string\n");
 		return VARIANT_NIL;
 	}
+	uint32 first_char = 0;
 
-	switch (bstring_get(json, 0)) {
+	for (uint32 i = 0; i < json.length; i++) {
+		if (!is_whitespace(bstring_get(json, i))) {
+			first_char = i;
+			break;
+		}
+	}
+
+	switch (bstring_get(json, first_char)) {
 		case '{':
 			return json_parse_object(json);
 		case '[':
@@ -51,8 +71,45 @@ BString json_stringify(Variant value) {
 	return json;
 }
 
+BString json_stringify_pretty(Variant value, uint32 spaces) {
+	BString json = BSTRING_EMPTY;
+	switch (value.type) {
+		case VARIANT_TYPE_DICTIONARY: {
+			json_stringify_pretty_object(&json, value.DICTIONARY, 0, spaces);
+		} break;
+
+		case VARIANT_TYPE_ARRAY: {
+			json_stringify_pretty_array(&json, value.ARRAY, 0, spaces);
+		} break;
+
+		default: {
+			json_stringify_pretty_value(&json, value, 0, spaces);
+		} break;
+	}
+
+	return json;
+}
+
 static Variant json_parse_object(const BString json) {
-	if (json.length < 2 || bstring_get(json, 0) != '{' || bstring_get(json, json.length - 1) != '}') {
+	uint32 first_char = 0;
+
+	for (uint32 i = 0; i < json.length; i++) {
+		if (!is_whitespace(bstring_get(json, i))) {
+			first_char = i;
+			break;
+		}
+	}
+
+	uint32 last_char = json.length - 1;
+
+	for (uint32 i = json.length - 1; i > 0; i--) {
+		if (!is_whitespace(bstring_get(json, i))) {
+			last_char = i;
+			break;
+		}
+	}
+
+	if (json.length < 2 || bstring_get(json, first_char) != '{' || bstring_get(json, last_char) != '}') {
 		ls_log(LOG_LEVEL_ERROR, "Invalid JSON object: %S\n", json);
 		return VARIANT_NIL;
 	}
@@ -68,9 +125,10 @@ static Variant json_parse_object(const BString json) {
 	} state = STATE_KEY;
 
 	uint32 start = 0;
+	uint32 depth = 0;
 	BString key = BSTRING_EMPTY;
 
-	for (uint32 i = 1; i < json.length; i++) {
+	for (uint32 i = first_char + 1; i < last_char; i++) {
 		switch (state) {
 			case STATE_NONE: {
 				if (!is_whitespace(bstring_get(json, i))) {
@@ -127,21 +185,36 @@ static Variant json_parse_object(const BString json) {
 
 			case STATE_VALUE: {
 				if (!is_whitespace(bstring_get(json, i))) {
-					if (bstring_get(json, i) == ',' || bstring_get(json, i) == '}') {
+					if (bstring_get(json, i) == ',') {
 						BString value = bstring_substring(json, start, i);
 						dictionary_set(dict, VARIANT_STRING(key), json_parse_value(value));
 						key = BSTRING_EMPTY;
 						start = 0;
 						state = bstring_get(json, i) == ',' ? STATE_KEY : STATE_NONE;
+					} else if (is_whitespace_between(json, i + 1, last_char)) {
+						BString value = bstring_substring(json, start, i + 1);
+						dictionary_set(dict, VARIANT_STRING(key), json_parse_value(value));
+						key = BSTRING_EMPTY;
+						start = 0;
+						state = STATE_NONE;
 					}
 				}
 			} break;
 
 			case STATE_ARRAY: {
-				if (bstring_get(json, i) == ']' && key.length > 0) {
-					BString value = bstring_substring(json, start, i + 1);
-					dictionary_set(dict, VARIANT_STRING(key), json_parse_array(value));
-					key = BSTRING_EMPTY;
+				if (bstring_get(json, i) == '[') {
+					depth++;
+				} else if (bstring_get(json, i) == ']') {
+					if (depth == 0) {
+						BString value = bstring_substring(json, start, i + 1);
+						dictionary_set(dict, VARIANT_STRING(key), json_parse_array(value));
+						key = BSTRING_EMPTY;
+						if (is_whitespace_between(json, i + 1, last_char)) {
+							state = STATE_NONE;
+						}
+					} else {
+						depth--;
+					}
 				} else if (key.length == 0) {
 					start = 0;
 					state = bstring_get(json, i) == ',' ? STATE_KEY : STATE_NONE;
@@ -149,10 +222,19 @@ static Variant json_parse_object(const BString json) {
 			} break;
 
 			case STATE_OBJECT: {
-				if (bstring_get(json, i) == '}' && key.length > 0) {
-					BString value = bstring_substring(json, start, i + 1);
-					dictionary_set(dict, VARIANT_STRING(key), json_parse_object(value));
-					key = BSTRING_EMPTY;
+				if (bstring_get(json, i) == '{') {
+					depth++;
+				} else if (bstring_get(json, i) == '}') {
+					if (depth == 0) {
+						BString value = bstring_substring(json, start, i + 1);
+						dictionary_set(dict, VARIANT_STRING(key), json_parse_object(value));
+						key = BSTRING_EMPTY;
+						if (is_whitespace_between(json, i + 1, last_char)) {
+							state = STATE_NONE;
+						}
+					} else {
+						depth--;
+					}
 				} else if (key.length == 0) {
 					start = 0;
 					state = bstring_get(json, i) == ',' ? STATE_KEY : STATE_NONE;
@@ -173,7 +255,25 @@ error:
 }
 
 static Variant json_parse_array(const BString json) {
-	if (json.length < 2 || bstring_get(json, 0) != '[' || bstring_get(json, json.length - 1) != ']') {
+	uint32 first_char = 0;
+
+	for (uint32 i = 0; i < json.length; i++) {
+		if (!is_whitespace(bstring_get(json, i))) {
+			first_char = i;
+			break;
+		}
+	}
+
+	uint32 last_char = json.length - 1;
+
+	for (uint32 i = json.length - 1; i > 0; i--) {
+		if (!is_whitespace(bstring_get(json, i))) {
+			last_char = i;
+			break;
+		}
+	}
+
+	if (json.length < 2 || bstring_get(json, first_char) != '[' || bstring_get(json, last_char) != ']') {
 		ls_log(LOG_LEVEL_ERROR, "Invalid JSON array: %S\n", json);
 		return VARIANT_NIL;
 	}
@@ -182,18 +282,92 @@ static Variant json_parse_array(const BString json) {
 
 	uint32 start = 0;
 
-	for (uint32 i = 1; i < json.length; i++) {
-		if (!is_whitespace(bstring_get(json, i))) {
+	enum {
+		STATE_NEXT_VAL,
+		STATE_VALUE,
+		STATE_ARRAY,
+		STATE_OBJECT,
+		STATE_NONE
+	} state = STATE_NEXT_VAL;
+
+	uint32 depth = 0;
+
+	for (uint32 i = first_char + 1; i < last_char; i++) {
+		char c = bstring_get(json, i);
+		if (!is_whitespace(c)) {
 			if (start == 0) {
 				start = i;
 			}
 
-			if (bstring_get(json, i) == ',' || bstring_get(json, i) == ']') {
-				BString value = bstring_substring(json, start, i);
-				array_append(array, json_parse(value));
-				start = 0;
+			switch (state) {
+				case STATE_NEXT_VAL: {
+					if (c == '{') {
+						state = STATE_OBJECT;
+					} else if (c == '[') {
+						state = STATE_ARRAY;
+					} else {
+						state = STATE_VALUE;
+					}
+				} break;
+
+				case STATE_VALUE: {
+					if (c == ',') {
+						BString value = bstring_substring(json, start, i);
+						array_append(array, json_parse_value(value));
+						start = 0;
+						state = STATE_NEXT_VAL;
+					} else if (is_whitespace_between(json, i + 1, last_char)) {
+						BString value = bstring_substring(json, start, i + 1);
+						array_append(array, json_parse_value(value));
+						start = 0;
+						state = STATE_NONE;
+					}
+				} break;
+
+				case STATE_ARRAY: {
+					if (c == '[') {
+						depth++;
+					} else if (c == ']') {
+						if (depth == 0) {
+							BString value = bstring_substring(json, start, i + 1);
+							array_append(array, json_parse_array(value));
+							start = 0;
+							state = STATE_NONE;
+						} else {
+							depth--;
+						}
+					}
+				} break;
+
+				case STATE_OBJECT: {
+					if (c == '{') {
+						depth++;
+					} else if (c == '}') {
+						if (depth == 0) {
+							BString value = bstring_substring(json, start, i + 1);
+							array_append(array, json_parse_object(value));
+							start = 0;
+							state = STATE_NONE;
+						} else {
+							depth--;
+						}
+					}
+				} break;
+
+				// Skip whitespace.
+				case STATE_NONE: {
+					if (c == ',') {
+						state = STATE_NEXT_VAL;
+					}
+				} break;
 			}
 		}
+	}
+
+	if (state != STATE_NONE) {
+		ls_log(LOG_LEVEL_ERROR, "Invalid JSON array. Unexpected end of array: %S\n", json);
+		array_unref(array);
+		return VARIANT_NIL;
 	}
 
 	return VARIANT_ARRAY(array);
@@ -302,6 +476,118 @@ static void json_stringify_array(BString *string, Array *array) {
 
 		if (i < array_get_size(array) - 1) {
 			bstring_append_cstr(string, ",", 1);
+		}
+	}
+
+	bstring_append_cstr(string, "]", 1);
+}
+
+static void json_stringify_pretty_value(BString *string, Variant value, uint32 indent, uint32 spaces) {
+	switch (value.type) {
+		case VARIANT_TYPE_INT: {
+			BString val = bstring_format("%lld", value.INT);
+			bstring_append(string, val);
+			bstring_unref(val);
+		} break;
+
+		case VARIANT_TYPE_FLOAT: {
+			BString val = bstring_format("%lf", value.FLOAT);
+			bstring_append(string, val);
+			bstring_unref(val);
+		} break;
+
+		case VARIANT_TYPE_BOOL: {
+			BString val = value.BOOL ? BSC("true") : BSC("false");
+			bstring_append(string, val);
+		} break;
+
+		case VARIANT_TYPE_STRING: {
+			BString val = bstring_format("\"%S\"", value.STRING);
+			bstring_append(string, val);
+			bstring_unref(val);
+		} break;
+
+		case VARIANT_TYPE_DICTIONARY: {
+			json_stringify_pretty_object(string, value.DICTIONARY, indent, spaces);
+		} break;
+
+		case VARIANT_TYPE_ARRAY: {
+			json_stringify_pretty_array(string, value.ARRAY, indent, spaces);
+		} break;
+
+		default: {
+			BString val = variant_to_string(value);
+			BString val_formatted = bstring_format("\"%S\"", val);
+			bstring_append(string, val_formatted);
+			bstring_unref(val);
+			bstring_unref(val_formatted);
+		} break;
+	}
+}
+
+static void json_stringify_pretty_object(BString *string, Dictionary *dict, uint32 indent, uint32 spaces) {
+	bstring_append_cstr(string, "{\n", 2);
+
+	Array *keys = dictionary_keys(dict);
+	for (size_t i = 0; i < array_get_size(keys); i++) {
+		Variant key = array_get(keys, i);
+		if (key.type != VARIANT_TYPE_STRING) {
+			ls_log(LOG_LEVEL_ERROR, "Invalid key type, expected String got %S\n", variant_type_to_string(key.type));
+			continue;
+		}
+
+		for (uint32 j = 0; j < indent + 1; j++) {
+			for (uint32 k = 0; k < spaces; k++) {
+				bstring_append_cstr(string, " ", 1);
+			}
+		}
+
+		Variant value = dictionary_get(dict, key);
+		BString key_str = bstring_format("\"%S\": ", key.STRING);
+		bstring_append(string, key_str);
+		bstring_unref(key_str);
+
+		json_stringify_pretty_value(string, value, indent + 1, spaces);
+
+		if (i < array_get_size(keys) - 1) {
+			bstring_append_cstr(string, ",\n", 2);
+		} else {
+			bstring_append_cstr(string, "\n", 1);
+		}
+	}
+
+	for (uint32 i = 0; i < indent; i++) {
+		for (uint32 j = 0; j < spaces; j++) {
+			bstring_append_cstr(string, " ", 1);
+		}
+	}
+
+	bstring_append_cstr(string, "}", 1);
+}
+
+static void json_stringify_pretty_array(BString *string, Array *array, uint32 indent, uint32 spaces) {
+	bstring_append_cstr(string, "[\n", 2);
+
+	for (size_t i = 0; i < array_get_size(array); i++) {
+		for (uint32 j = 0; j < indent + 1; j++) {
+			for (uint32 k = 0; k < spaces; k++) {
+				bstring_append_cstr(string, " ", 1);
+			}
+		}
+
+		Variant value = array_get(array, i);
+		json_stringify_pretty_value(string, value, indent + 1, spaces);
+
+		if (i < array_get_size(array) - 1) {
+			bstring_append_cstr(string, ",\n", 2);
+		} else {
+			bstring_append_cstr(string, "\n", 1);
+		}
+	}
+
+	for (uint32 i = 0; i < indent; i++) {
+		for (uint32 j = 0; j < spaces; j++) {
+			bstring_append_cstr(string, " ", 1);
 		}
 	}
 

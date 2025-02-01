@@ -11,7 +11,7 @@ static const BString TEXTURE_RESOURCE_TYPE = BSTRING_CONST_LENGTH("Texture", 7);
 void texture_manager_init();
 void texture_manager_deinit();
 
-LS_EXPORT uint32 texture_manager_get_resource_type();
+LS_EXPORT uint64 texture_manager_get_resource_type();
 
 typedef void (*TextureParseFunc)(String path, uint32 *width, uint32 *height, uint8 **data);
 

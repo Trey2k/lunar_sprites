@@ -31,7 +31,7 @@ OpenGLRenderer *opengl_renderer_create() {
 #endif // EGL_ENABLED
 
 #if defined(WGL_ENABLED)
-	renderer->wgl_enabled = wgl_init(core_get_os(core));
+	renderer->wgl_enabled = wgl_init();
 #endif // WGL_ENABLED
 
 	return renderer;

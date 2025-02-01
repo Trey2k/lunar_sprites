@@ -16,7 +16,9 @@ LS_EXPORT bool resource_equals(Resource *a, Resource *b);
 
 LS_EXPORT void *resource_get_data(Resource *resource);
 
-LS_EXPORT uint32 resource_get_type_id(Resource *resource);
+LS_EXPORT BString resource_get_path(Resource *resource);
+
+LS_EXPORT uint64 resource_get_type_id(Resource *resource);
 
 LS_EXPORT BString resource_get_type_name(Resource *resource);
 LS_EXPORT BString resource_to_string(Resource *resource);

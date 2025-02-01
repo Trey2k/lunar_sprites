@@ -5,9 +5,9 @@
 #include "core/core.h"
 #include "core/object/object_db.h"
 
-static uint32 object_type_id = 0;
+static uint64 object_type_id = 0;
 
-uint32 sprite_get_object_type() {
+uint64 sprite_get_object_type() {
 	return object_type_id;
 }
 
@@ -44,12 +44,6 @@ static Variant sprite_object_get_size(Object *object, const Variant *args, size_
 	return VARIANT_VECTOR2I(vec2i(size.x, size.y));
 }
 
-static Variant sprite_object_set_size(Object *object, const Variant *args, size_t n_args) {
-	ls_log(LOG_LEVEL_ERROR, "Sprite size is read only\n");
-
-	return VARIANT_NIL;
-}
-
 static Variant sprite_object_get_rotation(Object *object, const Variant *args, size_t n_args) {
 	Sprite *sprite = (Sprite *)object_get_data(object);
 
@@ -82,18 +76,20 @@ static void sprite_destroy_object(void *object_data) {
 	sprite_destroy((Sprite *)object_data);
 }
 
-static void sprite_draw_object(Object *object, float64 delta_time) {
+static void sprite_update_object(Object *object, float64 delta_time) {
 	Sprite *sprite = (Sprite *)object_get_data(object);
 	Vector2i position = object_get_global_position(object);
 	sprite_set_position(sprite, position);
+}
+
+static void sprite_draw_object(Object *object, float64 delta_time) {
+	Sprite *sprite = (Sprite *)object_get_data(object);
 
 	sprite_draw(sprite);
 }
 
-static BString sprite_to_string_object(Object *object) {
-	Sprite *sprite = (Sprite *)object_get_data(object);
-
-	return sprite_to_string(sprite);
+static BString sprite_to_string_object(const Object *object) {
+	return sprite_to_string(object_get_const_data(object));
 }
 
 static void sprite_register_methods() {
@@ -102,8 +98,6 @@ static void sprite_register_methods() {
 			OBJ_ARGS(OBJ_ARG_LAST("texture", RESOURCE)));
 
 	object_db_register_method(BSC("get_size"), sprite_object_get_size, NULL);
-	object_db_register_method(BSC("set_size"), sprite_object_set_size,
-			OBJ_ARGS(OBJ_ARG_LAST("size", VECTOR2I)));
 
 	object_db_register_method(BSC("get_rotation"), sprite_object_get_rotation, NULL);
 	object_db_register_method(BSC("set_rotation"), sprite_object_set_rotation,
@@ -114,7 +108,6 @@ static void sprite_register_methods() {
 	object_db_register_method(BSC("get_scale"), sprite_object_get_scale, NULL);
 
 	object_db_register_property(BSC("texture"), BSC("get_texture"), BSC("set_texture"));
-	object_db_register_property(BSC("size"), BSC("get_size"), BSC("set_size"));
 	object_db_register_property(BSC("scale"), BSC("get_scale"), BSC("set_scale"));
 	object_db_register_property(BSC("rotation"), BSC("get_rotation"), BSC("set_rotation"));
 }
@@ -126,6 +119,7 @@ void register_sprite_object() {
 					.destroy = sprite_destroy_object,
 					.register_methods = sprite_register_methods,
 					.draw = sprite_draw_object,
+					.update = sprite_update_object,
 					.to_string = sprite_to_string_object,
 			});
 }

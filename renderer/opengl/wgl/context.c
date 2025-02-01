@@ -133,7 +133,7 @@ void wgl_context_swap_buffers(const LSWGLContext *context) {
 	SwapBuffers(context->device_context);
 }
 
-bool wgl_init(const OS *os) {
+bool wgl_init() {
 	return true;
 }
 
@@ -160,14 +160,11 @@ static const WindowConfig TEMP_WINDOW_CONFIG = {
 };
 
 static uint32 load_wgl(const OpenGLRenderer *renderer, PIXELFORMATDESCRIPTOR *pfd) {
-	const OS *base_os = core_get_os(opengl_renderer_get_core(renderer));
-	const PlatformOS *os = os_get_platform_os(base_os);
-
 	// WGL requires us to create another window for the temporary context.
 	// We use PlatformWindow and not LSWindow as LSWindow will trigger context creation recureivly.
 
 	// Windows platform does not need the renderer reference.
-	PlatformWindow *window = platform_create_window(os, TEMP_WINDOW_CONFIG, NULL);
+	PlatformWindow *window = platform_create_window(TEMP_WINDOW_CONFIG, NULL);
 	LSNativeWindow native_window = platform_window_get_native_window(window);
 	HDC device_context = GetDC(native_window);
 

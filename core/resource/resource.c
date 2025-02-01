@@ -8,19 +8,23 @@
 #include <stdarg.h>
 
 struct Resource {
-	uint32 type_id;
+	uint64 type_id;
 	size_t ref_count;
+	BString path;
 
 	void *data;
 };
 
 Resource *resource_create(BString path) {
+	// TODO: BString path handler
+	bstring_ref(path);
 	char *c_str = bstring_encode_utf8(path);
 	Resource *resource = ls_malloc(sizeof(Resource));
 	char *ext = os_path_get_extension(c_str);
-	resource->type_id = resource_db_get_type_id_by_extension(ext);
-	resource->data = resource_db_create_instance(resource->type_id, c_str);
+	resource->type_id = resource_db_get_type_id_by_extension(BSC(ext));
+	resource->data = resource_db_create_instance(resource->type_id, path);
 	resource->ref_count = 1;
+	resource->path = path;
 	ls_free(c_str);
 
 	return resource;
@@ -60,7 +64,11 @@ void *resource_get_data(Resource *resource) {
 	return resource->data;
 }
 
-uint32 resource_get_type_id(Resource *resource) {
+BString resource_get_path(Resource *resource) {
+	return resource->path;
+}
+
+uint64 resource_get_type_id(Resource *resource) {
 	return resource->type_id;
 }
 

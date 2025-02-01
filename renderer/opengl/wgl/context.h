@@ -12,7 +12,7 @@ typedef struct {
 	LSNativeWindow native_window;
 } LSWGLContext;
 
-bool wgl_init(const OS *os);
+bool wgl_init();
 void wgl_deinit();
 
 LSWGLContext *wgl_context_create(const OpenGLRenderer *renderer, const LSWindow *window);

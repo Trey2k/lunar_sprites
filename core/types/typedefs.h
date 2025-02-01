@@ -49,6 +49,7 @@ LS_STATIC_ASSERT(sizeof(float64) == 8);
 
 typedef __builtin_va_list va_list;
 
+typedef uint8 VariantType;
 typedef struct Variant Variant;
 
 #if !defined(WEB_ENABLED)

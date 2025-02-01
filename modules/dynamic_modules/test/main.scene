@@ -1,0 +1,17 @@
+[
+    {
+        "type": "Sprite",
+        "properties": {
+            "texture": "moon.png",
+            "position": {
+                "x": 600,
+                "y": 450
+            },
+            "scale": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        }
+    }
+]
+

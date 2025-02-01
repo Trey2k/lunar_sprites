@@ -1,6 +1,7 @@
 #include "core/types/bstring.h"
 
 #include "core/core.h"
+#include "core/os/os.h"
 #include "core/types/cow_data.h"
 #include "core/types/string.h"
 
@@ -234,6 +235,25 @@ void bstring_fwritefb(LSFile file, const BString format, ...) {
 	va_end(args);
 }
 
+BString bstring_read_file(BString path) {
+	BString string = BSTRING_EMPTY;
+	size_t size = 0;
+	char *c_path = bstring_encode_utf8(path);
+	char *text = os_read_file(c_path, &size);
+	ls_free(c_path);
+	if (size > UINT32_MAX) {
+		ls_log(LOG_LEVEL_ERROR, "File is too large to read into a BString\n");
+		ls_free(text);
+		return string;
+	}
+	string.length = size;
+	string.is_const = false;
+
+	cowdata_set(&string.cow_data, text, 1, string.length);
+	ls_free(text);
+	return string;
+}
+
 char *bstring_encode_ascii(const BString string) {
 	char *encoded = ls_malloc(string.length + 1);
 	const char *data = string.is_const ? string.c_const : cowdata_get_data_ptr(&string.cow_data);
@@ -364,8 +384,16 @@ bool bstring_contains(const BString string, const BString substring) {
 		return false;
 	}
 
-	for (uint32 i = 0; i < string.length - substring.length; i++) {
-		if (bstring_starts_with(bstring_substring(string, i, i + substring.length), substring)) {
+	for (uint32 i = 0; i < string.length - substring.length + 1; i++) {
+		bool found = true;
+		for (uint32 j = 0; j < substring.length; j++) {
+			if (bstring_get(string, i + j) != bstring_get(substring, j)) {
+				found = false;
+				break;
+			}
+		}
+
+		if (found) {
 			return true;
 		}
 	}

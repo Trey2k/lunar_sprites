@@ -11,7 +11,6 @@
 #include "core/types/dictionary.h"
 #include "core/types/typedefs.h"
 
-typedef uint8 VariantType;
 #define VARIANT_TYPE_NIL 0
 
 #define VARIANT_TYPE_INT 1

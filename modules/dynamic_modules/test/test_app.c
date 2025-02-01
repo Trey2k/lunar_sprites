@@ -7,6 +7,8 @@ typedef struct {
 
 	bool should_stop;
 
+	Scene *scene;
+
 	Object *sprite;
 	Camera *camera;
 
@@ -139,6 +141,10 @@ void test_app_start(void *user_data) {
 	Vector2u viewport_size = renderer_get_viewport_size();
 	test_application->camera = camera_create(math_deg_to_rad(100), (float32)viewport_size.y / (float32)viewport_size.x, 0.1, 100.0);
 	camera_set_active(test_application->camera);
+
+	test_application->scene = scene_create();
+	scene_parse(test_application->scene, BSC("main.scene"));
+	scene_save(test_application->scene, BSC("main-test.scene"));
 }
 
 void test_app_deinit(void *user_data) {
@@ -192,15 +198,21 @@ void test_app_update(float64 delta_time, void *user_data) {
 	test_application->timer += delta_time;
 	check_input(test_application);
 
+	object_update(test_application->sprite, delta_time);
+
+	scene_update(test_application->scene, delta_time);
+
 	object_draw(test_application->sprite, delta_time);
 
+	scene_draw(test_application->scene, delta_time);
+
 	if (test_application->timer > 0.25) {
-		// Variant test = json_parse(BSC("{\"test\": [1, 2.5, 3, {\"bool\": false}], \"test2\": {\"test3\": \"test4\"}}"));
-		// ls_printf("Test: %V\n", test);
-		// BString json = json_stringify(test);
-		// ls_printf("JSON: %S\n", json);
-		// bstring_unref(json);
-		// variant_unref(test);
+		Variant test = json_parse(BSC("{\"test\": [1, 2.5, 3, {\"bool\": false}], \"test2\": {\"test3\": \"test4\"}}"));
+		ls_printf("Test: %V\n", test);
+		BString json = json_stringify(test);
+		ls_printf("%S\n", json);
+		bstring_unref(json);
+		variant_unref(test);
 
 		ls_free(test_application->fps_text);
 		test_application->fps_text = ls_str_format("FPS: %f", 1.0 / delta_time);

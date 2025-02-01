@@ -26,9 +26,13 @@ typedef struct {
 // The string must be valid for the lifetime of the BString, unless the BString is modified, in which case the string will be copied.
 #define BSTRING_CONST_LENGTH(a_str, a_length) \
 	(BString) { .c_const = a_str, .length = a_length, .is_const = true }
+
 // Short hand alias for BSTRING_CONST.
 #define BSC(a_str) BSTRING_CONST(a_str)
-#define STR(a_str) BSTRING_CONST(a_str)
+// const BString Variant.
+#define BSCV(a_str) VARIANT_STRING(BSTRING_CONST(a_str))
+// Compile time constant BString variant.
+#define BSCVL(a_str, a_length) VARIANT_STRING(BSTRING_CONST_LENGTH(a_str, a_length))
 
 // Creates a BString copy of the string.
 #define BSTRING(a_str) bstring_encode_utf8(BSTRING_CONST(a_str))
@@ -90,6 +94,8 @@ LS_EXPORT void bstring_fwrite(LSFile file, const BString string);
 LS_EXPORT void bstring_fwritef(LSFile file, const char *format, ...);
 LS_EXPORT void bstring_fwritefb(LSFile file, const BString format, ...);
 LS_EXPORT void bstring_fwrite_va(LSFile file, const BString format, va_list args);
+
+LS_EXPORT BString bstring_read_file(BString path);
 
 // Encodes a ASCII copy of the string.
 LS_EXPORT char *bstring_encode_ascii(const BString string);

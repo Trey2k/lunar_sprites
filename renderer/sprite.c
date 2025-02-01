@@ -110,7 +110,9 @@ Sprite *sprite_create(BString image_path, Vector2i position, Vector2 scale, floa
 }
 
 void sprite_destroy(Sprite *sprite) {
-	resource_unref(sprite->texture);
+	if (sprite->texture) {
+		resource_unref(sprite->texture);
+	}
 
 	ls_free(sprite);
 }

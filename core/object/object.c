@@ -60,6 +60,10 @@ void object_unref(Object *object) {
 		return;
 	}
 
+	for (size_t i = 0; i < slice64_get_size(object->children); i++) {
+		object_unref(slice64_get(object->children, i).ptr);
+	}
+
 	object_db_destroy_instance(object->type_id, object->data);
 	slice64_destroy(object->children);
 	ls_free(object);
@@ -69,24 +73,40 @@ void object_draw(Object *object, float64 delta_time) {
 	object_db_get_draw_function(object->type_id)(object, delta_time);
 }
 
-bool object_has_property(Object *object, BString name) {
+void object_update(Object *object, float64 delta_time) {
+	object_db_get_update_function(object->type_id)(object, delta_time);
+}
+
+bool object_has_property(const Object *object, BString name) {
 	return object_db_type_has_property(object->type_id, name);
 }
 
-Variant object_get_property(Object *object, BString name) {
+Variant object_get_property(const Object *object, BString name) {
 	return object_db_type_get_property(object->type_id, object, name);
+}
+
+VariantType object_get_property_type(const Object *object, BString name) {
+	return object_db_type_get_property_type(object->type_id, name);
+}
+
+Array *object_get_properties(const Object *object) {
+	return object_db_type_get_properties(object->type_id);
 }
 
 void object_set_property(Object *object, BString name, Variant value) {
 	object_db_type_set_property(object->type_id, object, name, value);
 }
 
-bool object_has_method(Object *object, BString name) {
+bool object_has_method(const Object *object, BString name) {
 	return object_db_type_has_method(object->type_id, name);
 }
 
 Variant object_call_method(Object *object, BString name, Variant *args, size_t n_args) {
 	return object_db_type_call_method(object->type_id, object, name, args, n_args);
+}
+
+Array *object_get_methods(const Object *object) {
+	return object_db_type_get_methods(object->type_id);
 }
 
 void object_set_position(Object *object, Vector2i position) {
@@ -95,13 +115,13 @@ void object_set_position(Object *object, Vector2i position) {
 	object->position = position;
 }
 
-Vector2i object_get_position(Object *object) {
+Vector2i object_get_position(const Object *object) {
 	LS_ASSERT(object);
 
 	return object->position;
 }
 
-Vector2i object_get_global_position(Object *object) {
+Vector2i object_get_global_position(const Object *object) {
 	LS_ASSERT(object);
 
 	Vector2i position = object->position;
@@ -136,7 +156,7 @@ void object_remove_child(Object *parent, Object *child) {
 	}
 }
 
-int32 object_get_child_count(Object *object) {
+int32 object_get_child_count(const Object *object) {
 	LS_ASSERT(object);
 
 	size_t r = slice64_get_size(object->children);
@@ -144,7 +164,7 @@ int32 object_get_child_count(Object *object) {
 	return (int32)r;
 }
 
-Object *object_get_child(Object *object, int32 index) {
+Object *object_get_child(const Object *object, int32 index) {
 	LS_ASSERT(object);
 
 	LS_ASSERT(index >= 0 && index < slice64_get_size(object->children));
@@ -152,13 +172,13 @@ Object *object_get_child(Object *object, int32 index) {
 	return slice64_get(object->children, (size_t)index).ptr;
 }
 
-Object *object_get_parent(Object *object) {
+Object *object_get_parent(const Object *object) {
 	LS_ASSERT(object);
 
 	return object->parent;
 }
 
-bool object_equals(Object *a, Object *b) {
+bool object_equals(const Object *a, const Object *b) {
 	// TODO: Maybe instance ID?
 	return a == b;
 }
@@ -169,19 +189,25 @@ void *object_get_data(Object *object) {
 	return object->data;
 }
 
-uint64 object_get_type_id(Object *object) {
+const void *object_get_const_data(const Object *object) {
+	LS_ASSERT(object);
+
+	return object->data;
+}
+
+uint64 object_get_type_id(const Object *object) {
 	LS_ASSERT(object);
 
 	return object->type_id;
 }
 
-BString object_get_type_name(Object *object) {
+BString object_get_type_name(const Object *object) {
 	LS_ASSERT(object);
 
 	return object_db_get_type_name(object->type_id);
 }
 
-BString object_to_string(Object *object) {
+BString object_to_string(const Object *object) {
 	LS_ASSERT(object);
 
 	return object_db_get_to_string_function(object->type_id)(object);

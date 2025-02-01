@@ -22,15 +22,16 @@ typedef void (*ObjectDestroyFunction)(void *object_data);
 // Registers the properties of the object type.
 typedef void (*ObjectRegisterMethodsFunction)();
 // Draws the object to the screen.
-typedef void (*ObjectDrawFunction)(Object *object, float64 delta_time);
+typedef void (*ObjectProcFunction)(Object *object, float64 delta_time);
 // Returns a string representation of the object.
-typedef BString (*ObjectToStringFunction)(Object *object);
+typedef BString (*ObjectToStringFunction)(const Object *object);
 
 typedef struct {
 	ObjectCreateFunction create;
 	ObjectDestroyFunction destroy;
 	ObjectRegisterMethodsFunction register_methods;
-	ObjectDrawFunction draw;
+	ObjectProcFunction draw;
+	ObjectProcFunction update;
 	ObjectToStringFunction to_string;
 } ObjectInterface;
 
@@ -38,36 +39,30 @@ typedef struct {
 
 // Declares that the argument is the last argument. This is used to mark the end of the argument list.
 #define OBJ_ARGUMENT_FLAG_LAST 0x100
-// Declares that the argument is optional. If the argument is not provided, the default value will be used.
-// Any arguments after an optional argument must also be optional.
-#define OBJ_ARGUMENT_FLAG_OPTIONAL 0x200
 // Declares that the argument is a varargs argument. 0 or more arguments of the same type can be provided.
 // Only the last argument can be a varargs argument.
-#define OBJ_ARGUMENT_FLAG_VARARGS 0x400
+#define OBJ_ARGUMENT_FLAG_VARARGS 0x200
 
 typedef struct {
 	String name;
 	uint16 flags;
-	Variant default_value;
 } ObjectMethodArgument;
 
-#define OBJ_ARG(name, type) ((ObjectMethodArgument){ name, VARIANT_TYPE_##type, VARIANT_NIL })
-#define OBJ_ARG_DEFAULT(name, type, default_value) ((ObjectMethodArgument){ name, VARIANT_TYPE_##type, default_value })
-#define OBJ_ARG_LAST_DEFAULT(name, type, default_value) ((ObjectMethodArgument){ name, VARIANT_TYPE_##type | OBJ_ARGUMENT_FLAG_LAST, default_value })
-#define OBJ_ARG_LAST_VARIABLE(name, type) ((ObjectMethodArgument){ name, VARIANT_TYPE_##type | OBJ_ARGUMENT_FLAG_VARARGS | OBJ_ARGUMENT_FLAG_LAST, VARIANT_NIL })
-#define OBJ_ARG_LAST(name, type) ((ObjectMethodArgument){ name, VARIANT_TYPE_##type | OBJ_ARGUMENT_FLAG_LAST, VARIANT_NIL })
+#define OBJ_ARG(name, type) ((ObjectMethodArgument){ name, VARIANT_TYPE_##type })
+#define OBJ_ARG_LAST_VARIABLE(name, type) ((ObjectMethodArgument){ name, VARIANT_TYPE_##type | OBJ_ARGUMENT_FLAG_VARARGS | OBJ_ARGUMENT_FLAG_LAST })
+#define OBJ_ARG_LAST(name, type) ((ObjectMethodArgument){ name, VARIANT_TYPE_##type | OBJ_ARGUMENT_FLAG_LAST })
 #define OBJ_ARGS(...) \
 	(ObjectMethodArgument[]) { __VA_ARGS__ }
 
 #define OBJ_ARGFLAG_TYPE(flag) (VariantType)(flag & OBJ_ARGUMENT_FLAG_TYPE_MASK)
 #define OBJ_ARGFLAG_IS_LAST(flag) (flag & OBJ_ARGUMENT_FLAG_LAST)
-#define OBJ_ARGFLAG_IS_OPTIONAL(flag) (flag & OBJ_ARGUMENT_FLAG_OPTIONAL)
 #define OBJ_ARGFLAG_IS_VARARGS(flag) (flag & OBJ_ARGUMENT_FLAG_VARARGS)
 
 void *object_db_create_instance(uint64 type_id);
 void object_db_destroy_instance(uint64 type_id, void *object_data);
 
-ObjectDrawFunction object_db_get_draw_function(uint64 type_id);
+ObjectProcFunction object_db_get_draw_function(uint64 type_id);
+ObjectProcFunction object_db_get_update_function(uint64 type_id);
 ObjectToStringFunction object_db_get_to_string_function(uint64 type_id);
 
 // Registers a new object type.
@@ -85,9 +80,12 @@ LS_EXPORT BString object_db_get_type_name(uint64 type_id);
 
 LS_EXPORT bool object_db_type_has_property(uint64 type_id, BString name);
 LS_EXPORT void object_db_type_set_property(uint64 type_id, Object *object, BString name, Variant value);
-LS_EXPORT Variant object_db_type_get_property(uint64 type_id, Object *object, BString name);
+LS_EXPORT Variant object_db_type_get_property(uint64 type_id, const Object *object, BString name);
+LS_EXPORT VariantType object_db_type_get_property_type(uint64 type_id, BString name);
+LS_EXPORT Array *object_db_type_get_properties(uint64 type_id);
 
 LS_EXPORT bool object_db_type_has_method(uint64 type_id, BString name);
 LS_EXPORT Variant object_db_type_call_method(uint64 type_id, Object *object, BString name, const Variant *args, size_t n_args);
+LS_EXPORT Array *object_db_type_get_methods(uint64 type_id);
 
 #endif // OBJECT_DB_H

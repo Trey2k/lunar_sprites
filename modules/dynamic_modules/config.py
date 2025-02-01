@@ -51,6 +51,7 @@ def configure(env):
         'core/types/variant.h',
         'core/object/object_db.h',
         'core/resource/resource_db.h',
+        'core/scene/scene.h',
         'core/flags.h',
         'core/window.h',
         'core/input/keycodes.h',

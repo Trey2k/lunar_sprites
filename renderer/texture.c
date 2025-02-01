@@ -12,18 +12,18 @@
 struct TextureManager {
 	Hashtable *parsers;
 
-	uint32 resource_type;
+	uint64 resource_type;
 };
 
-static struct TextureManager texture_manager;
+static struct TextureManager texture_manager = { 0 };
 
-static void *texture_resource_create(String path);
+static void *texture_resource_create(BString path);
 static void texture_resource_destroy(void *texture);
 
 void texture_manager_init() {
 	texture_manager.parsers = hashtable_create(HASHTABLE_KEY_STRING, 16, false);
 
-	texture_manager.resource_type = resource_db_register_type(TEXTURE_RESOURCE_TYPE, ".png,.jpg,.jpeg,.jpg,.bmp",
+	texture_manager.resource_type = resource_db_register_type(TEXTURE_RESOURCE_TYPE, BSC("png,jpg,jpeg,jpg,bmp"),
 			texture_resource_create, texture_resource_destroy);
 }
 
@@ -35,7 +35,7 @@ void texture_manager_register_parser(String extension, TextureParseFunc parse_fu
 	hashtable_set(texture_manager.parsers, HASH_KEY(str, extension), HASH_VAL(ptr, parse_func));
 }
 
-uint32 texture_manager_get_resource_type() {
+uint64 texture_manager_get_resource_type() {
 	return texture_manager.resource_type;
 }
 
@@ -131,8 +131,12 @@ Texture *texture_from_resource(Resource *resource) {
 	return (Texture *)resource_get_data(resource);
 }
 
-static void *texture_resource_create(String path) {
-	return (void *)texture_create_from_image(path);
+static void *texture_resource_create(BString path) {
+	char *c_path = bstring_encode_utf8(path);
+	void *res = (void *)texture_create_from_image(c_path);
+	ls_free(c_path);
+
+	return res;
 }
 
 static void texture_resource_destroy(void *texture) {
